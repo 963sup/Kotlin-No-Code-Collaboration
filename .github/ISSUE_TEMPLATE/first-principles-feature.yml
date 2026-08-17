@@ -1,0 +1,113 @@
+name: First Principles Feature
+description: Define a consequential product change through facts, invariants, minimum scope, and verification evidence.
+title: "[Feature] "
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for changes affecting product semantics, ownership, permissions, persistence, navigation, lifecycle state, or multiple files. Trivial isolated edits do not require this form.
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the user or system outcome without assuming an implementation.
+      placeholder: The user must be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: facts
+    attributes:
+      label: Verified Facts
+      description: List only facts confirmed in the current repository.
+      placeholder: Current entities, screens, relationships, states, or tests that already exist...
+    validations:
+      required: true
+
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Assumptions and Unknowns
+      description: Separate anything not yet verified from repository facts.
+      placeholder: We currently assume...
+    validations:
+      required: true
+
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Invariants
+      description: List product, governance, architecture, and mobile constraints that cannot be broken.
+      placeholder: Repository remains a no-code container; authorization routes through the policy engine...
+    validations:
+      required: true
+
+  - type: textarea
+    id: core-model
+    attributes:
+      label: Core Model
+      description: Identify the entities, relationships, states, events, and layer responsibilities involved.
+      placeholder: |
+        Entities:
+        Relationships:
+        States:
+        Events:
+        Responsibilities:
+    validations:
+      required: true
+
+  - type: textarea
+    id: root-constraint
+    attributes:
+      label: Root Constraint and Highest-Leverage Change
+      description: Identify the upstream cause and the smallest intervention that removes it.
+      placeholder: The root constraint is... The highest-leverage change is...
+    validations:
+      required: true
+
+  - type: textarea
+    id: minimum-change
+    attributes:
+      label: Minimum Viable Change
+      description: Define the smallest coherent implementation that completely resolves the root constraint.
+      placeholder: Change only...
+    validations:
+      required: true
+
+  - type: textarea
+    id: rejected-complexity
+    attributes:
+      label: Rejected Complexity
+      description: Explicitly exclude adjacent features, abstractions, screens, states, and refactors.
+      placeholder: Not included in this change...
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification Evidence and Stop Condition
+      description: State exact semantic assertions, behavior checks, invariant checks, commands, and the point at which work must stop.
+      placeholder: |
+        Evidence:
+        Commands:
+        Stop when:
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constitution
+    attributes:
+      label: Constitution Check
+      options:
+        - label: This proposal creates no-code collaboration or governance value.
+          required: true
+        - label: This proposal does not introduce Git, code-hosting, developer-environment, or CI/CD semantics.
+          required: true
+        - label: Existing entities and mechanisms were evaluated before proposing new ones.
+          required: true
+        - label: A new top-level mobile screen or tab is included only when explicitly justified above.
+          required: true
