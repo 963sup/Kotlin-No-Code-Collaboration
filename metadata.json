@@ -1,0 +1,7 @@
+{
+  "name": "RepoGovernance",
+  "description": "Hierarchical access control policy engine and no-code repository collaboration platform enforcing strict Enterprise, Organization, Team, User, Member, Collaborator, Maintainer, Reviewer, and Approver schema mappings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
