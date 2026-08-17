@@ -133,6 +133,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
     val selectedDiscussionComments by viewModel.selectedDiscussionComments.collectAsState()
     val simulationResult by viewModel.simulationResult.collectAsState()
     val unreadNotificationCount by viewModel.unreadNotificationCount.collectAsState()
+    val userNotifications by viewModel.userNotifications.collectAsState()
 
     val allIssues by viewModel.allIssues.collectAsState()
     val allDiscussions by viewModel.allDiscussions.collectAsState()
@@ -499,6 +500,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                 allAccessRules = allAccessRules,
                                 allOrgMemberships = allOrgMemberships,
                                 allTeamMemberships = allTeamMemberships,
+                                notifications = userNotifications,
                                 auditLogs = auditLogs,
                                 unreadNotificationCount = unreadNotificationCount,
                                 onNavigateToRepository = { repo ->

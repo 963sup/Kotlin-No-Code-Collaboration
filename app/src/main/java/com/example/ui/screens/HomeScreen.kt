@@ -29,7 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Approval
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
@@ -38,16 +38,20 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -89,6 +93,9 @@ import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
 import com.example.data.model.LifecycleState
 import com.example.data.model.NoCodeArtifact
+import com.example.data.model.NotificationCategory
+import com.example.data.model.NotificationPriority
+import com.example.data.model.NotificationStatus
 import com.example.data.model.OrgMembership
 import com.example.data.model.Organization
 import com.example.data.model.OwnerType
@@ -100,6 +107,7 @@ import com.example.data.model.Repository
 import com.example.data.model.Team
 import com.example.data.model.TeamMembership
 import com.example.data.model.User
+import com.example.engine.HierarchicalPolicyEngine
 import com.example.ui.theme.AmberGlow
 import com.example.ui.theme.AmberWarning
 import com.example.ui.theme.EmeraldDark
@@ -130,9 +138,11 @@ enum class HomeWorkFilter(val label: String) {
     ASSIGNED_ISSUES("Assigned Issues"),
     PENDING_REVIEWS("Review Requests"),
     PENDING_APPROVALS("Approval Requests"),
+    MENTIONS_AND_UNREAD("Mentions & Unread"),
     RECENT_ACTIVITY("Activity Trail")
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     activeUser: User?,
@@ -149,6 +159,7 @@ fun HomeScreen(
     allAccessRules: List<RepoAccessRule>,
     allOrgMemberships: List<OrgMembership>,
     allTeamMemberships: List<TeamMembership>,
+    notifications: List<AppNotification> = emptyList(),
     auditLogs: List<AuditLog>,
     unreadNotificationCount: Int,
     onNavigateToRepository: (Repository) -> Unit,
@@ -157,6 +168,7 @@ fun HomeScreen(
     onNavigateToRepositoriesCatalog: () -> Unit,
     onNavigateToMe: () -> Unit,
     onSwitchPersonaClick: () -> Unit,
+    onMarkNotificationAsRead: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedWorkFilter by remember { mutableStateOf(HomeWorkFilter.ASSIGNED_ISSUES) }
@@ -167,41 +179,71 @@ fun HomeScreen(
         else allTeamMemberships.filter { it.userId == activeUser.id }.map { it.teamId }.toSet()
     }
 
-    // Issues assigned to active user or user's teams
+    // Issues assigned to active user or user's teams, or authored by user and still open
     val assignedIssues = remember(activeUser, allIssues, userTeamIds) {
         if (activeUser == null) emptyList()
         else allIssues.filter { issue ->
             (issue.assigneeType == GranteeType.USER && issue.assigneeId == activeUser.id) ||
                     (issue.assigneeType == GranteeType.TEAM && userTeamIds.contains(issue.assigneeId)) ||
                     (issue.authorUserId == activeUser.id && issue.status != IssueStatus.CLOSED)
-        }.sortedWith(compareByDescending<RepoIssue> { it.status != IssueStatus.CLOSED }.thenByDescending { it.updatedAt })
+        }.sortedWith(
+            compareByDescending<RepoIssue> { it.priority == IssuePriority.CRITICAL }
+                .thenByDescending { it.priority == IssuePriority.HIGH }
+                .thenByDescending { it.status != IssueStatus.CLOSED }
+                .thenByDescending { it.updatedAt }
+        )
     }
 
-    // Artifacts waiting for review where user is reviewer/collaborator
+    // Artifacts waiting for review in user's accessible scope
     val pendingReviewArtifacts = remember(activeUser, allArtifacts, allReviews, repositories) {
         if (activeUser == null) emptyList()
         else {
             allArtifacts.filter { art ->
                 art.lifecycleState == LifecycleState.IN_REVIEW
-            }
+            }.sortedByDescending { it.updatedAt }
         }
     }
 
-    // Artifacts waiting for approval
+    // Artifacts waiting for multi-signatory approval
     val pendingApprovalArtifacts = remember(activeUser, allArtifacts, allApprovals, repositories) {
         if (activeUser == null) emptyList()
         else {
             allArtifacts.filter { art ->
                 art.lifecycleState == LifecycleState.PENDING_APPROVAL
-            }
+            }.sortedByDescending { it.updatedAt }
         }
     }
 
-    // Recent accessible repositories
-    val accessibleRepositories = remember(activeUser, repositories, allAccessRules, allOrgMemberships, userTeamIds) {
+    // Mentions & unread items for active user
+    val mentionAndUnreadNotifications = remember(activeUser, notifications) {
         if (activeUser == null) emptyList()
         else {
-            repositories.take(6)
+            notifications.filter { notif ->
+                notif.recipientUserId == activeUser.id &&
+                        (notif.category == NotificationCategory.MENTION_AND_REPLY ||
+                                notif.status == NotificationStatus.UNREAD ||
+                                notif.isActionable)
+            }.sortedWith(
+                compareByDescending<AppNotification> { it.status == NotificationStatus.UNREAD }
+                    .thenByDescending { it.priority == NotificationPriority.URGENT || it.priority == NotificationPriority.HIGH }
+                    .thenByDescending { it.createdAt }
+            )
+        }
+    }
+
+    // Recent accessible repositories sorted by relevance (owned / member / accessible)
+    val accessibleRepositories = remember(activeUser, repositories, allAccessRules, allOrgMemberships, allTeamMemberships, teams) {
+        if (activeUser == null) emptyList()
+        else {
+            repositories.sortedWith(
+                compareByDescending<Repository> { repo ->
+                    repo.ownerType == OwnerType.USER && repo.ownerId == activeUser.id
+                }.thenByDescending { repo ->
+                    allAccessRules.any { it.repoId == repo.id && it.granteeType == GranteeType.USER && it.granteeId == activeUser.id }
+                }.thenByDescending { repo ->
+                    allOrgMemberships.any { it.orgId == repo.ownerId && it.userId == activeUser.id }
+                }.thenByDescending { it.updatedAt }
+            ).take(5)
         }
     }
 
@@ -214,7 +256,7 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // =========================================================================
-        // 1. HOME HERO BANNER: ATTENTION & IDENTITY SUMMARY
+        // 1. HOME HERO BANNER: ACTIVE IDENTITY & ATTENTION SUMMARY
         // =========================================================================
         item {
             Card(
@@ -231,6 +273,7 @@ fun HomeScreen(
                         .padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    // Identity row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -242,7 +285,7 @@ fun HomeScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(44.dp)
+                                    .size(46.dp)
                                     .clip(CircleShape)
                                     .background(
                                         try {
@@ -276,7 +319,7 @@ fun HomeScreen(
                             }
                         }
 
-                        // Persona quick-switch chip
+                        // Persona quick-switch trigger
                         Surface(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
@@ -307,7 +350,7 @@ fun HomeScreen(
 
                     HorizontalDivider(color = SophisticatedBorderSubtle, thickness = 1.dp)
 
-                    // Work routing attention metrics
+                    // Work routing attention metrics (4 interactive summary pills)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -316,7 +359,7 @@ fun HomeScreen(
                             icon = Icons.Default.TaskAlt,
                             label = "Assigned",
                             count = assignedIssues.count { it.status != IssueStatus.CLOSED },
-                            accentColor = if (assignedIssues.any { it.priority == IssuePriority.CRITICAL }) RoseError else LavenderPrimary,
+                            accentColor = if (assignedIssues.any { it.priority == IssuePriority.CRITICAL && it.status != IssueStatus.CLOSED }) RoseError else LavenderPrimary,
                             isSelected = selectedWorkFilter == HomeWorkFilter.ASSIGNED_ISSUES,
                             onClick = { selectedWorkFilter = HomeWorkFilter.ASSIGNED_ISSUES },
                             modifier = Modifier.weight(1f)
@@ -333,19 +376,19 @@ fun HomeScreen(
                         AttentionMetricPill(
                             icon = Icons.Default.Approval,
                             label = "Approvals",
-                            count = pendingApprovalApprovalCount(pendingApprovalArtifacts),
+                            count = pendingApprovalArtifacts.size,
                             accentColor = EmeraldSuccess,
                             isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_APPROVALS,
                             onClick = { selectedWorkFilter = HomeWorkFilter.PENDING_APPROVALS },
                             modifier = Modifier.weight(1f)
                         )
                         AttentionMetricPill(
-                            icon = Icons.Default.Notifications,
-                            label = "Inbox",
-                            count = unreadNotificationCount,
-                            accentColor = LavenderPrimary,
-                            isSelected = false,
-                            onClick = onNavigateToInbox,
+                            icon = Icons.Default.AlternateEmail,
+                            label = "Mentions",
+                            count = mentionAndUnreadNotifications.size,
+                            accentColor = if (unreadNotificationCount > 0) LavenderPrimary else TextMediumEmphasis,
+                            isSelected = selectedWorkFilter == HomeWorkFilter.MENTIONS_AND_UNREAD,
+                            onClick = { selectedWorkFilter = HomeWorkFilter.MENTIONS_AND_UNREAD },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -354,7 +397,7 @@ fun HomeScreen(
         }
 
         // =========================================================================
-        // 2. WORK ROUTING SECTION: ASSIGNED WORK & REVIEWS
+        // 2. WORK & ATTENTION ROUTING SECTION
         // =========================================================================
         item {
             Column(
@@ -367,18 +410,24 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Work & Attention",
+                        text = "Work Requiring Attention",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "${assignedIssues.count { it.status != IssueStatus.CLOSED }} active items",
+                        text = when (selectedWorkFilter) {
+                            HomeWorkFilter.ASSIGNED_ISSUES -> "${assignedIssues.count { it.status != IssueStatus.CLOSED }} open issues"
+                            HomeWorkFilter.PENDING_REVIEWS -> "${pendingReviewArtifacts.size} in review"
+                            HomeWorkFilter.PENDING_APPROVALS -> "${pendingApprovalArtifacts.size} pending gates"
+                            HomeWorkFilter.MENTIONS_AND_UNREAD -> "${mentionAndUnreadNotifications.size} items"
+                            HomeWorkFilter.RECENT_ACTIVITY -> "${auditLogs.take(5).size} recent logs"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis
                     )
                 }
 
-                // Filter row for attention list
+                // Filter row for attention category tabs
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -388,6 +437,7 @@ fun HomeScreen(
                             HomeWorkFilter.ASSIGNED_ISSUES -> assignedIssues.count { it.status != IssueStatus.CLOSED }
                             HomeWorkFilter.PENDING_REVIEWS -> pendingReviewArtifacts.size
                             HomeWorkFilter.PENDING_APPROVALS -> pendingApprovalArtifacts.size
+                            HomeWorkFilter.MENTIONS_AND_UNREAD -> mentionAndUnreadNotifications.size
                             HomeWorkFilter.RECENT_ACTIVITY -> auditLogs.take(5).size
                         }
                         FilterChip(
@@ -417,7 +467,7 @@ fun HomeScreen(
             }
         }
 
-        // Selected filter content
+        // Selected filter content list
         when (selectedWorkFilter) {
             HomeWorkFilter.ASSIGNED_ISSUES -> {
                 if (assignedIssues.isEmpty()) {
@@ -425,7 +475,7 @@ fun HomeScreen(
                         EmptyHomeStateCard(
                             icon = Icons.Default.TaskAlt,
                             title = "No Assigned Issues",
-                            subtitle = "You have no pending or blocked action items assigned at this time."
+                            subtitle = "You have no active or blocked action items assigned at this time."
                         )
                     }
                 } else {
@@ -437,6 +487,7 @@ fun HomeScreen(
                             repo = repo,
                             blockers = blockers,
                             allIssues = allIssues,
+                            activeUser = activeUser,
                             onClick = {
                                 if (repo != null) {
                                     onNavigateToRepository(repo)
@@ -453,7 +504,7 @@ fun HomeScreen(
                         EmptyHomeStateCard(
                             icon = Icons.Default.RateReview,
                             title = "No Pending Reviews",
-                            subtitle = "All blueprints and schemas in your scope have completed review."
+                            subtitle = "All specifications and workflows in your scope have completed peer review."
                         )
                     }
                 } else {
@@ -462,6 +513,7 @@ fun HomeScreen(
                         HomeArtifactReviewCard(
                             artifact = artifact,
                             repo = repo,
+                            isApproval = false,
                             onClick = {
                                 if (repo != null) {
                                     onNavigateToArtifact(repo, artifact)
@@ -478,7 +530,7 @@ fun HomeScreen(
                         EmptyHomeStateCard(
                             icon = Icons.Default.Approval,
                             title = "No Pending Approvals",
-                            subtitle = "There are currently no artifacts awaiting multi-signatory approval."
+                            subtitle = "There are currently no artifacts awaiting governance sign-off or dual approval."
                         )
                     }
                 } else {
@@ -498,13 +550,43 @@ fun HomeScreen(
                 }
             }
 
+            HomeWorkFilter.MENTIONS_AND_UNREAD -> {
+                if (mentionAndUnreadNotifications.isEmpty()) {
+                    item {
+                        EmptyHomeStateCard(
+                            icon = Icons.Default.AlternateEmail,
+                            title = "No Mentions or Unread Items",
+                            subtitle = "You are fully caught up! New @mentions, thread replies, and assignments appear here."
+                        )
+                    }
+                } else {
+                    items(mentionAndUnreadNotifications.take(6)) { notification ->
+                        val targetRepo = repositories.firstOrNull { it.id == notification.repoId }
+                        val targetArtifact = allArtifacts.firstOrNull { it.id == notification.artifactId }
+                        HomeMentionNotificationCard(
+                            notification = notification,
+                            repo = targetRepo,
+                            onClick = {
+                                if (targetRepo != null && targetArtifact != null) {
+                                    onNavigateToArtifact(targetRepo, targetArtifact)
+                                } else if (targetRepo != null) {
+                                    onNavigateToRepository(targetRepo)
+                                } else {
+                                    onNavigateToInbox()
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
             HomeWorkFilter.RECENT_ACTIVITY -> {
                 if (auditLogs.isEmpty()) {
                     item {
                         EmptyHomeStateCard(
                             icon = Icons.Default.History,
                             title = "No Activity Logs",
-                            subtitle = "Recent governance events and collaboration activity will appear here."
+                            subtitle = "Recent governance events and collaboration actions will appear here."
                         )
                     }
                 } else {
@@ -517,7 +599,7 @@ fun HomeScreen(
         }
 
         // =========================================================================
-        // 3. RECENT REPOSITORIES SECTION
+        // 3. RECENTLY ACCESSED REPOSITORIES SECTION
         // =========================================================================
         item {
             Column(
@@ -530,7 +612,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Collaboration Repositories",
+                        text = "Recently Accessed Repositories",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
@@ -549,18 +631,36 @@ fun HomeScreen(
                 if (accessibleRepositories.isEmpty()) {
                     EmptyHomeStateCard(
                         icon = Icons.Default.Folder,
-                        title = "No Repositories Available",
-                        subtitle = "Create your first No-Code schema or blueprint container to get started."
+                        title = "No Repositories Accessible",
+                        subtitle = "Create your first schema or blueprint collaboration container to get started."
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         accessibleRepositories.forEach { repo ->
                             val repoArtifactCount = allArtifacts.count { it.repoId == repo.id }
-                            val repoIssueCount = allIssues.count { it.repoId == repo.id }
+                            val repoIssueCount = allIssues.count { it.repoId == repo.id && it.status != IssueStatus.CLOSED }
+                            val repoDiscussionCount = allDiscussions.count { it.repoId == repo.id }
+
+                            // Calculate user's effective role in this repository
+                            val effectiveRolePair = if (activeUser != null) {
+                                HierarchicalPolicyEngine.resolveEffectiveRole(
+                                    actor = activeUser,
+                                    repo = repo,
+                                    orgMemberships = allOrgMemberships,
+                                    teamMemberships = allTeamMemberships,
+                                    teams = teams,
+                                    accessRules = allAccessRules
+                                )
+                            } else {
+                                Pair(RepoRole.VIEWER, "Public")
+                            }
+
                             HomeRepositoryRowCard(
                                 repo = repo,
                                 artifactCount = repoArtifactCount,
-                                issueCount = repoIssueCount,
+                                openIssueCount = repoIssueCount,
+                                discussionCount = repoDiscussionCount,
+                                effectiveRole = effectiveRolePair.first,
                                 onClick = { onNavigateToRepository(repo) }
                             )
                         }
@@ -613,7 +713,25 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Schemas", color = TextHighEmphasis)
+                            Text("Containers", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+
+                        OutlinedButton(
+                            onClick = onNavigateToInbox,
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("home_quick_inbox_btn"),
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, SophisticatedBorder)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = null,
+                                tint = LavenderPrimary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Inbox", color = TextHighEmphasis)
                         }
 
                         OutlinedButton(
@@ -631,7 +749,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("My Space", color = TextHighEmphasis)
+                            Text("Me", color = TextHighEmphasis)
                         }
                     }
                 }
@@ -639,8 +757,6 @@ fun HomeScreen(
         }
     }
 }
-
-private fun pendingApprovalApprovalCount(list: List<NoCodeArtifact>): Int = list.size
 
 @Composable
 fun AttentionMetricPill(
@@ -664,7 +780,7 @@ fun AttentionMetricPill(
         )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -696,10 +812,12 @@ fun HomeIssueCard(
     repo: Repository?,
     blockers: List<IssueDependency>,
     allIssues: List<RepoIssue>,
+    activeUser: User?,
     onClick: () -> Unit
 ) {
     val isBlocked = blockers.isNotEmpty()
     val isClosed = issue.status == IssueStatus.CLOSED
+    val isAssignedToUser = activeUser != null && issue.assigneeType == GranteeType.USER && issue.assigneeId == activeUser.id
 
     Card(
         modifier = Modifier
@@ -743,6 +861,22 @@ fun HomeIssueCard(
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = TextMediumEmphasis,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    if (isAssignedToUser) {
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = LavenderContainer
+                        ) {
+                            Text(
+                                text = "You",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = LavenderPrimary,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                             )
                         }
                     }
@@ -805,12 +939,40 @@ fun HomeIssueCard(
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
-                            text = if (blockingNumbers.isNotEmpty()) "Blocked by #${blockingNumbers.joinToString(", #")}" else "Blocked by upstream dependency",
+                            text = if (blockingNumbers.isNotEmpty()) "Blocked by #${blockingNumbers.joinToString(", #")}" else "Blocked by upstream issue",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 10.sp
                             ),
                             color = AmberWarning
+                        )
+                    }
+                }
+            }
+
+            // Linked artifact chip if present
+            if (!issue.linkedArtifactTitle.isNullOrEmpty()) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = SophisticatedContainer
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = null,
+                            tint = TextMediumEmphasis,
+                            modifier = Modifier.size(10.dp)
+                        )
+                        Text(
+                            text = "Linked: ${issue.linkedArtifactTitle}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                            color = TextMediumEmphasis,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -851,7 +1013,7 @@ fun HomeArtifactReviewCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .testTag("home_review_${artifact.id}"),
+            .testTag(if (isApproval) "home_approval_${artifact.id}" else "home_review_${artifact.id}"),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
         border = BorderStroke(1.dp, if (isApproval) EmeraldSuccess.copy(alpha = 0.4f) else AmberWarning.copy(alpha = 0.4f))
@@ -878,7 +1040,7 @@ fun HomeArtifactReviewCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = if (isApproval) "Approval Request" else "Review Request",
+                        text = if (isApproval) "Approval Sign-off" else "Peer Review Request",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = if (isApproval) EmeraldSuccess else AmberWarning
@@ -891,7 +1053,7 @@ fun HomeArtifactReviewCard(
                     color = SophisticatedContainer
                 ) {
                     Text(
-                        text = artifact.type.name,
+                        text = artifact.type.name.replace("_", " "),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Medium
@@ -908,6 +1070,16 @@ fun HomeArtifactReviewCard(
                 color = TextHighEmphasis
             )
 
+            if (artifact.summary.isNotEmpty()) {
+                Text(
+                    text = artifact.summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMediumEmphasis,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -919,13 +1091,139 @@ fun HomeArtifactReviewCard(
                     color = TextMediumEmphasis
                 )
                 Text(
-                    text = "Version: v${artifact.version}",
+                    text = "v${artifact.version} • ${artifact.authorDisplayName}",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
                     ),
                     color = TextLowEmphasis
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeMentionNotificationCard(
+    notification: AppNotification,
+    repo: Repository?,
+    onClick: () -> Unit
+) {
+    val isUnread = notification.status == NotificationStatus.UNREAD
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .testTag("home_notification_${notification.id}"),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
+        border = BorderStroke(
+            1.dp,
+            if (isUnread) LavenderPrimary.copy(alpha = 0.5f) else SophisticatedBorder
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Actor avatar
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        try {
+                            Color(android.graphics.Color.parseColor(notification.actorAvatarColorHex))
+                        } catch (e: Exception) {
+                            LavenderPrimary
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = notification.actorDisplayName.take(1).uppercase(),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = notification.actorDisplayName,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            color = TextHighEmphasis
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = SophisticatedContainer
+                        ) {
+                            Text(
+                                text = notification.category.label,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                color = LavenderPrimary,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+
+                    if (isUnread) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(LavenderPrimary)
+                        )
+                    }
+                }
+
+                Text(
+                    text = notification.title,
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = TextHighEmphasis,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = notification.body,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMediumEmphasis,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = repo?.displayName ?: notification.repoName ?: "Workspace",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        color = TextLowEmphasis
+                    )
+                    Text(
+                        text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(notification.createdAt)),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        color = TextLowEmphasis
+                    )
+                }
             }
         }
     }
@@ -992,7 +1290,9 @@ fun HomeActivityCard(
 fun HomeRepositoryRowCard(
     repo: Repository,
     artifactCount: Int,
-    issueCount: Int,
+    openIssueCount: Int,
+    discussionCount: Int,
+    effectiveRole: RepoRole,
     onClick: () -> Unit
 ) {
     Card(
@@ -1027,13 +1327,42 @@ fun HomeRepositoryRowCard(
             }
 
             Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = repo.displayName,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = TextHighEmphasis
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = when (effectiveRole) {
+                            RepoRole.OWNER, RepoRole.MAINTAINER -> LavenderContainer
+                            RepoRole.APPROVER, RepoRole.REVIEWER -> EmeraldSuccess.copy(alpha = 0.15f)
+                            RepoRole.COLLABORATOR -> SophisticatedContainer
+                            RepoRole.VIEWER -> SophisticatedSurface
+                        }
+                    ) {
+                        Text(
+                            text = effectiveRole.name,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = when (effectiveRole) {
+                                RepoRole.OWNER, RepoRole.MAINTAINER -> LavenderPrimary
+                                RepoRole.APPROVER, RepoRole.REVIEWER -> EmeraldSuccess
+                                RepoRole.COLLABORATOR -> TextHighEmphasis
+                                RepoRole.VIEWER -> TextMediumEmphasis
+                            },
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                        )
+                    }
+                }
                 Text(
-                    text = repo.displayName,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextHighEmphasis
-                )
-                Text(
-                    text = "${repo.ownerDisplayName} • $artifactCount Blueprints • $issueCount Issues",
+                    text = "${repo.ownerDisplayName} • $artifactCount Blueprints • $openIssueCount Issues • $discussionCount Discussions",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis
                 )
