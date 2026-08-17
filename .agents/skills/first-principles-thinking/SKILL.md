@@ -1,110 +1,148 @@
 ---
 name: first-principles-thinking
-description: Core reasoning engine for problem definition, scope reduction, root-cause analysis, and composable skill routing across the No-Code Collaboration Platform.
+description: Mandatory reasoning gate for consequential product, architecture, navigation, policy, persistence, and multi-file changes.
 ---
 
 # First Principles Thinking
 
-A lightweight, high-leverage reasoning skill designed to deconstruct ambiguous requests, isolate root causes, eliminate non-essential complexity, and define the minimum viable path to verified outcomes.
+Use this skill to convert an ambiguous request into the smallest verifiable change that preserves the No-Code Collaboration Platform constitution.
 
-This skill **does not duplicate or replace execution skills**. It acts as the cognitive front-end, routing guide, and course-corrector before, during, or after execution.
-
----
+This skill is a decision gate, not an execution substitute.
 
 ## 1. Trigger Conditions
 
-Use this skill when facing:
-- **Architectural Ambiguity**: Unclear system boundaries or responsibility distribution.
-- **Unclear Product Semantics**: Ambiguity around whether a feature violates No-Code boundaries.
-- **Multiple Divergent Solutions**: Competing implementation paths requiring trade-off evaluation.
-- **Significant Refactoring**: Structural changes across multiple components.
-- **Recurring Defects / Regressions**: Bugs persisting across multiple attempts.
-- **Complex Dependencies**: Multi-layer state, policy, or data cascades.
-- **Production / Release Incidents**: Urgent triage requiring symptom vs. cause isolation.
-- **Consequential Decisions**: High-impact additions to data models, permissions, or navigation.
+Invoke for changes involving any of the following:
 
-> **Zero-Overhead Rule**: Do NOT invoke for trivial, isolated, or low-risk tasks (e.g., simple text edits, single-parameter adjustments).
+- product or Repository semantics
+- ownership, membership, access, roles, or policy
+- entities, relationships, lifecycle states, or persistence
+- navigation or cross-screen behavior
+- multiple plausible implementation paths
+- significant refactoring or recurring defects
+- changes spanning multiple files or layers
 
----
+### Zero-Overhead Rule
 
-## 2. Core Reasoning Cycle
+Do not invoke for trivial isolated edits whose objective, scope, and verification are already obvious.
 
+## 2. Immutable Project Invariants
+
+1. The product is a **No-Code Collaboration Platform**.
+2. A `Repository` is a collaboration container, never a Git or source-code repository.
+3. Git, commits, branches, tags, pull requests, diffs, CI/CD, source editors, terminals, and IDE semantics are excluded.
+4. Persistent entities and relationships use Room.
+5. UI state flows through ViewModel and StateFlow.
+6. Permission decisions route through `HierarchicalPolicyEngine`.
+7. Mobile interaction cost is a primary constraint; new top-level screens and tabs require explicit proof.
+
+## 3. Mandatory Decision Record
+
+Before implementation, produce the following concise record:
+
+### Objective
+
+State the user or system outcome without assuming a feature or technical solution.
+
+### Facts
+
+List only facts verified from the current repository.
+
+### Assumptions
+
+List material unknowns. Do not silently promote assumptions into facts.
+
+### Invariants
+
+List the constitutional, governance, architecture, and mobile constraints that must remain true.
+
+### Core Model
+
+Decompose the change into:
+
+- **Entities** — who or what exists
+- **Relationships** — ownership, membership, access, dependency, or linkage
+- **States** — lifecycle or condition
+- **Events** — triggers and mutations
+- **Responsibilities** — which layer owns each decision
+
+### Root Constraint
+
+Identify the smallest upstream cause preventing the objective. Do not describe only the visible symptom.
+
+### Highest-Leverage Change
+
+Identify the single intervention that removes the most repeated logic, navigation cost, ambiguity, or failure risk.
+
+### Minimum Viable Change
+
+Define the smallest coherent implementation that completely resolves the root constraint.
+
+### Rejected Complexity
+
+Explicitly list features, abstractions, screens, states, and refactors that are not required now.
+
+### Verification Evidence
+
+Define exact semantic assertions, relationship assertions, behavior checks, invariant checks, and technical commands.
+
+### Stop Condition
+
+State when the work is sufficient and must stop.
+
+## 4. Reasoning Protocol
+
+```text
+Request
+↓
+Objective
+↓
+Facts vs Assumptions
+↓
+Invariants
+↓
+Entities × Relationships × States × Events × Responsibilities
+↓
+Root Constraint
+↓
+Remove Accidental Complexity
+↓
+Highest-Leverage Change
+↓
+Minimum Viable Change
+↓
+Verification Evidence
+↓
+Pass → Stop
+Fail → Return to Root Constraint
 ```
-[Context / Prompt]
-       │
-       ▼
-Reverse Engineer (if decomposing external benchmark)
-       │
-       ▼
-First Principles (Deconstruct to fundamental truths & invariants)
-       │
-       ▼
-Simplify (Remove non-essential semantics & accidental complexity)
-       │
-       ▼
-Focus on Highest Leverage (Isolate root cause or primary leverage point)
-       │
-       ▼
-Minimum Viable Change (Smallest coherent delta in code/models)
-       │
-       ▼
-Verify (Evidence-based validation against invariants)
-       │
-       ▼
-Learn / Stop (Halt when verified; iterate cleanly if invalidated)
-```
 
----
+## 5. Decision Rules
 
-## 3. Ten-Step Reasoning Protocol
+- Repository evidence outranks benchmark imitation.
+- Translate useful GitHub collaboration semantics; reject code-centric mechanics.
+- Prefer an existing valid entity or mechanism before creating another one.
+- One reusable semantic abstraction is preferable to several feature-specific callbacks when they represent the same concept.
+- A smaller incomplete change is not an MVP. The minimum change must still form a complete behavior.
+- Do not design for hypothetical future features unless the current objective requires the extension point.
+- Do not optimize arbitrary line count; optimize semantic responsibility and dependency radius.
 
-1. **Identify the Actual Objective**: What fundamental problem is the user solving? (Strip away proposed implementation bias).
-2. **Separate Facts from Assumptions**: What is objectively verified in the codebase vs. what is assumed?
-3. **Isolate Immutable Invariants**: Respect project constitutions (No-Code Collaboration Platform, Repository as workspace container, Room + Compose architecture).
-4. **Decompose the Problem**: Break down into canonical dimensions:
-   - *Entities* (Who/What)
-   - *Relationships* (Ownership/Access)
-   - *States* (Lifecycle/Condition)
-   - *Events* (Triggers/Mutations)
-   - *Responsibilities* (Which layer owns what)
-5. **Find Root Cause**: Avoid patching symptoms; trace regressions to upstream state or semantic mismatches.
-6. **Remove Unnecessary Complexity**: Eliminate premature abstractions, speculative states, and extra layers.
-7. **Identify the Highest-Leverage Point**: What single change or pivot solves the core constraint?
-8. **Define the Smallest Sufficient Scope**: Target the minimal set of files and lines required for full correctness.
-9. **Define Verification Evidence**: Formulate exact criteria and test assertions to prove correctness.
-10. **Stop When Sufficient**: Do not over-design once the problem is resolved and verified.
+## 6. Skill Routing
 
----
+After the decision record:
 
-## 4. Composable Skill Combinations
+- use `product-guardian` when product meaning or constitutional boundaries are involved
+- use `feature-delivery` for implementation
+- use `verification-gate` before completion
 
-Combine this skill dynamically with domain execution skills using the smallest sufficient set:
+Use only skills that exist under `.agents/skills`.
 
-| Combination | Purpose & Outcome |
-| :--- | :--- |
-| **First Principles + Product Guardian** | Clarify whether candidate features belong within the No-Code Collaboration domain and eliminate leaked code-centric semantics. |
-| **First Principles + Architecture Steward** | Determine semantic responsibility boundaries and dependency radii before structural refactoring. |
-| **First Principles + Feature Delivery** | Find the smallest coherent implementation scope that achieves user intent without unnecessary UI or architectural baggage. |
-| **First Principles + Verification Gate** | Derive explicit verification criteria and invariant assertions directly from original objectives. |
-| **First Principles + Release Guardian** | Isolate highest-risk assumptions, security vulnerabilities, and release-critical invariants. |
-| **First Principles + Incident Triage** | Separate visible failure symptoms from root causes to execute the safest minimal recovery. |
+## 7. Completion Criteria
 
----
+This skill is complete only when:
 
-## 5. Operating Modes
-
-- **Standalone Analysis**: Deconstruct an ambiguous problem, validate feasibility, or define scope before proposing code changes.
-- **Pre-Execution Filter**: Run prior to `feature-delivery` or `architecture-steward` to define minimal scope and boundaries.
-- **Parallel Reasoning**: Accompany complex workflows to ensure focus on highest-leverage solutions.
-- **Post-Failure Correction**: Re-evaluate first principles when a build, test, or feature implementation fails or loops.
-
----
-
-## 6. Project Invariants & Decision Rules
-
-1. **Constitutional Invariant**: The root `AGENTS.md` is the authoritative product constitution. The product is a **No-Code Collaboration Platform**.
-2. **Container Semantics**: The `Repository` is a collaboration container for artifacts, issues, discussions, policies, and milestones—never a Git/code repository.
-3. **No Developer Semantics**: Strictly exclude Git, branches, diffs, PRs, CI/CD, IDE features, and syntax tooling.
-4. **Architecture Decisions**: Optimize for **semantic responsibility and tight dependency radii**, not arbitrary line counts.
-5. **Implementation Decisions**: Always prefer:
-   $$\text{Smallest affected scope} + \text{Minimum necessary files} + \text{Existing valid mechanisms} + \text{Explicit verification}$$
+- facts and assumptions are separated
+- the root constraint is explicit
+- the minimum viable change is bounded
+- rejected complexity is recorded
+- verification evidence is testable
+- a stop condition prevents speculative expansion
