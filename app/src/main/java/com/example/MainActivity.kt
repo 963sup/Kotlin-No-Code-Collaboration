@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -61,6 +62,7 @@ import com.example.data.model.NoCodeArtifact
 import com.example.data.model.Repository
 import com.example.data.model.User
 import com.example.ui.components.PersonaSwitcherDialog
+import com.example.ui.components.RepositoryWorkBoardDialog
 import com.example.ui.screens.ArtifactDetailScreen
 import com.example.ui.screens.AuditLogScreen
 import com.example.ui.screens.HomeScreen
@@ -152,6 +154,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
     var currentTab by remember { mutableStateOf(MainNavigationTab.HOME) }
     var meSubTab by remember { mutableStateOf(MeSubTab.PROFILE) }
     var showPersonaSwitcher by remember { mutableStateOf(false) }
+    var showWorkBoard by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -208,6 +211,20 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                     }
                 },
                 actions = {
+                    // Repository-scoped work view: a projection of Issues, not a new Project owner.
+                    if (selectedRepo != null && selectedArtifact == null) {
+                        IconButton(
+                            onClick = { showWorkBoard = true },
+                            modifier = Modifier.testTag("topbar_repo_work_board_btn")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Dashboard,
+                                contentDescription = "Repository Kanban Board and Nested Tasks",
+                                tint = LavenderPrimary
+                            )
+                        }
+                    }
+
                     // Inbox Quick Access Button with Badge
                     IconButton(
                         onClick = { currentTab = MainNavigationTab.INBOX },
@@ -397,8 +414,14 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         allTeamMemberships = allTeamMemberships,
                         allAuditLogs = auditLogs,
                         activeUser = activeUser,
-                        onBack = { viewModel.selectRepository(null) },
-                        onSelectArtifact = { art -> viewModel.selectArtifact(art) },
+                        onBack = {
+                            showWorkBoard = false
+                            viewModel.selectRepository(null)
+                        },
+                        onSelectArtifact = { art ->
+                            showWorkBoard = false
+                            viewModel.selectArtifact(art)
+                        },
                         onCreateArtifact = { title, type, summary, content, callback ->
                             viewModel.createNoCodeArtifact(
                                 repoId = selectedRepo!!.id,
@@ -677,6 +700,17 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                 }
             }
         }
+    }
+
+    if (showWorkBoard && selectedRepo != null && selectedArtifact == null) {
+        RepositoryWorkBoardDialog(
+            repo = selectedRepo!!,
+            issues = selectedRepoIssues,
+            onUpdateIssueStatus = { issueId, newStatus ->
+                viewModel.updateIssueStatus(issueId, newStatus)
+            },
+            onDismiss = { showWorkBoard = false }
+        )
     }
 
     if (showPersonaSwitcher) {

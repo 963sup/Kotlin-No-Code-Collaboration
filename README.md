@@ -13,11 +13,14 @@ In traditional systems, repositories are tied to source code and Git trees. **Re
 Enterprise / Organization
   └── Team
         └── Repository (Collaboration Container)
-              ├── Issues & Work Items (Labels, Milestones, Status, Assignees)
+              ├── Issues & Nested Tasks (Status, Priority, Assignees, Dependencies)
+              ├── Kanban Work Board (Repository-scoped view over Issues)
               ├── Discussions & Decisions (Threads, Categories, Comments)
-              ├── Projects & Artifacts (Specifications, Documents, Trackers)
+              ├── Artifacts (Specifications, Documents, Workflows, Trackers)
               └── Governance & Policy Engine (RBAC/ABAC, Approvals, Audit)
 ```
+
+The Kanban Board is intentionally a **view of Repository Issues**, not a separate Project ownership model. Nested Tasks reuse the recursive Issue parent relationship, avoiding duplicate task entities and unnecessary persistence layers.
 
 ---
 
@@ -28,7 +31,8 @@ Enterprise / Organization
   - Multi-tier role model: `Owner`, `Admin`, `Maintainer`, `Reviewer`, `Collaborator`, `Member`, `Approver`.
   - Real-time policy simulator and trace inspection dialog.
 - **No-Code Repository Workspace**:
-  - Structured issues management with labels, milestones, status tracking, and priority filters.
+  - Structured issues management with status tracking, priority filters, assignees, dependencies, and recursive Nested Tasks.
+  - Repository-scoped Kanban Board projecting the existing `Open -> In Progress -> Closed` Issue lifecycle without duplicating work data.
   - Discussions forum with threaded replies and category segmentation.
   - Artifact and document governance with review & approval workflows.
 - **Audit & Compliance Logging**:
