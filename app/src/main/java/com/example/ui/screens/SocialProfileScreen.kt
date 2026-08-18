@@ -37,6 +37,7 @@ import com.example.data.model.SyncStatusSummary
 import com.example.data.model.User
 import com.example.data.model.UserFollow
 import com.example.navigation.CollaborationTarget
+import com.example.navigation.CollaborationTargetAccess
 import com.example.ui.model.AchievementProjection
 import com.example.ui.model.FollowingActivityProjection
 import com.example.ui.model.SavedProjection
@@ -76,13 +77,18 @@ fun SocialProfileScreen(
     val issues by governanceViewModel.allIssues.collectAsState()
     val discussions by governanceViewModel.allDiscussions.collectAsState()
     val reviews by governanceViewModel.allReviews.collectAsState()
+    val allAccessRules by governanceViewModel.allAccessRules.collectAsState()
+    val allOrgMemberships by governanceViewModel.allOrgMemberships.collectAsState()
+    val allTeamMemberships by governanceViewModel.allTeamMemberships.collectAsState()
 
     var tabName by rememberSaveable(profileUser.id) { mutableStateOf(SocialProfileTab.OVERVIEW.name) }
     val selectedTab = SocialProfileTab.valueOf(tabName)
     val stats = remember(profileUser, auditLogs, visibleRepositoryIds) {
         SocialProjection.stats(profileUser, auditLogs, visibleRepositoryIds)
     }
-    val usersById = remember(users) { users.associateBy { it.id } }
+    val usersById = remember(users, activeUser.enterpriseId) {
+        users.filter { it.enterpriseId == activeUser.enterpriseId }.associateBy { it.id }
+    }
     val followerUsers = remember(profileUser.id, follows, usersById) {
         follows.filter { it.followedUserId == profileUser.id }
             .mapNotNull { usersById[it.followerUserId] }
@@ -105,12 +111,39 @@ fun SocialProfileScreen(
     val achievements = remember(profileUser.id, issues, reviews, artifacts, auditLogs, visibleRepositoryIds) {
         AchievementProjection.build(profileUser, issues, reviews, artifacts, auditLogs, visibleRepositoryIds)
     }
-    val repositoriesById = remember(repositories) { repositories.associateBy { it.id } }
-    val organizationsById = remember(organizations) { organizations.associateBy { it.id } }
-    val teamsById = remember(teams) { teams.associateBy { it.id } }
-    val artifactsById = remember(artifacts) { artifacts.associateBy { it.id } }
-    val issuesById = remember(issues) { issues.associateBy { it.id } }
-    val discussionsById = remember(discussions) { discussions.associateBy { it.id } }
+    val repositoriesById = remember(
+        repositories,
+        activeUser,
+        allOrgMemberships,
+        allTeamMemberships,
+        allAccessRules
+    ) {
+        repositories.filter { repository ->
+            CollaborationTargetAccess.canOpenRepository(
+                user = activeUser,
+                repository = repository,
+                orgMemberships = allOrgMemberships,
+                teamMemberships = allTeamMemberships,
+                accessRules = allAccessRules
+            )
+        }.associateBy { it.id }
+    }
+    val accessibleRepositoryIds = remember(repositoriesById) { repositoriesById.keys }
+    val organizationsById = remember(organizations, activeUser.enterpriseId) {
+        organizations.filter { it.enterpriseId == activeUser.enterpriseId }.associateBy { it.id }
+    }
+    val teamsById = remember(teams, organizationsById) {
+        teams.filter { it.orgId in organizationsById }.associateBy { it.id }
+    }
+    val artifactsById = remember(artifacts, accessibleRepositoryIds) {
+        artifacts.filter { it.repoId in accessibleRepositoryIds }.associateBy { it.id }
+    }
+    val issuesById = remember(issues, accessibleRepositoryIds) {
+        issues.filter { it.repoId in accessibleRepositoryIds }.associateBy { it.id }
+    }
+    val discussionsById = remember(discussions, accessibleRepositoryIds) {
+        discussions.filter { it.repoId in accessibleRepositoryIds }.associateBy { it.id }
+    }
 
     fun openTarget(target: CollaborationTarget) {
         when (target) {
@@ -143,7 +176,11 @@ fun SocialProfileScreen(
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(profileUser.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("@${profileUser.username} · ${profileUser.title}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Lv.${stats.level} · XP ${stats.xp} · 公開協作 ${stats.publicActions}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text(
+                    "Lv.${stats.level} · XP ${stats.xp} · 公開協作 ${stats.publicActions}",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
                 Text("追隨者 ${followerUsers.size} · 追蹤中 ${followingUsers.size} · 已解鎖 ${achievements.count { it.unlocked }} 個成就")
                 if (profileUser.id != activeUser.id) {
                     OutlinedButton(
@@ -195,7 +232,10 @@ fun SocialProfileScreen(
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("身份", fontWeight = FontWeight.Bold)
                                 Text(profileUser.bio)
-                                Text("${profileUser.location} · ${profileUser.pronouns}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    "${profileUser.location} · ${profileUser.pronouns}",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
@@ -247,7 +287,11 @@ fun SocialProfileScreen(
                                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                     Text(item.actorDisplayName, fontWeight = FontWeight.SemiBold)
                                     Text(item.actionName.replace('_', ' '), color = MaterialTheme.colorScheme.primary)
-                                    Text("${item.repositoryName} · ${formatSocialTime(item.timestamp)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(
+                                        "${item.repositoryName} · ${formatSocialTime(item.timestamp)}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
@@ -280,8 +324,17 @@ fun SocialProfileScreen(
                                         .testTag("saved_target_${target.toString().hashCode()}")
                                 ) {
                                     Column(Modifier.padding(14.dp)) {
-                                        Text(label.first, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        Text(label.second, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text(
+                                            label.first,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            label.second,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
@@ -296,7 +349,11 @@ fun SocialProfileScreen(
                                 Text(
                                     if (achievement.unlocked) "✓ ${achievement.badge.title}" else achievement.badge.title,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (achievement.unlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    color = if (achievement.unlocked) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                 )
                                 Text(achievement.badge.description, style = MaterialTheme.typography.bodySmall)
                                 LinearProgressIndicator(
@@ -328,7 +385,11 @@ private fun SocialPersonCard(user: User, onClick: () -> Unit) {
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(user.displayName, fontWeight = FontWeight.SemiBold)
-            Text("@${user.username} · ${user.title}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "@${user.username} · ${user.title}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -344,22 +405,22 @@ private fun resolveSavedLabel(
     users: Map<String, User>
 ): Pair<String, String> = when (target) {
     is CollaborationTarget.Repository -> repositories[target.repositoryId]
-        ?.let { it.displayName to "儲存庫" } ?: target.repositoryId to "儲存庫已不存在"
+        ?.let { it.displayName to "儲存庫" } ?: "無法開啟" to "儲存庫已不存在或權限已撤銷"
     is CollaborationTarget.Artifact -> artifacts[target.artifactId]
         ?.let { it.title to (repositories[target.repositoryId]?.displayName ?: "成果") }
-        ?: target.artifactId to "成果已不存在"
+        ?: "無法開啟" to "成果已不存在或權限已撤銷"
     is CollaborationTarget.Issue -> issues[target.issueId]
         ?.let { "#${it.issueNumber} ${it.title}" to (repositories[target.repositoryId]?.displayName ?: "工作") }
-        ?: target.issueId to "工作已不存在"
+        ?: "無法開啟" to "工作已不存在或權限已撤銷"
     is CollaborationTarget.Discussion -> discussions[target.discussionId]
         ?.let { it.title to (repositories[target.repositoryId]?.displayName ?: "討論") }
-        ?: target.discussionId to "討論已不存在"
+        ?: "無法開啟" to "討論已不存在或權限已撤銷"
     is CollaborationTarget.Organization -> organizations[target.organizationId]
-        ?.let { it.name to "組織" } ?: target.organizationId to "組織已不存在"
+        ?.let { it.name to "組織" } ?: "無法開啟" to "組織已不存在或不在目前企業"
     is CollaborationTarget.Team -> teams[target.teamId]
-        ?.let { it.name to "團隊" } ?: target.teamId to "團隊已不存在"
+        ?.let { it.name to "團隊" } ?: "無法開啟" to "團隊已不存在或不在目前企業"
     is CollaborationTarget.UserProfile -> users[target.userId]
-        ?.let { it.displayName to "@${it.username}" } ?: target.userId to "用戶已不存在"
+        ?.let { it.displayName to "@${it.username}" } ?: "無法開啟" to "用戶已不存在或不在目前企業"
 }
 
 private fun formatSocialTime(timestamp: Long): String =
