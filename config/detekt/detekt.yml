@@ -1,0 +1,30 @@
+# Detekt is advisory in the initial rollout. Keep high-signal correctness and structural findings,
+# while removing known Jetpack Compose / legacy-size noise that would otherwise reduce signal quality.
+
+config:
+  validation: true
+  warningsAsErrors: true
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - "Composable"
+  MatchingDeclarationName:
+    active: false
+
+style:
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    max: 5
+    excludeGuardClauses: true
+
+complexity:
+  CyclomaticComplexMethod:
+    allowedComplexity: 25
+  LongMethod:
+    active: false
+  TooManyFunctions:
+    active: false

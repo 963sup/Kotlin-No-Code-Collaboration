@@ -63,8 +63,11 @@ detekt {
   buildUponDefaultConfig = true
   allRules = false
   parallel = true
-  // Initial rollout is report-only so legacy findings do not block delivery.
-  // Konsist provides hard architecture gates below; Detekt can become blocking after a baseline cleanup.
+  source.setFrom("src/main/java", "src/main/kotlin")
+  config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+  basePath.set(rootProject.projectDir)
+  // Advisory rollout: existing debt stays visible without blocking AI Studio or web delivery.
+  // Konsist remains the hard architecture gate in unit tests.
   ignoreFailures = true
 }
 

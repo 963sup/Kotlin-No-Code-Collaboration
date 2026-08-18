@@ -6,6 +6,17 @@ on:
     branches: ["main"]
     paths:
       - "app/**"
+      - "config/detekt/**"
+      - "gradle/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - ".github/workflows/android.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "app/**"
+      - "config/detekt/**"
       - "gradle/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
@@ -39,4 +50,4 @@ jobs:
           gradle-version: "9.3.1"
 
       - name: Static analysis, tests, and assemble
-        run: gradle :app:detekt :app:testDebugUnitTest :app:assembleDebug
+        run: gradle :app:detekt :app:testDebugUnitTest :app:assembleDebug --console=plain
