@@ -24,9 +24,12 @@ def insert_import(text: str, line: str) -> str:
 
 def find_branch(text: str, label: str):
     marker = f"MainNavigationTab.{label} ->"
-    start = text.find(marker)
+    navigation_root = text.find("when (currentTab)")
+    if navigation_root < 0:
+        raise RuntimeError("Main navigation when(currentTab) missing")
+    start = text.find(marker, navigation_root)
     if start < 0:
-        raise RuntimeError(f"Missing {marker}")
+        raise RuntimeError(f"Missing {marker} in currentTab navigation")
     cursor = start + len(marker)
     while cursor < len(text) and text[cursor].isspace():
         cursor += 1

@@ -229,7 +229,7 @@ object ScopeOperationalProjection {
             null -> "目前"
         }
         return ScopeOperationalSummary(
-            title = "$prefix態勢｜${scopeName ?: "目前範圍"}",
+            title = "${prefix}態勢｜${scopeName ?: "目前範圍"}",
             healthScore = health,
             detail = "${repositories.size} 儲存庫 · ${issues.size} Issue · ${artifacts.size} 成果 · ${reviews.size} 審查 · ${approvals.size} 核准"
         )
