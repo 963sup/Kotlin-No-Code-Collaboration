@@ -19,17 +19,18 @@ for path, mapping in patches.items():
         text = text.replace(old, new)
     path.write_text(text, encoding='utf-8')
 
-# Fixed English labels that must not remain in user-facing Kotlin UI.
-forbidden = [
+# Check user-facing literal values rather than matching Kotlin identifiers such as HomeScreen.
+exact_literals = [
     'Access Governance', 'Home', 'Repositories', 'Inbox', 'Me',
     'Kanban Board', 'Nested Tasks', 'Overview', 'Issues', 'Discussions', 'Artifacts',
     'New Issue', 'New Discussion', 'Unified Inbox', 'Repository Settings',
     'Work Requiring Attention', 'SELECT BLOCKING PREREQUISITE',
-    'All Categories (', 'Select Specific ', 'PERSONAL WORKSPACES', 'RFC DISCUSSIONS INITIATED',
 ]
+phrase_literals = ['All Categories (', 'Select Specific ', 'PERSONAL WORKSPACES', 'RFC DISCUSSIONS INITIATED']
 ui_files = list((ROOT / 'app/src/main/java/com/example/ui').rglob('*.kt')) + [ROOT / 'app/src/main/java/com/example/MainActivity.kt']
 joined = '\n'.join(path.read_text(encoding='utf-8') for path in ui_files)
-remaining = [token for token in forbidden if token in joined]
+remaining = [token for token in exact_literals if f'"{token}"' in joined]
+remaining += [token for token in phrase_literals if f'"{token}' in joined]
 if remaining:
-    raise RuntimeError(f'fixed English UI literals remain: {remaining}')
+    raise RuntimeError(f'fixed English UI literals remain: {sorted(set(remaining))}')
 print('Final fixed-English UI literals: 0')
