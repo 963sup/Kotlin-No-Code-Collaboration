@@ -41,29 +41,41 @@ object CollaborationTargetResolver {
         val teamId = notification.teamId.identifier()
 
         return when (action) {
-  "REVIEW", "APPROVE", "VIEW_ARTIFACT" ->
-      repositoryId?.let { repo -> artifactId?.let { CollaborationTarget.Artifact(repo, it) } }
+            "REVIEW", "APPROVE", "VIEW_ARTIFACT" ->
+                repositoryId?.let { repo -> artifactId?.let { CollaborationTarget.Artifact(repo, it) } }
 
-  "VIEW_ISSUE" ->
-      repositoryId?.let { repo -> issueId?.let { CollaborationTarget.Issue(repo, it) } }
+            "VIEW_ISSUE" ->
+                repositoryId?.let { repo -> issueId?.let { CollaborationTarget.Issue(repo, it) } }
 
-  "VIEW_DISCUSSION" ->
-      repositoryId?.let { repo -> discussionId?.let { CollaborationTarget.Discussion(repo, it) } }
+            "VIEW_DISCUSSION" ->
+                repositoryId?.let { repo -> discussionId?.let { CollaborationTarget.Discussion(repo, it) } }
 
-  "VIEW_REPO" -> repositoryId?.let(CollaborationTarget::Repository)
-  "VIEW_ORG" -> organizationId?.let(CollaborationTarget::Organization)
-  "VIEW_TEAM" -> teamId?.let(CollaborationTarget::Team)
-  "VIEW_PROFILE" -> notification.actorUserId.identifier()?.let(CollaborationTarget::UserProfile)
+            "VIEW_REPO" -> repositoryId?.let(CollaborationTarget::Repository)
 
-  else -> when {
-      repositoryId != null && issueId != null -> CollaborationTarget.Issue(repositoryId, issueId)
-      repositoryId != null && discussionId != null -> CollaborationTarget.Discussion(repositoryId, discussionId)
-      repositoryId != null && artifactId != null -> CollaborationTarget.Artifact(repositoryId, artifactId)
-      repositoryId != null -> CollaborationTarget.Repository(repositoryId)
-      teamId != null -> CollaborationTarget.Team(teamId)
-      organizationId != null -> CollaborationTarget.Organization(organizationId)
-      else -> null
-  }
+            "VIEW_ORG" -> organizationId?.let(CollaborationTarget::Organization)
+
+            "VIEW_TEAM" -> teamId?.let(CollaborationTarget::Team)
+
+            "VIEW_PROFILE" -> notification.actorUserId.identifier()?.let(CollaborationTarget::UserProfile)
+
+            else -> when {
+                repositoryId != null && issueId != null -> CollaborationTarget.Issue(repositoryId, issueId)
+
+                repositoryId != null && discussionId != null -> CollaborationTarget.Discussion(
+                    repositoryId,
+                    discussionId,
+                )
+
+                repositoryId != null && artifactId != null -> CollaborationTarget.Artifact(repositoryId, artifactId)
+
+                repositoryId != null -> CollaborationTarget.Repository(repositoryId)
+
+                teamId != null -> CollaborationTarget.Team(teamId)
+
+                organizationId != null -> CollaborationTarget.Organization(organizationId)
+
+                else -> null
+            }
         }
     }
 
@@ -81,33 +93,33 @@ object CollaborationTargetAccess {
         repository: Repository,
         orgMemberships: List<OrgMembership>,
         teamMemberships: List<TeamMembership>,
-        accessRules: List<RepoAccessRule>
+        accessRules: List<RepoAccessRule>,
     ): Boolean {
         if (user.enterpriseId != repository.enterpriseId) return false
         if (user.isEnterpriseAdmin) return true
         if (repository.ownerType == OwnerType.USER && repository.ownerId == user.id) return true
 
         val organizationIds = orgMemberships
-  .asSequence()
-  .filter { it.userId == user.id }
-  .map { it.orgId }
-  .toSet()
+            .asSequence()
+            .filter { it.userId == user.id }
+            .map { it.orgId }
+            .toSet()
 
         if (repository.ownerType == OwnerType.ORGANIZATION && repository.ownerId in organizationIds) {
-  return true
+            return true
         }
 
         val teamIds = teamMemberships
-  .asSequence()
-  .filter { it.userId == user.id }
-  .map { it.teamId }
-  .toSet()
+            .asSequence()
+            .filter { it.userId == user.id }
+            .map { it.teamId }
+            .toSet()
 
         return accessRules.any { rule ->
-  rule.repoId == repository.id && when (rule.granteeType) {
-      GranteeType.USER -> rule.granteeId == user.id
-      GranteeType.TEAM -> rule.granteeId in teamIds
-  }
+            rule.repoId == repository.id && when (rule.granteeType) {
+                GranteeType.USER -> rule.granteeId == user.id
+                GranteeType.TEAM -> rule.granteeId in teamIds
+            }
         }
     }
 }

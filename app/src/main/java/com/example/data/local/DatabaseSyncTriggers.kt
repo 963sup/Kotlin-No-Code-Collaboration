@@ -17,7 +17,7 @@ object DatabaseSyncTriggers {
         "no_code_artifacts" to "artifact",
         "repo_discussions" to "discussion",
         "saved_targets" to "saved_target",
-        "user_follows" to "user_follow"
+        "user_follows" to "user_follow",
     )
 
     val callback: RoomDatabase.Callback = object : RoomDatabase.Callback() {
@@ -29,7 +29,9 @@ object DatabaseSyncTriggers {
     fun install(db: SupportSQLiteDatabase) {
         db.execSQL("INSERT OR IGNORE INTO sync_runtime_state(id, isApplyingRemote) VALUES(1, 0)")
         db.execSQL("UPDATE sync_runtime_state SET isApplyingRemote = 0 WHERE id = 1")
-        db.execSQL("UPDATE sync_outbox SET state = 'PENDING', lastError = 'Recovered interrupted sync' WHERE state = 'IN_FLIGHT'")
+        db.execSQL(
+            "UPDATE sync_outbox SET state = 'PENDING', lastError = 'Recovered interrupted sync' WHERE state = 'IN_FLIGHT'",
+        )
         trackedTables.forEach { (table, entityType) ->
             db.execSQL(upsertTrigger(table, entityType, "INSERT"))
             db.execSQL(upsertTrigger(table, entityType, "UPDATE"))

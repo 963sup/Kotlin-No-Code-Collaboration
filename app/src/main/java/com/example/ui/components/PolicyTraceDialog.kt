@@ -17,13 +17,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,9 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,21 +45,15 @@ import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.LavenderSubtle
 import com.example.ui.theme.RoseDark
 import com.example.ui.theme.RoseError
-import com.example.ui.theme.SophisticatedBg
 import com.example.ui.theme.SophisticatedBorder
-import com.example.ui.theme.SophisticatedBorderSubtle
 import com.example.ui.theme.SophisticatedContainer
 import com.example.ui.theme.SophisticatedSurface
 import com.example.ui.theme.SophisticatedSurfaceDark
 import com.example.ui.theme.TextHighEmphasis
-import com.example.ui.theme.TextLowEmphasis
 import com.example.ui.theme.TextMediumEmphasis
 
 @Composable
-fun PolicyTraceDialog(
-    evaluation: PolicyEvaluationDetail,
-    onDismiss: () -> Unit
-) {
+fun PolicyTraceDialog(evaluation: PolicyEvaluationDetail, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
@@ -71,48 +61,48 @@ fun PolicyTraceDialog(
                 .clip(RoundedCornerShape(24.dp)),
             color = SophisticatedSurface,
             border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
-            tonalElevation = 8.dp
+            tonalElevation = 8.dp,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(22.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Box(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(SophisticatedContainer),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = null,
                             tint = if (evaluation.verdict == PolicyVerdict.ALLOWED) EmeraldSuccess else RoseError,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                     Column {
                         Text(
                             text = "政策評估軌跡",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                            color = LavenderPrimary
+                            color = LavenderPrimary,
                         )
                         Text(
                             text = "階層治理引擎",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 9.sp,
                                 letterSpacing = 1.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             ),
-                            color = TextMediumEmphasis
+                            color = TextMediumEmphasis,
                         )
                     }
                 }
@@ -127,19 +117,25 @@ fun PolicyTraceDialog(
                 Card(
                     colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
                     shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         TraceKeyVal("Actor", "${evaluation.actor.displayName} (@${evaluation.actor.username})")
                         TraceKeyVal("Action Requested", evaluation.action.label)
-                        TraceKeyVal("Target Repository", "${evaluation.targetRepo.displayName} (${evaluation.targetRepo.ownerType.name})")
+                        TraceKeyVal(
+                            "Target Repository",
+                            "${evaluation.targetRepo.displayName} (${evaluation.targetRepo.ownerType.name})",
+                        )
                         if (evaluation.targetArtifact != null) {
-                            TraceKeyVal("Target Artifact", "${evaluation.targetArtifact.title} [${evaluation.targetArtifact.lifecycleState.name}]")
+                            TraceKeyVal(
+                                "Target Artifact",
+                                "${evaluation.targetArtifact.title} [${evaluation.targetArtifact.lifecycleState.name}]",
+                            )
                         }
                         TraceKeyVal("有效角色", evaluation.effectiveRole.name)
                         TraceKeyVal("角色來源", evaluation.roleSource)
@@ -152,7 +148,7 @@ fun PolicyTraceDialog(
                 Text(
                     text = "1. 企業護欄評估",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = LavenderPrimary
+                    color = LavenderPrimary,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -167,7 +163,7 @@ fun PolicyTraceDialog(
                 Text(
                     text = "2. 儲存庫角色與生命週期門檻檢查",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = LavenderSubtle
+                    color = LavenderSubtle,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -183,21 +179,35 @@ fun PolicyTraceDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (evaluation.verdict == PolicyVerdict.ALLOWED) EmeraldDark.copy(alpha = 0.6f) else RoseDark.copy(alpha = 0.6f))
+                        .background(
+                            if (evaluation.verdict == PolicyVerdict.ALLOWED) {
+                                EmeraldDark.copy(
+                                    alpha = 0.6f,
+                                )
+                            } else {
+                                RoseDark.copy(alpha = 0.6f)
+                            },
+                        )
                         .border(
                             1.dp,
-                            if (evaluation.verdict == PolicyVerdict.ALLOWED) EmeraldSuccess.copy(alpha = 0.4f) else RoseError.copy(alpha = 0.4f),
-                            RoundedCornerShape(14.dp)
+                            if (evaluation.verdict == PolicyVerdict.ALLOWED) {
+                                EmeraldSuccess.copy(
+                                    alpha = 0.4f,
+                                )
+                            } else {
+                                RoseError.copy(alpha = 0.4f)
+                            },
+                            RoundedCornerShape(14.dp),
                         )
-                        .padding(14.dp)
+                        .padding(14.dp),
                 ) {
                     Text(
                         text = evaluation.finalExplanation,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.Medium,
-                            lineHeight = 18.sp
+                            lineHeight = 18.sp,
                         ),
-                        color = TextHighEmphasis
+                        color = TextHighEmphasis,
                     )
                 }
 
@@ -210,9 +220,9 @@ fun PolicyTraceDialog(
                         .testTag("dismiss_policy_trace_button"),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LavenderPrimary,
-                        contentColor = LavenderOnPrimary
+                        contentColor = LavenderOnPrimary,
                     ),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
                 ) {
                     Text("確認並關閉", fontWeight = FontWeight.Bold)
                 }
@@ -226,17 +236,17 @@ fun TraceKeyVal(key: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = key,
             style = MaterialTheme.typography.labelSmall,
-            color = TextMediumEmphasis
+            color = TextMediumEmphasis,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-            color = TextHighEmphasis
+            color = TextHighEmphasis,
         )
     }
 }
@@ -255,20 +265,20 @@ fun PolicyCheckCard(check: PolicyCheckItem) {
             .border(1.dp, SophisticatedBorder, RoundedCornerShape(12.dp))
             .padding(10.dp),
         verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(
             modifier = Modifier
                 .size(22.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(color.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(14.dp),
             )
         }
 
@@ -276,12 +286,12 @@ fun PolicyCheckCard(check: PolicyCheckItem) {
             Text(
                 text = check.title,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = TextHighEmphasis
+                color = TextHighEmphasis,
             )
             Text(
                 text = check.detail,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                color = TextMediumEmphasis
+                color = TextMediumEmphasis,
             )
         }
     }

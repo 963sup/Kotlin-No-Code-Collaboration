@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CognitiveComplexMethod:HierarchicalPolicyEngine.kt:HierarchicalPolicyEngine$fun evaluateAction: PolicyEvaluationDetail</ID>
+    <ID>CognitiveComplexMethod:InboxScreen.kt:@Composable private fun InboxHeaderCard</ID>
+    <ID>CognitiveComplexMethod:InboxScreen.kt:@Composable private fun NotificationItemCard</ID>
+    <ID>CognitiveComplexMethod:InboxScreen.kt:@Composable private fun NotificationRelationalDetailDialog</ID>
+    <ID>CognitiveComplexMethod:InboxScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun InboxScreen</ID>
+    <ID>CognitiveComplexMethod:KanbanBoardScreen.kt:@Composable private fun RepositorySelector</ID>
+    <ID>CognitiveComplexMethod:MainActivity.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun GovernanceApp</ID>
+    <ID>CognitiveComplexMethod:OrgTeamScreen.kt:@Composable fun AddOrgMemberDialog</ID>
+    <ID>CognitiveComplexMethod:OrgTeamScreen.kt:@Composable fun AddTeamMemberDialog</ID>
+    <ID>CognitiveComplexMethod:OrgTeamScreen.kt:@Composable fun CreateOrganizationDialog</ID>
+    <ID>CognitiveComplexMethod:OrgTeamScreen.kt:@Composable fun CreateTeamDialog</ID>
+    <ID>CognitiveComplexMethod:PersonaSwitcherModal.kt:@Composable fun PersonaSwitcherDialog</ID>
+    <ID>CognitiveComplexMethod:RemoteSync.kt:SyncCoordinator$private suspend fun applyRemoteMutation: Boolean</ID>
+    <ID>CognitiveComplexMethod:RemoteSync.kt:SyncCoordinator$suspend fun runOnce: SyncRunResult</ID>
+    <ID>CognitiveComplexMethod:RepoDetailScreen.kt:@Composable fun AddAccessRuleDialog</ID>
+    <ID>CognitiveComplexMethod:RepoDetailScreen.kt:@Composable fun RepoDetailScreen</ID>
+    <ID>CognitiveComplexMethod:RepoDetailScreen.kt:@Composable fun RepoKanbanView</ID>
+    <ID>CognitiveComplexMethod:RepoDetailScreen.kt:@Composable fun RepoOverviewSection</ID>
+    <ID>CognitiveComplexMethod:RepoDiscussionsSection.kt:@Composable fun DiscussionDetailDialog</ID>
+    <ID>CognitiveComplexMethod:RepoDiscussionsSection.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class) @Composable fun RepoDiscussionsSection</ID>
+    <ID>CognitiveComplexMethod:RepoDiscussionsSection.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateDiscussionDialog</ID>
+    <ID>CognitiveComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun HierarchicalIssueCard</ID>
+    <ID>CognitiveComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun IssueDetailDialog</ID>
+    <ID>CognitiveComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class) @Composable fun RepoIssuesSection</ID>
+    <ID>CognitiveComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateIssueDialog</ID>
+    <ID>CognitiveComplexMethod:RepositoriesScreen.kt:@Composable fun CreateRepositoryDialog</ID>
+    <ID>CognitiveComplexMethod:SocialProfileScreen.kt:@Composable fun SocialProfileScreen</ID>
+    <ID>CognitiveComplexMethod:UserProfileScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun UserProfileHeroCard</ID>
+    <ID>CognitiveComplexMethod:UserProfileScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun UserProfileScreen</ID>
+    <ID>CognitiveComplexMethod:VerificationScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun VerificationScreen</ID>
+    <ID>CognitiveComplexMethod:WorkItemDetailScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun WorkItemDetailScreen</ID>
+    <ID>CognitiveComplexMethod:WorkspaceScopeSwitcherSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun WorkspaceScopeSwitcherSheet</ID>
+    <ID>CyclomaticComplexMethod:InboxScreen.kt:@Composable private fun NotificationRelationalDetailDialog</ID>
+    <ID>CyclomaticComplexMethod:InboxScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun InboxScreen</ID>
+    <ID>CyclomaticComplexMethod:MainActivity.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun GovernanceApp</ID>
+    <ID>CyclomaticComplexMethod:RemoteSync.kt:SyncCoordinator$private suspend fun applyRemoteMutation: Boolean</ID>
+    <ID>CyclomaticComplexMethod:RepoDetailScreen.kt:@Composable fun RepoDetailScreen</ID>
+    <ID>CyclomaticComplexMethod:RepoDetailScreen.kt:@Composable fun RepoOverviewSection</ID>
+    <ID>CyclomaticComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun IssueDetailDialog</ID>
+    <ID>CyclomaticComplexMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class) @Composable fun RepoIssuesSection</ID>
+    <ID>LargeClass:GovernanceRepository.kt:GovernanceRepository</ID>
+    <ID>LargeClass:GovernanceViewModel.kt:GovernanceViewModel : AndroidViewModel</ID>
+    <ID>LargeClass:SampleDataSeeder.kt:SampleDataSeeder</ID>
+    <ID>LongMethod:ArtifactDetailScreen.kt:@Composable fun GovernanceActionPanel</ID>
+    <ID>LongMethod:ArtifactDetailScreen.kt:@Composable fun SignaturesAndReviewsSection</ID>
+    <ID>LongMethod:AuditLogScreen.kt:@Composable fun AuditLogScreen</ID>
+    <ID>LongMethod:HierarchicalPolicyEngine.kt:HierarchicalPolicyEngine$fun evaluateAction: PolicyEvaluationDetail</ID>
+    <ID>LongMethod:HomeScreen.kt:@Composable fun HomeScreen</ID>
+    <ID>LongMethod:InboxScreen.kt:@Composable private fun InboxGovernanceArchitectureCard</ID>
+    <ID>LongMethod:InboxScreen.kt:@Composable private fun InboxHeaderCard</ID>
+    <ID>LongMethod:InboxScreen.kt:@Composable private fun NotificationItemCard</ID>
+    <ID>LongMethod:InboxScreen.kt:@Composable private fun NotificationRelationalDetailDialog</ID>
+    <ID>LongMethod:InboxScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun InboxScreen</ID>
+    <ID>LongMethod:InboxScreen.kt:fun openNotificationTarget: Boolean</ID>
+    <ID>LongMethod:KanbanBoardScreen.kt:@Composable fun KanbanBoardScreen</ID>
+    <ID>LongMethod:MainActivity.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun GovernanceApp</ID>
+    <ID>LongMethod:MeScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun MeScreen</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun AddOrgMemberDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun AddTeamMemberDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun CreateEnterpriseDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun CreateOrganizationDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun CreateTeamDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun CreateUserDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun EditEnterprisePoliciesDialog</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun HierarchyVisualizerSection</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@Composable fun TeamItemCard</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun EnterpriseGovernanceSection</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun OrgTeamScreen</ID>
+    <ID>LongMethod:OrgTeamScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun OrganizationCard</ID>
+    <ID>LongMethod:PersonaSwitcherModal.kt:@Composable fun PersonaSwitcherDialog</ID>
+    <ID>LongMethod:PolicySimulatorScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun PolicySimulatorScreen</ID>
+    <ID>LongMethod:PolicyTraceDialog.kt:@Composable fun PolicyTraceDialog</ID>
+    <ID>LongMethod:RemoteSync.kt:SyncCoordinator$suspend fun runOnce: SyncRunResult</ID>
+    <ID>LongMethod:RepoDetailScreen.kt:@Composable fun AddAccessRuleDialog</ID>
+    <ID>LongMethod:RepoDetailScreen.kt:@Composable fun CreateArtifactDialog</ID>
+    <ID>LongMethod:RepoDetailScreen.kt:@Composable fun RepoDetailScreen</ID>
+    <ID>LongMethod:RepoDetailScreen.kt:@Composable fun RepoKanbanView</ID>
+    <ID>LongMethod:RepoDetailScreen.kt:@Composable fun RepoOverviewSection</ID>
+    <ID>LongMethod:RepoDiscussionsSection.kt:@Composable fun DiscussionCard</ID>
+    <ID>LongMethod:RepoDiscussionsSection.kt:@Composable fun DiscussionDetailDialog</ID>
+    <ID>LongMethod:RepoDiscussionsSection.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class) @Composable fun RepoDiscussionsSection</ID>
+    <ID>LongMethod:RepoDiscussionsSection.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateDiscussionDialog</ID>
+    <ID>LongMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun HierarchicalIssueCard</ID>
+    <ID>LongMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun IssueDetailDialog</ID>
+    <ID>LongMethod:RepoIssuesSection.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class) @Composable fun RepoIssuesSection</ID>
+    <ID>LongMethod:RepoIssuesSection.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateIssueDialog</ID>
+    <ID>LongMethod:RepositoriesScreen.kt:@Composable fun CreateRepositoryDialog</ID>
+    <ID>LongMethod:RepositoriesScreen.kt:@Composable fun RepoCardItem</ID>
+    <ID>LongMethod:RepositoriesScreen.kt:@Composable fun RepositoriesScreen</ID>
+    <ID>LongMethod:SampleDataSeeder.kt:SampleDataSeeder$suspend fun seedInitialDataIfEmpty</ID>
+    <ID>LongMethod:SocialProfileScreen.kt:@Composable fun SocialProfileScreen</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@Composable private fun ProfileApprovalsSection</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@Composable private fun ProfileIssuesAndDiscussionsSection</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@Composable private fun TeamMembershipsSection</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun UserProfileHeroCard</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun EditProfileModal</ID>
+    <ID>LongMethod:UserProfileScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun UserProfileScreen</ID>
+    <ID>LongMethod:VerificationScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun VerificationScreen</ID>
+    <ID>LongMethod:WorkItemDetailScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun WorkItemDetailScreen</ID>
+    <ID>LongMethod:WorkspaceScopeSwitcherSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun WorkspaceScopeSwitcherSheet</ID>
+    <ID>TooGenericExceptionCaught:RemoteSync.kt:SyncCoordinator$error: Exception</ID>
+    <ID>TooManyFunctions:CollaborationExperienceDao.kt:CollaborationExperienceDao</ID>
+    <ID>TooManyFunctions:GovernanceDao.kt:GovernanceDao</ID>
+    <ID>TooManyFunctions:GovernanceRepository.kt:GovernanceRepository</ID>
+    <ID>TooManyFunctions:GovernanceViewModel.kt:GovernanceViewModel : AndroidViewModel</ID>
+  </CurrentIssues>
+</SmellBaseline>

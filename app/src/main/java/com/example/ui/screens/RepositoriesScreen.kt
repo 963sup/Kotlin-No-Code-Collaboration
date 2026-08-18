@@ -72,15 +72,11 @@ import com.example.data.model.User
 import com.example.engine.HierarchicalPolicyEngine
 import com.example.ui.components.OwnerTypeTag
 import com.example.ui.components.RoleBadge
-import com.example.ui.theme.EmeraldDark
-import com.example.ui.theme.EmeraldSuccess
-import com.example.ui.theme.LavenderContainer
-import com.example.ui.theme.LavenderGlow
 import com.example.ui.theme.LavenderOnPrimary
 import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.LavenderSubtle
 import com.example.ui.theme.PinkAccent
-import com.example.ui.theme.SophisticatedBg
+import com.example.ui.theme.RoseError
 import com.example.ui.theme.SophisticatedBorder
 import com.example.ui.theme.SophisticatedBorderSubtle
 import com.example.ui.theme.SophisticatedContainer
@@ -89,12 +85,12 @@ import com.example.ui.theme.SophisticatedSurfaceDark
 import com.example.ui.theme.TextHighEmphasis
 import com.example.ui.theme.TextLowEmphasis
 import com.example.ui.theme.TextMediumEmphasis
-import com.example.ui.theme.WhiteM3
 
-enum class RepoFilter {
-    ALL,
-    ORG_OWNED,
-    USER_OWNED
+enum class RepoFilter(val label: String) {
+    ALL("全部"),
+    CREATED_BY_ME("我建立的"),
+    PARTICIPATED("我參與的"),
+    FAVORITES("已收藏"),
 }
 
 @Composable
@@ -109,7 +105,7 @@ fun RepositoriesScreen(
     allArtifacts: List<NoCodeArtifact>,
     activeUser: User?,
     onSelectRepo: (Repository) -> Unit,
-    onCreateRepo: (String, String, OwnerType, String, String, String, String, (Boolean) -> Unit) -> Unit
+    onCreateRepo: (String, String, OwnerType, String, String, String, String, (Boolean) -> Unit) -> Unit,
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf(RepoFilter.ALL) }
@@ -118,13 +114,14 @@ fun RepositoriesScreen(
     val filteredRepos = repositories.filter { repo ->
         val matchesFilter = when (selectedFilter) {
             RepoFilter.ALL -> true
-            RepoFilter.ORG_OWNED -> repo.ownerType == OwnerType.ORGANIZATION
-            RepoFilter.USER_OWNED -> repo.ownerType == OwnerType.USER
+            RepoFilter.CREATED_BY_ME -> repo.ownerId == activeUser?.id
+            RepoFilter.PARTICIPATED -> true
+            RepoFilter.FAVORITES -> true
         }
         val matchesQuery = repo.displayName.contains(searchQuery, ignoreCase = true) ||
-                repo.name.contains(searchQuery, ignoreCase = true) ||
-                repo.ownerDisplayName.contains(searchQuery, ignoreCase = true) ||
-                repo.category.contains(searchQuery, ignoreCase = true)
+            repo.name.contains(searchQuery, ignoreCase = true) ||
+            repo.ownerDisplayName.contains(searchQuery, ignoreCase = true) ||
+            repo.category.contains(searchQuery, ignoreCase = true)
         matchesFilter && matchesQuery
     }
 
@@ -134,7 +131,7 @@ fun RepositoriesScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(top = 12.dp, bottom = 88.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // Enterprise Governance Hero Banner
             item {
@@ -142,7 +139,7 @@ fun RepositoriesScreen(
                     totalRepos = repositories.size,
                     orgRepos = repositories.count { it.ownerType == OwnerType.ORGANIZATION },
                     userRepos = repositories.count { it.ownerType == OwnerType.USER },
-                    totalArtifacts = allArtifacts.size
+                    totalArtifacts = allArtifacts.size,
                 )
             }
 
@@ -161,11 +158,11 @@ fun RepositoriesScreen(
                         focusedBorderColor = LavenderPrimary,
                         unfocusedBorderColor = SophisticatedBorder,
                         focusedTextColor = TextHighEmphasis,
-                        unfocusedTextColor = TextHighEmphasis
+                        unfocusedTextColor = TextHighEmphasis,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("search_repos_input")
+                        .testTag("search_repos_input"),
                 )
             }
 
@@ -173,30 +170,14 @@ fun RepositoriesScreen(
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    item {
+                    items(RepoFilter.values()) { filter ->
                         FilterChip(
-                            label = "全部 (${repositories.size})",
-                            isSelected = selectedFilter == RepoFilter.ALL,
-                            onClick = { selectedFilter = RepoFilter.ALL },
-                            testTag = "filter_all_repos"
-                        )
-                    }
-                    item {
-                        FilterChip(
-                            label = "組織擁有 (${repositories.count { it.ownerType == OwnerType.ORGANIZATION }})",
-                            isSelected = selectedFilter == RepoFilter.ORG_OWNED,
-                            onClick = { selectedFilter = RepoFilter.ORG_OWNED },
-                            testTag = "filter_org_repos"
-                        )
-                    }
-                    item {
-                        FilterChip(
-                            label = "個人擁有 (${repositories.count { it.ownerType == OwnerType.USER }})",
-                            isSelected = selectedFilter == RepoFilter.USER_OWNED,
-                            onClick = { selectedFilter = RepoFilter.USER_OWNED },
-                            testTag = "filter_user_repos"
+                            label = filter.label,
+                            isSelected = selectedFilter == filter,
+                            onClick = { selectedFilter = filter },
+                            testTag = "filter_${filter.name.lowercase()}",
                         )
                     }
                 }
@@ -217,16 +198,18 @@ fun RepositoriesScreen(
                             orgMemberships = allOrgMemberships,
                             teamMemberships = allTeamMemberships,
                             teams = teams,
-                            accessRules = allAccessRules
+                            accessRules = allAccessRules,
                         )
-                    } else Pair(RepoRole.VIEWER, "Default")
+                    } else {
+                        Pair(RepoRole.VIEWER, "Default")
+                    }
 
                     RepoCardItem(
                         repo = repo,
                         artifactCount = repoArtifacts.size,
                         effectiveRole = effectiveRolePair.first,
                         roleSource = effectiveRolePair.second,
-                        onClick = { onSelectRepo(repo) }
+                        onClick = { onSelectRepo(repo) },
                     )
                 }
             }
@@ -241,12 +224,12 @@ fun RepositoriesScreen(
                 .testTag("create_repo_fab"),
             containerColor = LavenderPrimary,
             contentColor = LavenderOnPrimary,
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "建立無程式碼儲存庫")
                 Text("新增儲存庫", fontWeight = FontWeight.Bold)
@@ -264,61 +247,56 @@ fun RepositoriesScreen(
                 onCreateRepo(name, displayName, ownerType, ownerId, ownerDisplayName, desc, category) { success ->
                     if (success) showCreateDialog = false
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
-fun EnterpriseGovernanceHeroBanner(
-    totalRepos: Int,
-    orgRepos: Int,
-    userRepos: Int,
-    totalArtifacts: Int
-) {
+fun EnterpriseGovernanceHeroBanner(totalRepos: Int, orgRepos: Int, userRepos: Int, totalArtifacts: Int) {
     Card(
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurface),
         shape = RoundedCornerShape(20.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp)
+                .padding(18.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Box(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(SophisticatedContainer),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
                         tint = LavenderPrimary,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                 }
                 Column {
                     Text(
                         text = "無程式碼協作容器",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = TextHighEmphasis
+                        color = TextHighEmphasis,
                     )
                     Text(
                         text = "探索可存取的專案與成果",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             letterSpacing = 0.8.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
                         ),
-                        color = TextMediumEmphasis
+                        color = TextMediumEmphasis,
                     )
                 }
             }
@@ -332,7 +310,7 @@ fun EnterpriseGovernanceHeroBanner(
                     .background(SophisticatedSurfaceDark)
                     .border(1.dp, SophisticatedBorderSubtle, RoundedCornerShape(14.dp))
                     .padding(vertical = 12.dp, horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround
+                horizontalArrangement = Arrangement.SpaceAround,
             ) {
                 HeroStatItem(label = "儲存庫總數", value = totalRepos.toString(), color = TextHighEmphasis)
                 HeroStatItem(label = "組織擁有", value = orgRepos.toString(), color = LavenderPrimary)
@@ -349,23 +327,18 @@ fun HeroStatItem(label: String, value: String, color: Color) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = color
+            color = color,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-            color = TextMediumEmphasis
+            color = TextMediumEmphasis,
         )
     }
 }
 
 @Composable
-fun FilterChip(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    testTag: String
-) {
+fun FilterChip(label: String, isSelected: Boolean, onClick: () -> Unit, testTag: String) {
     Box(
         modifier = Modifier
             .testTag(testTag)
@@ -374,17 +347,17 @@ fun FilterChip(
             .border(
                 1.dp,
                 if (isSelected) LavenderPrimary else SophisticatedBorder,
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             ),
-            color = if (isSelected) LavenderOnPrimary else TextMediumEmphasis
+            color = if (isSelected) LavenderOnPrimary else TextMediumEmphasis,
         )
     }
 }
@@ -395,7 +368,7 @@ fun RepoCardItem(
     artifactCount: Int,
     effectiveRole: RepoRole,
     roleSource: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -404,18 +377,18 @@ fun RepoCardItem(
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurface),
         shape = RoundedCornerShape(18.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder)
+        border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             // Header Row: Owner Badge & Effective User Role
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 OwnerTypeTag(ownerType = repo.ownerType, ownerDisplayName = repo.ownerDisplayName)
                 RoleBadge(role = effectiveRole)
@@ -426,18 +399,18 @@ fun RepoCardItem(
             // Repo Title & Category
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.Folder,
                     contentDescription = null,
                     tint = LavenderPrimary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Text(
                     text = repo.displayName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = TextHighEmphasis
+                    color = TextHighEmphasis,
                 )
             }
 
@@ -445,7 +418,7 @@ fun RepoCardItem(
                 text = repo.name,
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMediumEmphasis,
-                modifier = Modifier.padding(start = 28.dp, bottom = 6.dp)
+                modifier = Modifier.padding(start = 28.dp, bottom = 6.dp),
             )
 
             Text(
@@ -453,48 +426,105 @@ fun RepoCardItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis,
                 maxLines = 2,
-                lineHeight = 18.sp
+                lineHeight = 18.sp,
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Footer Info
-            Row(
+            // Footer Info & WBS Metrics
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(SophisticatedSurfaceDark)
                     .border(1.dp, SophisticatedBorderSubtle, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
             ) {
+                // WBS Progress Bar
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "$artifactCount 個成果",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = LavenderSubtle
+                        text = "WBS 60%",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = LavenderPrimary,
                     )
                     Text(
-                        text = "•",
-                        color = SophisticatedBorder
-                    )
-                    Text(
-                        text = "${repo.requiredApproverCount} 個核准人關卡",
+                        text = "Issue 18",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMediumEmphasis
+                        color = TextMediumEmphasis,
                     )
                 }
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "開啟儲存庫",
-                    tint = TextMediumEmphasis,
-                    modifier = Modifier.size(16.dp)
+                Spacer(modifier = Modifier.height(6.dp))
+                androidx.compose.material3.LinearProgressIndicator(
+                    progress = { 0.6f },
+                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                    color = LavenderPrimary,
+                    trackColor = SophisticatedBorder,
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    // Member Avatar Pile
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy((-6).dp),
+                    ) {
+                        Box(
+                            modifier = Modifier.size(
+                                22.dp,
+                            ).background(
+                                Color(0xFFEF4444),
+                                CircleShape,
+                            ).border(1.dp, SophisticatedSurfaceDark, CircleShape),
+                        )
+                        Box(
+                            modifier = Modifier.size(
+                                22.dp,
+                            ).background(
+                                Color(0xFF3B82F6),
+                                CircleShape,
+                            ).border(1.dp, SophisticatedSurfaceDark, CircleShape),
+                        )
+                        Box(
+                            modifier = Modifier.size(
+                                22.dp,
+                            ).background(
+                                Color(0xFF10B981),
+                                CircleShape,
+                            ).border(1.dp, SophisticatedSurfaceDark, CircleShape),
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        // Badge counter
+                        Surface(
+                            shape = CircleShape,
+                            color = RoseError,
+                            modifier = Modifier.size(18.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("2", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            }
+                        }
+
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "開啟儲存庫",
+                            tint = TextMediumEmphasis,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
             }
         }
     }
@@ -506,7 +536,7 @@ fun CreateRepositoryDialog(
     users: List<User>,
     activeUser: User?,
     onDismiss: () -> Unit,
-    onCreate: (String, String, OwnerType, String, String, String, String) -> Unit
+    onCreate: (String, String, OwnerType, String, String, String, String) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
@@ -529,19 +559,19 @@ fun CreateRepositoryDialog(
                 .clip(RoundedCornerShape(24.dp)),
             color = SophisticatedSurface,
             border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
-            tonalElevation = 8.dp
+            tonalElevation = 8.dp,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(22.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Text(
                     text = "新增無程式碼儲存庫容器",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                    color = LavenderPrimary
+                    color = LavenderPrimary,
                 )
 
                 // Governance Notice
@@ -551,17 +581,22 @@ fun CreateRepositoryDialog(
                         .clip(RoundedCornerShape(14.dp))
                         .background(SophisticatedContainer)
                         .border(1.dp, SophisticatedBorder, RoundedCornerShape(14.dp))
-                        .padding(12.dp)
+                        .padding(12.dp),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.Top,
                     ) {
-                        Icon(Icons.Default.Info, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            tint = LavenderPrimary,
+                            modifier = Modifier.size(18.dp),
+                        )
                         Text(
                             text = "只有組織或使用者可以擁有儲存庫；團隊不能擁有儲存庫，只能繼承協作角色。",
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 16.sp),
-                            color = LavenderSubtle
+                            color = LavenderSubtle,
                         )
                     }
                 }
@@ -570,12 +605,12 @@ fun CreateRepositoryDialog(
                 Text(
                     text = "儲存庫擁有者實體",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = TextHighEmphasis
+                    color = TextHighEmphasis,
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     OwnerTypeOption(
                         title = "組織",
@@ -587,7 +622,7 @@ fun CreateRepositoryDialog(
                             selectedOwnerId = organizations.firstOrNull()?.id ?: ""
                         },
                         modifier = Modifier.weight(1f),
-                        testTag = "owner_type_org"
+                        testTag = "owner_type_org",
                     )
                     OwnerTypeOption(
                         title = "使用者",
@@ -599,7 +634,7 @@ fun CreateRepositoryDialog(
                             selectedOwnerId = activeUser?.id ?: users.firstOrNull()?.id ?: ""
                         },
                         modifier = Modifier.weight(1f),
-                        testTag = "owner_type_user"
+                        testTag = "owner_type_user",
                     )
                 }
 
@@ -607,12 +642,12 @@ fun CreateRepositoryDialog(
                 Text(
                     text = "選擇指定的 ${selectedOwnerType.displayName()}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextMediumEmphasis
+                    color = TextMediumEmphasis,
                 )
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (selectedOwnerType == OwnerType.ORGANIZATION) {
                         organizations.forEach { org ->
@@ -622,19 +657,32 @@ fun CreateRepositoryDialog(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(if (isSelected) SophisticatedContainer else SophisticatedSurfaceDark)
-                                    .border(1.dp, if (isSelected) LavenderPrimary.copy(alpha = 0.6f) else SophisticatedBorder, RoundedCornerShape(12.dp))
+                                    .border(
+                                        1.dp,
+                                        if (isSelected) LavenderPrimary.copy(alpha = 0.6f) else SophisticatedBorder,
+                                        RoundedCornerShape(12.dp),
+                                    )
                                     .clickable { selectedOwnerId = org.id }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
                                     selected = isSelected,
                                     onClick = { selectedOwnerId = org.id },
-                                    colors = RadioButtonDefaults.colors(selectedColor = LavenderPrimary)
+                                    colors = RadioButtonDefaults.colors(selectedColor = LavenderPrimary),
                                 )
                                 Column {
-                                    Text(org.name, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                                    Text(org.description, style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis, maxLines = 1)
+                                    Text(
+                                        org.name,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                        color = TextHighEmphasis,
+                                    )
+                                    Text(
+                                        org.description,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextMediumEmphasis,
+                                        maxLines = 1,
+                                    )
                                 }
                             }
                         }
@@ -646,19 +694,31 @@ fun CreateRepositoryDialog(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(if (isSelected) SophisticatedContainer else SophisticatedSurfaceDark)
-                                    .border(1.dp, if (isSelected) PinkAccent.copy(alpha = 0.6f) else SophisticatedBorder, RoundedCornerShape(12.dp))
+                                    .border(
+                                        1.dp,
+                                        if (isSelected) PinkAccent.copy(alpha = 0.6f) else SophisticatedBorder,
+                                        RoundedCornerShape(12.dp),
+                                    )
                                     .clickable { selectedOwnerId = user.id }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
                                     selected = isSelected,
                                     onClick = { selectedOwnerId = user.id },
-                                    colors = RadioButtonDefaults.colors(selectedColor = PinkAccent)
+                                    colors = RadioButtonDefaults.colors(selectedColor = PinkAccent),
                                 )
                                 Column {
-                                    Text(user.displayName, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                                    Text("@${user.username} • ${user.title}", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                                    Text(
+                                        user.displayName,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                        color = TextHighEmphasis,
+                                    )
+                                    Text(
+                                        "@${user.username} • ${user.title}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextMediumEmphasis,
+                                    )
                                 }
                             }
                         }
@@ -683,9 +743,9 @@ fun CreateRepositoryDialog(
                         focusedBorderColor = LavenderPrimary,
                         unfocusedBorderColor = SophisticatedBorder,
                         focusedTextColor = TextHighEmphasis,
-                        unfocusedTextColor = TextHighEmphasis
+                        unfocusedTextColor = TextHighEmphasis,
                     ),
-                    modifier = Modifier.fillMaxWidth().testTag("repo_display_name_input")
+                    modifier = Modifier.fillMaxWidth().testTag("repo_display_name_input"),
                 )
 
                 OutlinedTextField(
@@ -700,9 +760,9 @@ fun CreateRepositoryDialog(
                         focusedBorderColor = LavenderPrimary,
                         unfocusedBorderColor = SophisticatedBorder,
                         focusedTextColor = TextHighEmphasis,
-                        unfocusedTextColor = TextHighEmphasis
+                        unfocusedTextColor = TextHighEmphasis,
                     ),
-                    modifier = Modifier.fillMaxWidth().testTag("repo_slug_input")
+                    modifier = Modifier.fillMaxWidth().testTag("repo_slug_input"),
                 )
 
                 OutlinedTextField(
@@ -717,9 +777,9 @@ fun CreateRepositoryDialog(
                         focusedBorderColor = LavenderPrimary,
                         unfocusedBorderColor = SophisticatedBorder,
                         focusedTextColor = TextHighEmphasis,
-                        unfocusedTextColor = TextHighEmphasis
+                        unfocusedTextColor = TextHighEmphasis,
                     ),
-                    modifier = Modifier.fillMaxWidth().testTag("repo_desc_input")
+                    modifier = Modifier.fillMaxWidth().testTag("repo_desc_input"),
                 )
 
                 OutlinedTextField(
@@ -734,9 +794,9 @@ fun CreateRepositoryDialog(
                         focusedBorderColor = LavenderPrimary,
                         unfocusedBorderColor = SophisticatedBorder,
                         focusedTextColor = TextHighEmphasis,
-                        unfocusedTextColor = TextHighEmphasis
+                        unfocusedTextColor = TextHighEmphasis,
                     ),
-                    modifier = Modifier.fillMaxWidth().testTag("repo_category_input")
+                    modifier = Modifier.fillMaxWidth().testTag("repo_category_input"),
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -744,7 +804,7 @@ fun CreateRepositoryDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(onClick = onDismiss) {
                         Text("取消", color = TextMediumEmphasis)
@@ -753,16 +813,24 @@ fun CreateRepositoryDialog(
                     Button(
                         onClick = {
                             if (name.isNotBlank() && displayName.isNotBlank() && selectedOwnerId.isNotBlank()) {
-                                onCreate(name, displayName, selectedOwnerType, selectedOwnerId, selectedOwnerDisplayName, description, category)
+                                onCreate(
+                                    name,
+                                    displayName,
+                                    selectedOwnerType,
+                                    selectedOwnerId,
+                                    selectedOwnerDisplayName,
+                                    description,
+                                    category,
+                                )
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = LavenderPrimary,
-                            contentColor = LavenderOnPrimary
+                            contentColor = LavenderOnPrimary,
                         ),
                         shape = RoundedCornerShape(14.dp),
                         enabled = name.isNotBlank() && displayName.isNotBlank(),
-                        modifier = Modifier.testTag("submit_create_repo_button")
+                        modifier = Modifier.testTag("submit_create_repo_button"),
                     ) {
                         Text("建立工作區", fontWeight = FontWeight.Bold)
                     }
@@ -780,7 +848,7 @@ fun OwnerTypeOption(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    testTag: String
+    testTag: String,
 ) {
     Box(
         modifier = modifier
@@ -790,27 +858,27 @@ fun OwnerTypeOption(
             .border(
                 1.dp,
                 if (isSelected) LavenderPrimary.copy(alpha = 0.8f) else SophisticatedBorder,
-                RoundedCornerShape(14.dp)
+                RoundedCornerShape(14.dp),
             )
             .clickable(onClick = onClick)
-            .padding(14.dp)
+            .padding(14.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isSelected) LavenderPrimary else TextMediumEmphasis,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
             )
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = TextHighEmphasis
+                color = TextHighEmphasis,
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                color = TextMediumEmphasis
+                color = TextMediumEmphasis,
             )
         }
     }
@@ -822,18 +890,18 @@ fun EmptyStateCard(message: String) {
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurface),
         shape = RoundedCornerShape(16.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(32.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextMediumEmphasis
+                color = TextMediumEmphasis,
             )
         }
     }

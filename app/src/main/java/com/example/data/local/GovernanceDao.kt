@@ -408,7 +408,9 @@ interface GovernanceDao {
     @Query("DELETE FROM issue_dependencies WHERE id = :dependencyId")
     suspend fun deleteIssueDependencyById(dependencyId: String)
 
-    @Query("DELETE FROM issue_dependencies WHERE blockedIssueId = :blockedIssueId AND blockingIssueId = :blockingIssueId")
+    @Query(
+        "DELETE FROM issue_dependencies WHERE blockedIssueId = :blockedIssueId AND blockingIssueId = :blockingIssueId",
+    )
     suspend fun deleteIssueDependencyBetween(blockedIssueId: String, blockingIssueId: String)
 
     @Query("DELETE FROM issue_dependencies WHERE blockedIssueId = :issueId OR blockingIssueId = :issueId")
@@ -542,7 +544,9 @@ interface GovernanceDao {
     @Query("SELECT * FROM notifications WHERE recipientUserId = :recipientUserId ORDER BY createdAt DESC")
     fun getNotificationsForUser(recipientUserId: String): Flow<List<AppNotification>>
 
-    @Query("SELECT * FROM notifications WHERE recipientUserId = :recipientUserId AND status = 'UNREAD' ORDER BY createdAt DESC")
+    @Query(
+        "SELECT * FROM notifications WHERE recipientUserId = :recipientUserId AND status = 'UNREAD' ORDER BY createdAt DESC",
+    )
     fun getUnreadNotificationsForUser(recipientUserId: String): Flow<List<AppNotification>>
 
     @Query("SELECT COUNT(*) FROM notifications WHERE recipientUserId = :recipientUserId AND status = 'UNREAD'")
@@ -566,7 +570,9 @@ interface GovernanceDao {
     @Query("UPDATE notifications SET status = 'READ', readAt = :readAt WHERE id = :id")
     suspend fun markNotificationAsRead(id: String, readAt: Long = System.currentTimeMillis())
 
-    @Query("UPDATE notifications SET status = 'READ', readAt = :readAt WHERE recipientUserId = :recipientUserId AND status = 'UNREAD'")
+    @Query(
+        "UPDATE notifications SET status = 'READ', readAt = :readAt WHERE recipientUserId = :recipientUserId AND status = 'UNREAD'",
+    )
     suspend fun markAllNotificationsAsReadForUser(recipientUserId: String, readAt: Long = System.currentTimeMillis())
 
     @Query("UPDATE notifications SET status = 'ARCHIVED' WHERE id = :id")
@@ -580,4 +586,36 @@ interface GovernanceDao {
 
     @Query("DELETE FROM notifications WHERE id = :id")
     suspend fun deleteNotificationById(id: String)
+
+    // --- WORK EVIDENCE ---
+    @Query("SELECT * FROM work_evidence WHERE issueId = :issueId ORDER BY submittedAt DESC")
+    fun getWorkEvidenceForIssue(issueId: String): Flow<List<com.example.data.model.WorkEvidence>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkEvidence(evidence: com.example.data.model.WorkEvidence)
+
+    // --- WORK VERIFICATION ---
+    @Query("SELECT * FROM work_verifications WHERE evidenceId = :evidenceId ORDER BY verifiedAt DESC")
+    fun getVerificationsForEvidence(evidenceId: String): Flow<List<com.example.data.model.WorkVerification>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkVerification(verification: com.example.data.model.WorkVerification)
+
+    // --- TASK CHECKLIST ---
+    @Query("SELECT * FROM task_checklists WHERE issueId = :issueId ORDER BY createdAt ASC")
+    fun getChecklistForIssue(issueId: String): Flow<List<com.example.data.model.TaskChecklist>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTaskChecklist(item: com.example.data.model.TaskChecklist)
+
+    @Query(
+        "UPDATE task_checklists SET isCompleted = :isCompleted, completedByUserId = :userId, completedByDisplayName = :displayName, completedAt = :completedAt WHERE id = :id",
+    )
+    suspend fun updateTaskChecklistStatus(
+        id: String,
+        isCompleted: Boolean,
+        userId: String?,
+        displayName: String?,
+        completedAt: Long?,
+    )
 }

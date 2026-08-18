@@ -12,7 +12,7 @@ data class WbsProjectionRow(
     val code: String,
     val completedCount: Int,
     val totalCount: Int,
-    val progress: Float
+    val progress: Float,
 )
 
 object IssueHierarchyRules {
@@ -89,10 +89,14 @@ object IssueHierarchyRules {
                 leafProgress(issue)
             } else {
                 val totalWeight = children.sumOf { max(it.wbsWeight, 0.01) }
-                if (totalWeight <= 0.0) 0f else {
-                    (children.sumOf { child ->
-                        progressOf(child, visiting) * max(child.wbsWeight, 0.01)
-                    } / totalWeight).toFloat()
+                if (totalWeight <= 0.0) {
+                    0f
+                } else {
+                    (
+                        children.sumOf { child ->
+                            progressOf(child, visiting) * max(child.wbsWeight, 0.01)
+                        } / totalWeight
+                        ).toFloat()
                 }
             }
             visiting.remove(issue.id)
@@ -112,7 +116,7 @@ object IssueHierarchyRules {
                 code = code,
                 completedCount = subtree.count { it.status == IssueStatus.CLOSED },
                 totalCount = subtree.size.coerceAtLeast(1),
-                progress = progressOf(issue, mutableSetOf())
+                progress = progressOf(issue, mutableSetOf()),
             )
             childrenByParent[issue.id].orEmpty().forEachIndexed { index, child ->
                 visit(child, depth + 1, "$code.${index + 1}")
@@ -139,7 +143,9 @@ object IssueHierarchyRules {
         val rootRows = rows.filter { it.depth == 0 }
         if (rootRows.isEmpty()) return 0f
         val totalWeight = rootRows.sumOf { max(it.issue.wbsWeight, 0.01) }
-        return if (totalWeight <= 0.0) 0f else {
+        return if (totalWeight <= 0.0) {
+            0f
+        } else {
             (rootRows.sumOf { it.progress * max(it.issue.wbsWeight, 0.01) } / totalWeight)
                 .toFloat()
                 .coerceIn(0f, 1f)
@@ -151,14 +157,18 @@ object IssueHierarchyRules {
         plannedStartAt: Long?,
         plannedEndAt: Long?,
         wbsWeight: Double,
-        progressPercent: Int
+        progressPercent: Int,
     ): String? = when {
         sortOrder < 0 -> "WBS 排序不得小於 0"
+
         plannedStartAt != null && plannedEndAt != null && plannedEndAt < plannedStartAt ->
             "計畫結束日不得早於開始日"
+
         !wbsWeight.isFinite() || wbsWeight <= 0.0 || wbsWeight > 1000.0 ->
             "WBS 權重必須介於 0 與 1000 之間"
+
         progressPercent !in 0..100 -> "進度必須介於 0% 與 100% 之間"
+
         else -> null
     }
 

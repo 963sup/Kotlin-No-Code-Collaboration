@@ -137,8 +137,8 @@ private fun boardLabel(status: IssueStatus) = when (status) {
 fun RepositoryWorkBoardDialog(
     repo: Repository,
     issues: List<RepoIssue>,
-    onUpdateIssueStatus:(String, IssueStatus) -> Unit,
-    onDismiss: () -> Unit
+    onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+    onDismiss: () -> Unit,
 ) {
     var view by remember { mutableStateOf(RepositoryWorkView.KANBAN) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -146,7 +146,7 @@ fun RepositoryWorkBoardDialog(
             modifier = Modifier.fillMaxSize().padding(10.dp).testTag("repository_work_board"),
             shape = RoundedCornerShape(20.dp),
             color = SophisticatedBg,
-            border = BorderStroke(1.dp, SophisticatedBorder)
+            border = BorderStroke(1.dp, SophisticatedBorder),
         ) {
             Column(Modifier.fillMaxSize()) {
                 BoardHeader(repo, issues, onDismiss)
@@ -165,19 +165,29 @@ private fun BoardHeader(repo: Repository, issues: List<RepoIssue>, onDismiss: ()
     Row(
         Modifier.fillMaxWidth().background(SophisticatedSurfaceDark).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(40.dp).background(LavenderContainer, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(Icons.Default.Dashboard, null, tint = LavenderPrimary)
             }
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text(repo.displayName, fontWeight = FontWeight.Bold, color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${issues.size} 個任務 • ${issues.count { it.parentIssueId != null }} 個巢狀任務", color = TextMediumEmphasis, fontSize = 12.sp)
+                Text(
+                    repo.displayName,
+                    fontWeight = FontWeight.Bold,
+                    color = TextHighEmphasis,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    "${issues.size} 個任務 • ${issues.count { it.parentIssueId != null }} 個巢狀任務",
+                    color = TextMediumEmphasis,
+                    fontSize = 12.sp,
+                )
             }
         }
         IconButton(onClick = onDismiss, modifier = Modifier.size(48.dp).testTag("close_repository_work_board")) {
@@ -190,21 +200,21 @@ private fun BoardHeader(repo: Repository, issues: List<RepoIssue>, onDismiss: ()
 private fun ViewSelector(selected: RepositoryWorkView, onSelect: (RepositoryWorkView) -> Unit) {
     Row(
         Modifier.fillMaxWidth().background(SophisticatedSurfaceDark).padding(horizontal = 14.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ViewButton(
             selected = selected == RepositoryWorkView.KANBAN,
             label = "工作看板",
             icon = { Icon(Icons.Default.Dashboard, null, Modifier.size(18.dp)) },
             tag = "work_view_kanban",
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) { onSelect(RepositoryWorkView.KANBAN) }
         ViewButton(
             selected = selected == RepositoryWorkView.NESTED,
             label = "巢狀任務",
             icon = { Icon(Icons.Default.AccountTree, null, Modifier.size(18.dp)) },
             tag = "work_view_nested",
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) { onSelect(RepositoryWorkView.NESTED) }
     }
 }
@@ -216,13 +226,21 @@ private fun ViewButton(
     icon: @Composable () -> Unit,
     tag: String,
     modifier: Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val m = modifier.heightIn(min = 48.dp).testTag(tag)
-    if (selected) Button(onClick = onClick, modifier = m) {
-        icon(); Spacer(Modifier.width(6.dp)); Text(label)
-    } else OutlinedButton(onClick = onClick, modifier = m) {
-        icon(); Spacer(Modifier.width(6.dp)); Text(label)
+    if (selected) {
+        Button(onClick = onClick, modifier = m) {
+            icon()
+            Spacer(Modifier.width(6.dp))
+            Text(label)
+        }
+    } else {
+        OutlinedButton(onClick = onClick, modifier = m) {
+            icon()
+            Spacer(Modifier.width(6.dp))
+            Text(label)
+        }
     }
 }
 
@@ -231,14 +249,14 @@ private fun KanbanBoard(issues: List<RepoIssue>, onUpdate: (String, IssueStatus)
     if (issues.isEmpty()) return EmptyState("#", "尚無任務", "在此儲存庫建立任務後，會自動顯示於工作看板。")
     LazyRow(
         Modifier.fillMaxSize().padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { Spacer(Modifier.width(4.dp)) }
         items(IssueStatus.entries, key = { it.name }) { status ->
             val columnIssues = issues.filter { it.status == status }.sortedWith(
                 compareByDescending<RepoIssue> { it.priority == IssuePriority.CRITICAL }
                     .thenByDescending { it.priority == IssuePriority.HIGH }
-                    .thenBy { it.issueNumber }
+                    .thenBy { it.issueNumber },
             )
             KanbanColumn(status, columnIssues, issues, onUpdate)
         }
@@ -251,22 +269,31 @@ private fun KanbanColumn(
     status: IssueStatus,
     columnIssues: List<RepoIssue>,
     allIssues: List<RepoIssue>,
-    onUpdate: (String, IssueStatus) -> Unit
+    onUpdate: (String, IssueStatus) -> Unit,
 ) {
     Surface(
         Modifier.width(300.dp).fillMaxHeight(),
         shape = RoundedCornerShape(16.dp),
         color = SophisticatedSurface,
-        border = BorderStroke(1.dp, SophisticatedBorder)
+        border = BorderStroke(1.dp, SophisticatedBorder),
     ) {
         Column(Modifier.fillMaxSize().padding(12.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Column {
                     Text(boardLabel(status), fontWeight = FontWeight.Bold, color = TextHighEmphasis)
                     Text(status.label, fontSize = 11.sp, color = TextLowEmphasis)
                 }
                 Surface(shape = RoundedCornerShape(10.dp), color = SophisticatedContainer) {
-                    Text(columnIssues.size.toString(), Modifier.padding(horizontal = 9.dp, vertical = 4.dp), color = LavenderGlow, fontWeight = FontWeight.Bold)
+                    Text(
+                        columnIssues.size.toString(),
+                        Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        color = LavenderGlow,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
             }
             Spacer(Modifier.height(10.dp))
@@ -285,7 +312,7 @@ private fun NestedTasks(issues: List<RepoIssue>, onUpdate: (String, IssueStatus)
     if (rows.isEmpty()) return EmptyState("↳", "尚無巢狀任務", "請在任務中建立子任務以形成階層。")
     LazyColumn(
         Modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(rows, key = { it.issue.id }) { row ->
             Row(Modifier.fillMaxWidth()) {
@@ -303,31 +330,52 @@ private fun TaskCard(
     issue: RepoIssue,
     progress: NestedTaskProgress,
     onUpdate: (String, IssueStatus) -> Unit,
-    nested: Boolean = false
+    nested: Boolean = false,
 ) {
     Card(
         Modifier.fillMaxWidth().testTag(if (nested) "nested_task_${issue.id}" else "kanban_task_${issue.id}"),
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
         border = BorderStroke(1.dp, SophisticatedBorder),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(14.dp),
     ) {
         Column(Modifier.fillMaxWidth().padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
                 Text(
                     "${if (nested) "↳ " else ""}#${issue.issueNumber} ${issue.title}",
                     Modifier.weight(1f),
                     color = TextHighEmphasis,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
-                Spacer(Modifier.width(8.dp)); Priority(issue.priority)
+                Spacer(Modifier.width(8.dp))
+                Priority(issue.priority)
             }
-            issue.parentIssueTitle?.let { Text("上層任務：$it", color = LavenderGlow, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            if (progress.total > 0) Text(
-                "巢狀任務：${progress.closed}/${progress.total} 已完成",
-                color = if (progress.closed == progress.total) EmeraldSuccess else TextMediumEmphasis,
-                fontSize = 11.sp
+            issue.parentIssueTitle?.let {
+                Text(
+                    "上層任務：$it",
+                    color = LavenderGlow,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (progress.total > 0) {
+                Text(
+                    "巢狀任務：${progress.closed}/${progress.total} 已完成",
+                    color = if (progress.closed == progress.total) EmeraldSuccess else TextMediumEmphasis,
+                    fontSize = 11.sp,
+                )
+            }
+            Text(
+                "${issue.assigneeName ?: "未指派"} • ${issue.labels.ifBlank { "無標籤" }}",
+                color = TextMediumEmphasis,
+                fontSize = 11.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Text("${issue.assigneeName ?: "未指派"} • ${issue.labels.ifBlank { "無標籤" }}", color = TextMediumEmphasis, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             MoveActions(issue, onUpdate)
         }
     }
@@ -338,17 +386,32 @@ private fun MoveActions(issue: RepoIssue, onUpdate: (String, IssueStatus) -> Uni
     val back = previousStatus(issue.status)
     val forward = nextStatus(issue.status)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (back != null) OutlinedButton(
-            onClick = { onUpdate(issue.id, back) },
-            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("task_${issue.id}_move_back")
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(16.dp)); Spacer(Modifier.width(4.dp)); Text(boardLabel(back), fontSize = 11.sp)
+        if (back != null) {
+            OutlinedButton(
+                onClick = { onUpdate(issue.id, back) },
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("task_${issue.id}_move_back"),
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    null,
+                    Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(boardLabel(back), fontSize = 11.sp)
+            }
         }
-        if (forward != null) Button(
-            onClick = { onUpdate(issue.id, forward) },
-            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("task_${issue.id}_move_forward")
-        ) {
-            Text(boardLabel(forward), fontSize = 11.sp); Spacer(Modifier.width(4.dp)); Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(16.dp))
+        if (forward != null) {
+            Button(
+                onClick = { onUpdate(issue.id, forward) },
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("task_${issue.id}_move_forward"),
+            ) {
+                Text(
+                    boardLabel(forward),
+                    fontSize = 11.sp,
+                )
+                Spacer(Modifier.width(4.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(16.dp))
+            }
         }
     }
 }
@@ -362,7 +425,13 @@ private fun Priority(priority: IssuePriority) {
         IssuePriority.LOW -> TextMediumEmphasis
     }
     Surface(shape = RoundedCornerShape(8.dp), color = color.copy(alpha = 0.12f)) {
-        Text(priority.label, Modifier.padding(horizontal = 7.dp, vertical = 3.dp), color = color, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(
+            priority.label,
+            Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+            color = color,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

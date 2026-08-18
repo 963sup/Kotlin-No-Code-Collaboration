@@ -50,3 +50,12 @@ val IndigoDark = Color(0xFF002F66)
 val CardSurfaceDark = SophisticatedSurface
 val CardBorderDark = SophisticatedBorder
 val TopBarSurfaceDark = SophisticatedSurfaceDark
+
+fun parseHexColor(hex: String?, fallback: Color = LavenderPrimary): Color {
+    if (hex.isNullOrBlank()) return fallback
+    return try {
+        Color(android.graphics.Color.parseColor(hex))
+    } catch (_: IllegalArgumentException) {
+        fallback
+    }
+}

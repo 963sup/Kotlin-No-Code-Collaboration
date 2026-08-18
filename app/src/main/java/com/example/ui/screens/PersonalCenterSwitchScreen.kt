@@ -31,18 +31,25 @@ fun PersonalCenterSwitchScreen(
     syncStatus: SyncStatusSummary,
     onToggleFollow: (String) -> Unit,
     onSyncNow: () -> Unit,
-    governanceContent: @Composable () -> Unit
+    governanceContent: @Composable () -> Unit,
 ) {
     var social by rememberSaveable(profileUser.id) { mutableStateOf(true) }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)) {
             FilterChip(selected = social, onClick = { social = true }, label = { Text("成就與動態") })
-            FilterChip(selected = !social, onClick = { social = false }, label = { Text("身份與治理") }, modifier = Modifier.padding(start = 8.dp))
+            FilterChip(
+                selected = !social,
+                onClick = { social = false },
+                label = { Text("身份與治理") },
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
         Column(Modifier.fillMaxWidth()) {
             if (social) {
                 SocialProfileScreen(profileUser, activeUser, auditLogs, visibleRepositoryIds, follows, savedTargets, syncStatus, onToggleFollow, onSyncNow)
-            } else governanceContent()
+            } else {
+                governanceContent()
+            }
         }
     }
 }

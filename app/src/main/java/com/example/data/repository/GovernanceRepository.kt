@@ -41,7 +41,7 @@ import com.example.engine.HierarchicalPolicyEngine
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-class GovernanceRepository(private val dao: GovernanceDao) {
+class GovernanceRepository(val dao: GovernanceDao) {
 
     val enterprises: Flow<List<Enterprise>> = dao.getAllEnterprises()
     val enterprise: Flow<Enterprise?> = dao.getEnterprise()
@@ -69,7 +69,9 @@ class GovernanceRepository(private val dao: GovernanceDao) {
     fun getArtifactsByRepo(repoId: String): Flow<List<NoCodeArtifact>> = dao.getArtifactsByRepo(repoId)
     fun getAccessRulesByRepo(repoId: String): Flow<List<RepoAccessRule>> = dao.getAccessRulesByRepo(repoId)
     fun getReviewsByArtifact(artifactId: String): Flow<List<ArtifactReview>> = dao.getReviewsByArtifact(artifactId)
-    fun getApprovalsByArtifact(artifactId: String): Flow<List<ArtifactApproval>> = dao.getApprovalsByArtifact(artifactId)
+    fun getApprovalsByArtifact(artifactId: String): Flow<List<ArtifactApproval>> = dao.getApprovalsByArtifact(
+        artifactId,
+    )
 
     suspend fun updateEnterprise(enterprise: Enterprise) {
         dao.updateEnterprise(enterprise)
@@ -84,7 +86,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         enterpriseId: String,
         description: String,
         category: String,
-        creatorUser: User
+        creatorUser: User,
     ): Pair<Boolean, String> {
         // Enforce Owner Type Rule: ONLY Organization or User can own a Repository!
         if (ownerType != OwnerType.ORGANIZATION && ownerType != OwnerType.USER) {
@@ -94,7 +96,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = creatorUser.displayName,
                 actionName = "CREATE_REPOSITORY_ATTEMPT",
                 verdict = PolicyVerdict.DENIED_UNAUTHORIZED_OWNER_ENTITY,
-                reasoning = "Creation rejected: Only an Organization or User entity can be assigned as Owner of a Repository."
+                reasoning = "Creation rejected: Only an Organization or User entity can be assigned as Owner of a Repository.",
             )
             dao.insertAuditLog(log)
             return Pair(false, "Policy Violation: Only an Organization or User can own a Repository.")
@@ -110,7 +112,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             enterpriseId = enterpriseId,
             description = description.trim(),
             category = category,
-            requiredApproverCount = if (ownerType == OwnerType.ORGANIZATION) 2 else 1
+            requiredApproverCount = if (ownerType == OwnerType.ORGANIZATION) 2 else 1,
         )
         dao.insertRepository(newRepo)
 
@@ -121,7 +123,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             granteeId = creatorUser.id,
             granteeName = creatorUser.displayName,
             role = RepoRole.OWNER,
-            grantedByUserId = creatorUser.id
+            grantedByUserId = creatorUser.id,
         )
         dao.insertRepoAccessRule(creatorRule)
 
@@ -134,7 +136,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             actorDisplayName = creatorUser.displayName,
             actionName = "CREATE_REPOSITORY",
             verdict = PolicyVerdict.ALLOWED,
-            reasoning = "Created No-Code Repository '${newRepo.displayName}' with Owner [${ownerType.displayName()}: $ownerDisplayName]."
+            reasoning = "Created No-Code Repository '${newRepo.displayName}' with Owner [${ownerType.displayName()}: $ownerDisplayName].",
         )
         dao.insertAuditLog(log)
         return Pair(true, "Repository created successfully!")
@@ -146,7 +148,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         granteeId: String,
         granteeName: String,
         role: RepoRole,
-        grantedByUser: User
+        grantedByUser: User,
     ) {
         val rule = RepoAccessRule(
             repoId = repoId,
@@ -154,7 +156,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             granteeId = granteeId,
             granteeName = granteeName,
             role = role,
-            grantedByUserId = grantedByUser.id
+            grantedByUserId = grantedByUser.id,
         )
         dao.insertRepoAccessRule(rule)
 
@@ -168,7 +170,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             actorDisplayName = grantedByUser.displayName,
             actionName = "MANAGE_ACCESS_RULES",
             verdict = PolicyVerdict.ALLOWED,
-            reasoning = "Granted role '${role.name}' to ${granteeType.name} '$granteeName' on repository '${repo?.name}'."
+            reasoning = "Granted role '${role.name}' to ${granteeType.name} '$granteeName' on repository '${repo?.name}'.",
         )
         dao.insertAuditLog(log)
     }
@@ -185,7 +187,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             actorDisplayName = actor.displayName,
             actionName = "REVOKE_ACCESS_RULE",
             verdict = PolicyVerdict.ALLOWED,
-            reasoning = "Revoked role '${rule.role.name}' for ${rule.granteeType.name} '${rule.granteeName}' on repository '${repo?.name}'."
+            reasoning = "Revoked role '${rule.role.name}' for ${rule.granteeType.name} '${rule.granteeName}' on repository '${repo?.name}'.",
         )
         dao.insertAuditLog(log)
     }
@@ -196,7 +198,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         type: com.example.data.model.ArtifactType,
         summary: String,
         content: String,
-        author: User
+        author: User,
     ): Pair<Boolean, String> {
         val repo = dao.getRepositoryByIdOnce(repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -206,7 +208,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             actor = author,
             repo = repo,
             artifact = null,
-            action = GovernanceAction.CREATE_DRAFT
+            action = GovernanceAction.CREATE_DRAFT,
         )
 
         if (evaluation.verdict != PolicyVerdict.ALLOWED) {
@@ -219,7 +221,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = author.displayName,
                 actionName = "CREATE_DRAFT_ATTEMPT",
                 verdict = evaluation.verdict,
-                reasoning = evaluation.finalExplanation
+                reasoning = evaluation.finalExplanation,
             )
             dao.insertAuditLog(log)
             return Pair(false, evaluation.finalExplanation)
@@ -234,7 +236,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             lifecycleState = LifecycleState.DRAFT,
             authorUserId = author.id,
             authorDisplayName = author.displayName,
-            version = "v1.0.0"
+            version = "v1.0.0",
         )
         dao.insertArtifact(newArtifact)
 
@@ -247,7 +249,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             actorDisplayName = author.displayName,
             actionName = "CREATE_DRAFT",
             verdict = PolicyVerdict.ALLOWED,
-            reasoning = "Created No-Code Artifact '${newArtifact.title}' (${type.label}) in repository '${repo.name}'."
+            reasoning = "Created No-Code Artifact '${newArtifact.title}' (${type.label}) in repository '${repo.name}'.",
         )
         dao.insertAuditLog(log)
         return Pair(true, "Draft created successfully")
@@ -269,15 +271,15 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = actor.displayName,
                     actionName = "SUBMIT_FOR_REVIEW_BLOCKED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
 
         val updated = artifact.copy(
             lifecycleState = LifecycleState.IN_REVIEW,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateArtifact(updated)
 
@@ -291,8 +293,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "SUBMIT_FOR_REVIEW",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Transitioned '${artifact.title}' to IN_REVIEW lifecycle stage."
-            )
+                reasoning = "Transitioned '${artifact.title}' to IN_REVIEW lifecycle stage.",
+            ),
         )
         return Pair(true, "Artifact submitted for Reviewer inspection.")
     }
@@ -301,13 +303,19 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         artifactId: String,
         reviewer: User,
         decision: ReviewDecision,
-        feedback: String
+        feedback: String,
     ): Pair<Boolean, String> {
         val artifact = dao.getArtifactByIdOnce(artifactId) ?: return Pair(false, "Artifact not found")
         val repo = dao.getRepositoryByIdOnce(artifact.repoId) ?: return Pair(false, "Repo not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
 
-        val action = if (decision == ReviewDecision.CHANGES_REQUESTED) GovernanceAction.REQUEST_CHANGES else GovernanceAction.SUBMIT_REVIEW
+        val action = if (decision ==
+            ReviewDecision.CHANGES_REQUESTED
+        ) {
+            GovernanceAction.REQUEST_CHANGES
+        } else {
+            GovernanceAction.SUBMIT_REVIEW
+        }
         val evaluation = evaluateAction(reviewer, repo, artifact, action)
 
         if (evaluation.verdict != PolicyVerdict.ALLOWED) {
@@ -320,8 +328,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = reviewer.displayName,
                     actionName = "SUBMIT_REVIEW_BLOCKED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
@@ -331,7 +339,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             reviewerUserId = reviewer.id,
             reviewerDisplayName = reviewer.displayName,
             decision = decision,
-            feedbackNote = feedback.trim()
+            feedbackNote = feedback.trim(),
         )
         dao.insertReview(review)
 
@@ -342,7 +350,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         }
         val updated = artifact.copy(
             lifecycleState = nextState,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateArtifact(updated)
 
@@ -356,16 +364,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = reviewer.displayName,
                 actionName = "SUBMIT_REVIEW",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Reviewer ${reviewer.displayName} submitted review with decision ${decision.name}. Artifact state updated to ${nextState.name}."
-            )
+                reasoning = "Reviewer ${reviewer.displayName} submitted review with decision ${decision.name}. Artifact state updated to ${nextState.name}.",
+            ),
         )
         return Pair(true, "Review recorded successfully!")
     }
 
-    suspend fun submitApproverSignOff(
-        artifactId: String,
-        approver: User
-    ): Pair<Boolean, String> {
+    suspend fun submitApproverSignOff(artifactId: String, approver: User): Pair<Boolean, String> {
         val artifact = dao.getArtifactByIdOnce(artifactId) ?: return Pair(false, "Artifact not found")
         val repo = dao.getRepositoryByIdOnce(artifact.repoId) ?: return Pair(false, "Repo not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -381,8 +386,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = approver.displayName,
                     actionName = "APPROVAL_SIGN_OFF_BLOCKED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
@@ -393,20 +398,29 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             approverUserId = approver.id,
             approverDisplayName = approver.displayName,
             approverTitle = approver.title,
-            status = ApprovalStatus.APPROVED
+            status = ApprovalStatus.APPROVED,
         )
         dao.insertApproval(approval)
 
         val approvals = dao.getApprovalsByArtifactOnce(artifactId)
-        val requiredCount = if (enterprise.enforceDualApproval) maxOf(repo.requiredApproverCount, 2) else repo.requiredApproverCount
-        val distinctApprovedCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+        val requiredCount = if (enterprise.enforceDualApproval) {
+            maxOf(
+                repo.requiredApproverCount,
+                2,
+            )
+        } else {
+            repo.requiredApproverCount
+        }
+        val distinctApprovedCount = approvals.filter {
+            it.status == ApprovalStatus.APPROVED
+        }.distinctBy { it.approverUserId }.size
 
         val isNowApproved = distinctApprovedCount >= requiredCount
         val nextState = if (isNowApproved) LifecycleState.APPROVED else LifecycleState.PENDING_APPROVAL
 
         val updated = artifact.copy(
             lifecycleState = nextState,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateArtifact(updated)
 
@@ -420,11 +434,14 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = approver.displayName,
                 actionName = "SUBMIT_FINAL_APPROVAL",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Approver ${approver.displayName} granted signature ($distinctApprovedCount of $requiredCount signatures collected). State: ${nextState.name}."
-            )
+                reasoning = "Approver ${approver.displayName} granted signature ($distinctApprovedCount of $requiredCount signatures collected). State: ${nextState.name}.",
+            ),
         )
 
-        return Pair(true, if (isNowApproved) "All required approvals acquired! Artifact is ready to publish." else "Approval recorded ($distinctApprovedCount/$requiredCount signatures).")
+        return Pair(
+            true,
+            if (isNowApproved) "All required approvals acquired! Artifact is ready to publish." else "Approval recorded ($distinctApprovedCount/$requiredCount signatures).",
+        )
     }
 
     suspend fun publishAndLock(artifactId: String, actor: User): Pair<Boolean, String> {
@@ -443,8 +460,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = actor.displayName,
                     actionName = "PUBLISH_LOCK_BLOCKED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
@@ -452,7 +469,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val updated = artifact.copy(
             lifecycleState = LifecycleState.PUBLISHED,
             lockedByPolicy = true,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateArtifact(updated)
 
@@ -466,8 +483,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "PUBLISH_AND_LOCK",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Artifact '${artifact.title}' published and locked under cryptographic policy control by ${actor.displayName}."
-            )
+                reasoning = "Artifact '${artifact.title}' published and locked under cryptographic policy control by ${actor.displayName}.",
+            ),
         )
         return Pair(true, "Artifact published & locked successfully!")
     }
@@ -476,7 +493,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         actor: User,
         repo: Repository,
         artifact: NoCodeArtifact?,
-        action: GovernanceAction
+        action: GovernanceAction,
     ): PolicyEvaluationDetail {
         val enterprise = dao.getEnterpriseOnce() ?: Enterprise(name = "Default", slug = "default", description = "")
         val reviews = if (artifact != null) dao.getReviewsByArtifactOnce(artifact.id) else emptyList()
@@ -497,7 +514,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             teamMemberships = teamMemberships,
             teams = teams,
             accessRules = accessRules,
-            action = action
+            action = action,
         )
     }
 
@@ -506,14 +523,14 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         name: String,
         slug: String,
         description: String,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val team = Team(
             orgId = orgId,
             name = name.trim(),
             slug = slug.trim().lowercase().replace(" ", "-"),
             description = description.trim(),
-            canOwnerRepository = false
+            canOwnerRepository = false,
         )
         dao.insertTeam(team)
         return Pair(true, "Team '${team.name}' created.")
@@ -523,7 +540,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val membership = TeamMembership(
             teamId = teamId,
             userId = userId,
-            role = role
+            role = role,
         )
         dao.insertTeamMembership(membership)
     }
@@ -546,7 +563,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         linkedArtifactTitle: String?,
         parentIssueId: String? = null,
         labels: String,
-        author: User
+        author: User,
     ): Pair<Boolean, String> {
         val repo = dao.getRepositoryByIdOnce(repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -563,8 +580,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = author.displayName,
                     actionName = "CREATE_ISSUE_DENIED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
@@ -603,11 +620,17 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             parentIssueId = parentIssueId,
             parentIssueNumber = parentNum,
             parentIssueTitle = parentTitle,
-            labels = labels.ifBlank { "governance" }
+            labels = labels.ifBlank { "governance" },
         )
         dao.insertIssue(newIssue)
 
-        val assignDetail = if (assigneeName != null) " (Assigned to ${assigneeType?.name ?: "USER"}: $assigneeName)" else ""
+        val assignDetail = if (assigneeName !=
+            null
+        ) {
+            " (Assigned to ${assigneeType?.name ?: "USER"}: $assigneeName)"
+        } else {
+            ""
+        }
         val parentDetail = if (parentNum != null) " (Sub-issue of #$parentNum)" else ""
         dao.insertAuditLog(
             AuditLog(
@@ -619,17 +642,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = author.displayName,
                 actionName = "CREATE_ISSUE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Created Issue #${newIssue.issueNumber} '${newIssue.title}' in repo '${repo.name}'$parentDetail$assignDetail."
-            )
+                reasoning = "Created Issue #${newIssue.issueNumber} '${newIssue.title}' in repo '${repo.name}'$parentDetail$assignDetail.",
+            ),
         )
         return Pair(true, "Issue #${newIssue.issueNumber} created successfully.")
     }
 
-    suspend fun linkParentIssue(
-        issueId: String,
-        parentIssueId: String?,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun linkParentIssue(issueId: String, parentIssueId: String?, actor: User): Pair<Boolean, String> {
         val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Target issue not found.")
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found.")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found.")
@@ -645,7 +664,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 parentIssueId = null,
                 parentIssueNumber = null,
                 parentIssueTitle = null,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = System.currentTimeMillis(),
             )
             dao.updateIssue(updated)
             dao.insertAuditLog(
@@ -658,8 +677,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = actor.displayName,
                     actionName = "UNLINK_PARENT_ISSUE",
                     verdict = PolicyVerdict.ALLOWED,
-                    reasoning = "Unlinked parent issue relationship from Issue #${issue.issueNumber}."
-                )
+                    reasoning = "Unlinked parent issue relationship from Issue #${issue.issueNumber}.",
+                ),
             )
             return Pair(true, "Parent issue removed.")
         }
@@ -683,7 +702,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             parentIssueId = parent.id,
             parentIssueNumber = parent.issueNumber,
             parentIssueTitle = parent.title,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateIssue(updated)
 
@@ -697,8 +716,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "LINK_PARENT_ISSUE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Set Issue #${parent.issueNumber} ('${parent.title}') as parent for Issue #${issue.issueNumber}."
-            )
+                reasoning = "Set Issue #${parent.issueNumber} ('${parent.title}') as parent for Issue #${issue.issueNumber}.",
+            ),
         )
         return Pair(true, "Linked to Parent Issue #${parent.issueNumber}.")
     }
@@ -707,7 +726,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         repoId: String,
         blockedIssueId: String,
         blockingIssueId: String,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val repo = dao.getRepositoryByIdOnce(repoId) ?: return Pair(false, "Repository not found.")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found.")
@@ -722,7 +741,9 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         }
 
         val blockedIssue = dao.getIssueByIdOnce(blockedIssueId) ?: return Pair(false, "Target blocked issue not found.")
-        val blockingIssue = dao.getIssueByIdOnce(blockingIssueId) ?: return Pair(false, "Prerequisite blocking issue not found.")
+        val blockingIssue = dao.getIssueByIdOnce(
+            blockingIssueId,
+        ) ?: return Pair(false, "Prerequisite blocking issue not found.")
 
         if (blockedIssue.repoId != repoId || blockingIssue.repoId != repoId) {
             return Pair(false, "Both issues must strictly belong to this repository container.")
@@ -731,7 +752,10 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         // Check for direct inverted dependency (blockingIssue is already blocked by blockedIssue)
         val existingReverse = dao.getBlockedByForIssueOnce(blockingIssueId)
         if (existingReverse.any { it.blockingIssueId == blockedIssueId }) {
-            return Pair(false, "Circular dependency conflict: Issue #${blockingIssue.issueNumber} is already blocked by Issue #${blockedIssue.issueNumber}.")
+            return Pair(
+                false,
+                "Circular dependency conflict: Issue #${blockingIssue.issueNumber} is already blocked by Issue #${blockedIssue.issueNumber}.",
+            )
         }
 
         val dependency = IssueDependency(
@@ -740,7 +764,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             blockingIssueId = blockingIssueId,
             dependencyType = com.example.data.model.DependencyType.BLOCKS,
             createdByUserId = actor.id,
-            createdByDisplayName = actor.displayName
+            createdByDisplayName = actor.displayName,
         )
         dao.insertIssueDependency(dependency)
 
@@ -754,26 +778,19 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "ADD_ISSUE_DEPENDENCY",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Established dependency: Issue #${blockingIssue.issueNumber} ('${blockingIssue.title}') blocks Issue #${blockedIssue.issueNumber} ('${blockedIssue.title}')."
-            )
+                reasoning = "Established dependency: Issue #${blockingIssue.issueNumber} ('${blockingIssue.title}') blocks Issue #${blockedIssue.issueNumber} ('${blockedIssue.title}').",
+            ),
         )
         return Pair(true, "Added dependency: #${blockingIssue.issueNumber} blocks #${blockedIssue.issueNumber}.")
     }
 
-    suspend fun removeIssueDependency(
-        dependencyId: String,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun removeIssueDependency(dependencyId: String, actor: User): Pair<Boolean, String> {
         val allDeps = dao.getAllEnterprisesOnce() // just to verify connection
         dao.deleteIssueDependencyById(dependencyId)
         return Pair(true, "Dependency removed.")
     }
 
-    suspend fun addIssueComment(
-        issueId: String,
-        content: String,
-        author: User
-    ): Pair<Boolean, String> {
+    suspend fun addIssueComment(issueId: String, content: String, author: User): Pair<Boolean, String> {
         val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Issue not found")
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
 
@@ -787,7 +804,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             authorUserId = author.id,
             authorDisplayName = author.displayName,
             authorRole = evaluation.effectiveRole.name,
-            content = content.trim()
+            content = content.trim(),
         )
         dao.insertIssueComment(comment)
 
@@ -797,11 +814,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         return Pair(true, "Comment added.")
     }
 
-    suspend fun updateIssueStatus(
-        issueId: String,
-        newStatus: IssueStatus,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun updateIssueStatus(issueId: String, newStatus: IssueStatus, actor: User): Pair<Boolean, String> {
         val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Issue not found")
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -822,7 +835,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             closedAt = if (isClosing) System.currentTimeMillis() else null,
             closedByUserId = if (isClosing) actor.id else null,
             closedByDisplayName = if (isClosing) actor.displayName else null,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateIssue(updated)
 
@@ -836,8 +849,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = if (isClosing) "CLOSE_ISSUE" else "REOPEN_ISSUE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "${if (isClosing) "已完成" else "Reopened"} Issue #${issue.issueNumber} '${issue.title}'."
-            )
+                reasoning = "${if (isClosing) "已完成" else "Reopened"} Issue #${issue.issueNumber} '${issue.title}'.",
+            ),
         )
         return Pair(true, "Issue #${issue.issueNumber} updated to ${newStatus.label}.")
     }
@@ -847,7 +860,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         assigneeType: GranteeType?,
         assigneeId: String?,
         assigneeName: String?,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Issue not found")
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
@@ -862,7 +875,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             assigneeType = assigneeType,
             assigneeId = assigneeId,
             assigneeName = assigneeName,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateIssue(updated)
 
@@ -877,12 +890,11 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "ASSIGN_ISSUE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Reassigned Issue #${issue.issueNumber} to $target."
-            )
+                reasoning = "Reassigned Issue #${issue.issueNumber} to $target.",
+            ),
         )
         return Pair(true, "Issue #${issue.issueNumber} assigned to $target.")
     }
-
 
     suspend fun updateIssuePlan(
         issueId: String,
@@ -891,7 +903,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         plannedEndAt: Long?,
         wbsWeight: Double,
         progressPercent: Int,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Issue not found")
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
@@ -905,7 +917,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             plannedStartAt = plannedStartAt,
             plannedEndAt = plannedEndAt,
             wbsWeight = wbsWeight,
-            progressPercent = progressPercent
+            progressPercent = progressPercent,
         )
         if (validationError != null) return Pair(false, validationError)
 
@@ -923,8 +935,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 plannedEndAt = plannedEndAt,
                 wbsWeight = wbsWeight,
                 progressPercent = effectiveProgress,
-                updatedAt = now
-            )
+                updatedAt = now,
+            ),
         )
         dao.insertAuditLog(
             AuditLog(
@@ -936,22 +948,24 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "UPDATE_ISSUE_PLAN",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Updated WBS plan for Issue #${issue.issueNumber}."
-            )
+                reasoning = "Updated WBS plan for Issue #${issue.issueNumber}.",
+            ),
         )
         return Pair(true, "Issue #${issue.issueNumber} WBS plan updated.")
     }
 
     // --- REPO DISCUSSIONS METHODS ---
     fun getDiscussionsByRepo(repoId: String): Flow<List<RepoDiscussion>> = dao.getDiscussionsByRepo(repoId)
-    fun getDiscussionComments(discussionId: String): Flow<List<DiscussionComment>> = dao.getCommentsByDiscussion(discussionId)
+    fun getDiscussionComments(discussionId: String): Flow<List<DiscussionComment>> = dao.getCommentsByDiscussion(
+        discussionId,
+    )
 
     suspend fun createDiscussion(
         repoId: String,
         title: String,
         category: DiscussionCategory,
         body: String,
-        author: User
+        author: User,
     ): Pair<Boolean, String> {
         val repo = dao.getRepositoryByIdOnce(repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -968,8 +982,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = author.displayName,
                     actionName = "CREATE_DISCUSSION_DENIED",
                     verdict = evaluation.verdict,
-                    reasoning = evaluation.finalExplanation
-                )
+                    reasoning = evaluation.finalExplanation,
+                ),
             )
             return Pair(false, evaluation.finalExplanation)
         }
@@ -984,7 +998,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             authorUserId = author.id,
             authorDisplayName = author.displayName,
             authorRole = evaluation.effectiveRole.name,
-            upvoteCount = 1
+            upvoteCount = 1,
         )
         dao.insertDiscussion(discussion)
 
@@ -998,17 +1012,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = author.displayName,
                 actionName = "CREATE_DISCUSSION",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Started Discussion #${discussion.discussionNumber} '${discussion.title}' under category [${category.label}]."
-            )
+                reasoning = "Started Discussion #${discussion.discussionNumber} '${discussion.title}' under category [${category.label}].",
+            ),
         )
         return Pair(true, "Discussion #${discussion.discussionNumber} posted.")
     }
 
-    suspend fun addDiscussionComment(
-        discussionId: String,
-        content: String,
-        author: User
-    ): Pair<Boolean, String> {
+    suspend fun addDiscussionComment(discussionId: String, content: String, author: User): Pair<Boolean, String> {
         val discussion = dao.getDiscussionByIdOnce(discussionId) ?: return Pair(false, "Discussion not found")
         val repo = dao.getRepositoryByIdOnce(discussion.repoId) ?: return Pair(false, "Repository not found")
 
@@ -1019,10 +1029,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 orgMemberships = dao.getAllOrgMembershipsOnce(),
                 teamMemberships = dao.getAllTeamMembershipsOnce(),
                 teams = dao.getAllTeamsOnce(),
-                accessRules = dao.getAllRepoAccessRulesOnce()
+                accessRules = dao.getAllRepoAccessRulesOnce(),
             )
             if (!role.canPerform(RepoRole.MAINTAINER)) {
-                return Pair(false, "This discussion thread is locked by maintainers. Only Maintainers and Owners can post replies.")
+                return Pair(
+                    false,
+                    "This discussion thread is locked by maintainers. Only Maintainers and Owners can post replies.",
+                )
             }
         }
 
@@ -1036,7 +1049,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             authorUserId = author.id,
             authorDisplayName = author.displayName,
             authorRole = evaluation.effectiveRole.name,
-            content = content.trim()
+            content = content.trim(),
         )
         dao.insertDiscussionComment(comment)
 
@@ -1046,10 +1059,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         return Pair(true, "Reply added.")
     }
 
-    suspend fun toggleLockDiscussion(
-        discussionId: String,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun toggleLockDiscussion(discussionId: String, actor: User): Pair<Boolean, String> {
         val discussion = dao.getDiscussionByIdOnce(discussionId) ?: return Pair(false, "Discussion not found")
         val repo = dao.getRepositoryByIdOnce(discussion.repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
@@ -1073,23 +1083,22 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = if (newLocked) "LOCK_DISCUSSION" else "UNLOCK_DISCUSSION",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "${if (newLocked) "Locked" else "Unlocked"} Discussion #${discussion.discussionNumber} '${discussion.title}'."
-            )
+                reasoning = "${if (newLocked) "Locked" else "Unlocked"} Discussion #${discussion.discussionNumber} '${discussion.title}'.",
+            ),
         )
         return Pair(true, if (newLocked) "Discussion thread locked." else "Discussion thread unlocked.")
     }
 
-    suspend fun markAcceptedAnswer(
-        discussionId: String,
-        commentId: String,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun markAcceptedAnswer(discussionId: String, commentId: String, actor: User): Pair<Boolean, String> {
         val discussion = dao.getDiscussionByIdOnce(discussionId) ?: return Pair(false, "Discussion not found")
         val repo = dao.getRepositoryByIdOnce(discussion.repoId) ?: return Pair(false, "Repository not found")
 
         val evaluation = evaluateAction(actor, repo, null, GovernanceAction.ACCEPT_DISCUSSION_ANSWER)
         if (evaluation.verdict != PolicyVerdict.ALLOWED && discussion.authorUserId != actor.id) {
-            return Pair(false, "Only the author of the discussion, or Collaborators/Maintainers, can mark an accepted answer.")
+            return Pair(
+                false,
+                "Only the author of the discussion, or Collaborators/Maintainers, can mark an accepted answer.",
+            )
         }
 
         val comments = dao.getCommentsByDiscussionOnce(discussionId)
@@ -1106,7 +1115,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val updatedDiscussion = discussion.copy(
             isAnswered = isNowAccepted,
             acceptedAnswerCommentId = if (isNowAccepted) commentId else null,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
         )
         dao.updateDiscussion(updatedDiscussion)
         return Pair(true, if (isNowAccepted) "Marked as accepted answer." else "Removed accepted answer.")
@@ -1135,7 +1144,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         allowUserOwnedRepos: Boolean,
         enforceReviewerBeforeApprover: Boolean,
         enforceSegregationOfDuties: Boolean,
-        creatorUser: User
+        creatorUser: User,
     ): Pair<Boolean, String> {
         val cleanSlug = slug.trim().lowercase().replace(" ", "-").replace(Regex("[^a-z0-9-]"), "")
         val entId = "ent_${cleanSlug.take(16)}_${UUID.randomUUID().toString().take(6)}"
@@ -1148,14 +1157,14 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             enforceDualApproval = enforceDualApproval,
             allowUserOwnedRepos = allowUserOwnedRepos,
             enforceReviewerBeforeApprover = enforceReviewerBeforeApprover,
-            enforceSegregationOfDuties = enforceSegregationOfDuties
+            enforceSegregationOfDuties = enforceSegregationOfDuties,
         )
         dao.insertEnterprise(newEnterprise)
 
         // Ensure creator has admin credentials on enterprise
         val updatedUser = creatorUser.copy(
             enterpriseId = newEnterprise.id,
-            isEnterpriseAdmin = true
+            isEnterpriseAdmin = true,
         )
         dao.insertUser(updatedUser)
 
@@ -1166,16 +1175,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = creatorUser.displayName,
                 actionName = "CREATE_ENTERPRISE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Established new Root Enterprise '${newEnterprise.name}' with policy baseline (DualApproval=$enforceDualApproval, SoD=$enforceSegregationOfDuties, UserOwnedRepos=$allowUserOwnedRepos)."
-            )
+                reasoning = "Established new Root Enterprise '${newEnterprise.name}' with policy baseline (DualApproval=$enforceDualApproval, SoD=$enforceSegregationOfDuties, UserOwnedRepos=$allowUserOwnedRepos).",
+            ),
         )
         return Pair(true, "Enterprise '${newEnterprise.name}' created.")
     }
 
-    suspend fun updateEnterpriseSecurityPolicies(
-        enterprise: Enterprise,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun updateEnterpriseSecurityPolicies(enterprise: Enterprise, actor: User): Pair<Boolean, String> {
         dao.updateEnterprise(enterprise)
         dao.insertAuditLog(
             AuditLog(
@@ -1184,8 +1190,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "UPDATE_ENTERPRISE_POLICIES",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Updated Enterprise '${enterprise.name}' security governance policies: Dual Approval=${enterprise.enforceDualApproval}, SoD=${enterprise.enforceSegregationOfDuties}, User Repos=${enterprise.allowUserOwnedRepos}, Reviewer Gates=${enterprise.enforceReviewerBeforeApprover}."
-            )
+                reasoning = "Updated Enterprise '${enterprise.name}' security governance policies: Dual Approval=${enterprise.enforceDualApproval}, SoD=${enterprise.enforceSegregationOfDuties}, User Repos=${enterprise.allowUserOwnedRepos}, Reviewer Gates=${enterprise.enforceReviewerBeforeApprover}.",
+            ),
         )
         return Pair(true, "Enterprise policies updated successfully.")
     }
@@ -1198,7 +1204,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         title: String,
         isEnterpriseAdmin: Boolean,
         avatarColorHex: String,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val cleanUsername = username.trim().lowercase().replace(" ", "_").replace(Regex("[^a-z0-9_]"), "")
         val newUser = User(
@@ -1210,7 +1216,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             title = title.trim(),
             avatarColorHex = avatarColorHex,
             isEnterpriseAdmin = isEnterpriseAdmin,
-            canOwnerRepository = true
+            canOwnerRepository = true,
         )
         dao.insertUser(newUser)
         dao.insertAuditLog(
@@ -1220,8 +1226,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "CREATE_USER",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Provisioned new Enterprise identity: ${newUser.displayName} (@${newUser.username}, Admin=$isEnterpriseAdmin)."
-            )
+                reasoning = "Provisioned new Enterprise identity: ${newUser.displayName} (@${newUser.username}, Admin=$isEnterpriseAdmin).",
+            ),
         )
         return Pair(true, "User ${newUser.displayName} created.")
     }
@@ -1238,7 +1244,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         badgeColorHex: String,
         defaultMemberRole: RepoRole,
         creatorUser: User,
-        ownerUserId: String
+        ownerUserId: String,
     ): Pair<Boolean, String> {
         val cleanSlug = slug.trim().lowercase().replace(" ", "-").replace(Regex("[^a-z0-9-]"), "")
         val orgId = "org_${cleanSlug.take(16)}_${UUID.randomUUID().toString().take(6)}"
@@ -1251,7 +1257,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             description = description.trim(),
             badgeColorHex = badgeColorHex,
             defaultMemberRole = defaultMemberRole,
-            canOwnerRepository = true // Organizations CAN own repositories
+            canOwnerRepository = true, // Organizations CAN own repositories
         )
         dao.insertOrganization(newOrg)
 
@@ -1260,7 +1266,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val ownerMem = OrgMembership(
             orgId = newOrg.id,
             userId = initialOwnerId,
-            role = OrgRole.OWNER
+            role = OrgRole.OWNER,
         )
         dao.insertOrgMembership(ownerMem)
 
@@ -1269,7 +1275,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             val creatorMem = OrgMembership(
                 orgId = newOrg.id,
                 userId = creatorUser.id,
-                role = OrgRole.ADMIN
+                role = OrgRole.ADMIN,
             )
             dao.insertOrgMembership(creatorMem)
         }
@@ -1282,16 +1288,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = creatorUser.displayName,
                 actionName = "CREATE_ORGANIZATION",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Established new Organization '${newOrg.name}' (@${newOrg.slug}) under Enterprise. Default Member Repo Role: ${defaultMemberRole.name}."
-            )
+                reasoning = "Established new Organization '${newOrg.name}' (@${newOrg.slug}) under Enterprise. Default Member Repo Role: ${defaultMemberRole.name}.",
+            ),
         )
         return Pair(true, "Organization '${newOrg.name}' created.")
     }
 
-    suspend fun updateOrganization(
-        org: Organization,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun updateOrganization(org: Organization, actor: User): Pair<Boolean, String> {
         dao.updateOrganization(org)
         dao.insertAuditLog(
             AuditLog(
@@ -1301,18 +1304,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "UPDATE_ORGANIZATION",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Updated Organization '${org.name}' settings (Default Member Role: ${org.defaultMemberRole.name})."
-            )
+                reasoning = "Updated Organization '${org.name}' settings (Default Member Role: ${org.defaultMemberRole.name}).",
+            ),
         )
         return Pair(true, "Organization updated.")
     }
 
-    suspend fun addOrgMember(
-        orgId: String,
-        userId: String,
-        role: OrgRole,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun addOrgMember(orgId: String, userId: String, role: OrgRole, actor: User): Pair<Boolean, String> {
         val org = dao.getOrganizationByIdOnce(orgId) ?: return Pair(false, "Organization not found")
         val user = dao.getUserByIdOnce(userId) ?: return Pair(false, "User not found")
 
@@ -1328,8 +1326,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                     actorDisplayName = actor.displayName,
                     actionName = "UPDATE_ORG_MEMBER_ROLE",
                     verdict = PolicyVerdict.ALLOWED,
-                    reasoning = "Updated ${user.displayName}'s role to ${role.name} in Organization '${org.name}'."
-                )
+                    reasoning = "Updated ${user.displayName}'s role to ${role.name} in Organization '${org.name}'.",
+                ),
             )
             return Pair(true, "Updated ${user.displayName}'s role to ${role.name}.")
         }
@@ -1337,7 +1335,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val membership = OrgMembership(
             orgId = orgId,
             userId = userId,
-            role = role
+            role = role,
         )
         dao.insertOrgMembership(membership)
         dao.insertAuditLog(
@@ -1348,17 +1346,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "ADD_ORG_MEMBER",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Added ${user.displayName} to Organization '${org.name}' with role ${role.name}."
-            )
+                reasoning = "Added ${user.displayName} to Organization '${org.name}' with role ${role.name}.",
+            ),
         )
         return Pair(true, "Added ${user.displayName} to ${org.name}.")
     }
 
-    suspend fun removeOrgMember(
-        orgId: String,
-        userId: String,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun removeOrgMember(orgId: String, userId: String, actor: User): Pair<Boolean, String> {
         val org = dao.getOrganizationByIdOnce(orgId) ?: return Pair(false, "Organization not found")
         val user = dao.getUserByIdOnce(userId) ?: return Pair(false, "User not found")
 
@@ -1371,8 +1365,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "REMOVE_ORG_MEMBER",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Removed ${user.displayName} from Organization '${org.name}'."
-            )
+                reasoning = "Removed ${user.displayName} from Organization '${org.name}'.",
+            ),
         )
         return Pair(true, "Removed ${user.displayName} from ${org.name}.")
     }
@@ -1387,7 +1381,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         slug: String,
         description: String,
         parentTeamId: String?,
-        creatorUser: User
+        creatorUser: User,
     ): Pair<Boolean, String> {
         val org = dao.getOrganizationByIdOnce(orgId) ?: return Pair(false, "Organization not found")
         val cleanSlug = slug.trim().lowercase().replace(" ", "-").replace(Regex("[^a-z0-9-]"), "")
@@ -1399,7 +1393,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             name = name.trim(),
             slug = cleanSlug,
             description = description.trim(),
-            canOwnerRepository = false // Strictly False: Teams CANNOT own repositories
+            canOwnerRepository = false, // Strictly False: Teams CANNOT own repositories
         )
         dao.insertTeam(newTeam)
 
@@ -1407,7 +1401,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val teamMem = TeamMembership(
             teamId = newTeam.id,
             userId = creatorUser.id,
-            role = TeamRole.MAINTAINER
+            role = TeamRole.MAINTAINER,
         )
         dao.insertTeamMembership(teamMem)
 
@@ -1419,18 +1413,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = creatorUser.displayName,
                 actionName = "CREATE_TEAM",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Created Team '${newTeam.name}' (@${newTeam.slug}) under Organization '${org.name}'."
-            )
+                reasoning = "Created Team '${newTeam.name}' (@${newTeam.slug}) under Organization '${org.name}'.",
+            ),
         )
         return Pair(true, "Team '${newTeam.name}' created.")
     }
 
-    suspend fun addTeamMember(
-        teamId: String,
-        userId: String,
-        role: TeamRole,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun addTeamMember(teamId: String, userId: String, role: TeamRole, actor: User): Pair<Boolean, String> {
         val teams = dao.getAllTeamsOnce()
         val team = teams.firstOrNull { it.id == teamId } ?: return Pair(false, "Team not found")
         val user = dao.getUserByIdOnce(userId) ?: return Pair(false, "User not found")
@@ -1450,7 +1439,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             val mem = TeamMembership(
                 teamId = teamId,
                 userId = userId,
-                role = role
+                role = role,
             )
             dao.insertTeamMembership(mem)
         }
@@ -1463,17 +1452,13 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "ADD_TEAM_MEMBER",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Added ${user.displayName} to Team '${team.name}' with role ${role.name}."
-            )
+                reasoning = "Added ${user.displayName} to Team '${team.name}' with role ${role.name}.",
+            ),
         )
         return Pair(true, "Added ${user.displayName} to ${team.name}.")
     }
 
-    suspend fun removeTeamMember(
-        teamId: String,
-        userId: String,
-        actor: User
-    ): Pair<Boolean, String> {
+    suspend fun removeTeamMember(teamId: String, userId: String, actor: User): Pair<Boolean, String> {
         val teams = dao.getAllTeamsOnce()
         val team = teams.firstOrNull { it.id == teamId } ?: return Pair(false, "Team not found")
         val user = dao.getUserByIdOnce(userId) ?: return Pair(false, "User not found")
@@ -1488,8 +1473,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "REMOVE_TEAM_MEMBER",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Removed ${user.displayName} from Team '${team.name}'."
-            )
+                reasoning = "Removed ${user.displayName} from Team '${team.name}'.",
+            ),
         )
         return Pair(true, "Removed ${user.displayName} from ${team.name}.")
     }
@@ -1515,7 +1500,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         pronouns: String,
         avatarColorHex: String,
         notificationPreferences: String,
-        actor: User
+        actor: User,
     ): Pair<Boolean, String> {
         val updated = user.copy(
             displayName = displayName.trim().ifEmpty { user.displayName },
@@ -1524,7 +1509,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             location = location.trim(),
             pronouns = pronouns.trim(),
             avatarColorHex = avatarColorHex,
-            notificationPreferences = notificationPreferences
+            notificationPreferences = notificationPreferences,
         )
         dao.updateUser(updated)
 
@@ -1535,8 +1520,8 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = "UPDATE_USER_PROFILE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Updated profile information for user ${user.username} (${updated.displayName})."
-            )
+                reasoning = "Updated profile information for user ${user.username} (${updated.displayName}).",
+            ),
         )
         return Pair(true, "Profile updated successfully.")
     }
@@ -1546,7 +1531,9 @@ class GovernanceRepository(private val dao: GovernanceDao) {
     // =========================================================================
 
     fun getNotificationsForUser(userId: String): Flow<List<AppNotification>> = dao.getNotificationsForUser(userId)
-    fun getUnreadNotificationsForUser(userId: String): Flow<List<AppNotification>> = dao.getUnreadNotificationsForUser(userId)
+    fun getUnreadNotificationsForUser(userId: String): Flow<List<AppNotification>> = dao.getUnreadNotificationsForUser(
+        userId,
+    )
     fun getUnreadCountForUser(userId: String): Flow<Int> = dao.getUnreadCountForUser(userId)
 
     suspend fun markNotificationAsRead(id: String) {
@@ -1593,7 +1580,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         discussionTitle: String? = null,
         reviewId: String? = null,
         approvalId: String? = null,
-        membershipId: String? = null
+        membershipId: String? = null,
     ) {
         // Do not self-notify
         if (recipientUserId == actor.id) return
@@ -1626,7 +1613,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             reviewId = reviewId,
             approvalId = approvalId,
             membershipId = membershipId,
-            createdAt = System.currentTimeMillis()
+            createdAt = System.currentTimeMillis(),
         )
         dao.insertNotification(notif)
     }

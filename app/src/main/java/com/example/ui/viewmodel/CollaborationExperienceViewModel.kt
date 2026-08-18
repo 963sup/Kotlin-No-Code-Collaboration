@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.AppDatabase
-import com.example.data.model.SavedTarget
 import com.example.data.model.SyncState
 import com.example.data.model.SyncStatusSummary
 import com.example.data.model.UserFollow
@@ -41,7 +40,7 @@ class CollaborationExperienceViewModel(application: Application) : AndroidViewMo
             failed = queue.count { it.state == SyncState.FAILED },
             conflicts = conflictRows.count { it.resolvedAt == null },
             authRequired = queue.count { it.state == SyncState.AUTH_REQUIRED },
-            lastSyncedAt = lastSync
+            lastSyncedAt = lastSync,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SyncStatusSummary())
 
@@ -53,8 +52,11 @@ class CollaborationExperienceViewModel(application: Application) : AndroidViewMo
         viewModelScope.launch {
             val key = target.storageKey()
             val existing = dao.getSavedTarget(userId, key)
-            if (existing == null) dao.upsertSavedTarget(target.toSavedTarget(userId))
-            else dao.deleteSavedTarget(userId, key)
+            if (existing == null) {
+                dao.upsertSavedTarget(target.toSavedTarget(userId))
+            } else {
+                dao.deleteSavedTarget(userId, key)
+            }
         }
     }
 
@@ -66,8 +68,8 @@ class CollaborationExperienceViewModel(application: Application) : AndroidViewMo
                 dao.upsertUserFollow(
                     UserFollow(
                         followerUserId = followerUserId,
-                        followedUserId = followedUserId
-                    )
+                        followedUserId = followedUserId,
+                    ),
                 )
             } else {
                 dao.deleteUserFollow(followerUserId, followedUserId)

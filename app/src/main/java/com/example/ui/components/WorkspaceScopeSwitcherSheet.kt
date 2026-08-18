@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Business
@@ -65,15 +65,10 @@ enum class WorkspaceScopeKind(val label: String) {
     ENTERPRISE("企業"),
     ORGANIZATION("組織"),
     TEAM("團隊"),
-    USER("用戶")
+    USER("用戶"),
 }
 
-data class WorkspaceScopeSelection(
-    val kind: WorkspaceScopeKind,
-    val id: String,
-    val name: String,
-    val subtitle: String
-)
+data class WorkspaceScopeSelection(val kind: WorkspaceScopeKind, val id: String, val name: String, val subtitle: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +79,7 @@ fun WorkspaceScopeSwitcherSheet(
     users: List<User>,
     selectedScope: WorkspaceScopeSelection?,
     onSelectScope: (WorkspaceScopeSelection) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var selectedKind by remember(selectedScope?.kind) {
         mutableStateOf(selectedScope?.kind ?: WorkspaceScopeKind.USER)
@@ -100,7 +95,7 @@ fun WorkspaceScopeSwitcherSheet(
                 kind = WorkspaceScopeKind.ENTERPRISE,
                 id = it.id,
                 name = it.name,
-                subtitle = it.slug
+                subtitle = it.slug,
             )
         }
 
@@ -109,7 +104,7 @@ fun WorkspaceScopeSwitcherSheet(
                 kind = WorkspaceScopeKind.ORGANIZATION,
                 id = it.id,
                 name = it.name,
-                subtitle = enterpriseById[it.enterpriseId]?.name ?: "企業"
+                subtitle = enterpriseById[it.enterpriseId]?.name ?: "企業",
             )
         }
 
@@ -118,7 +113,7 @@ fun WorkspaceScopeSwitcherSheet(
                 kind = WorkspaceScopeKind.TEAM,
                 id = it.id,
                 name = it.name,
-                subtitle = organizationById[it.orgId]?.name ?: "組織"
+                subtitle = organizationById[it.orgId]?.name ?: "組織",
             )
         }
 
@@ -127,7 +122,7 @@ fun WorkspaceScopeSwitcherSheet(
                 kind = WorkspaceScopeKind.USER,
                 id = it.id,
                 name = it.displayName,
-                subtitle = "@${it.username} • ${it.title}"
+                subtitle = "@${it.username} • ${it.title}",
             )
         }
     }
@@ -148,24 +143,24 @@ fun WorkspaceScopeSwitcherSheet(
         onDismissRequest = onDismiss,
         containerColor = SophisticatedSurface,
         contentColor = TextHighEmphasis,
-        modifier = Modifier.testTag("workspace_scope_switcher_sheet")
+        modifier = Modifier.testTag("workspace_scope_switcher_sheet"),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             Text(
                 text = "切換工作範圍",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = TextHighEmphasis
+                color = TextHighEmphasis,
             )
             Text(
                 text = "只改變目前瀏覽範圍，不改變登入身分。",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -183,7 +178,7 @@ fun WorkspaceScopeSwitcherSheet(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = TextMediumEmphasis
+                        tint = TextMediumEmphasis,
                     )
                 },
                 colors = TextFieldDefaults.colors(
@@ -191,8 +186,8 @@ fun WorkspaceScopeSwitcherSheet(
                     unfocusedContainerColor = SophisticatedSurfaceDark,
                     focusedIndicatorColor = LavenderPrimary,
                     unfocusedIndicatorColor = SophisticatedBorder,
-                    cursorColor = LavenderPrimary
-                )
+                    cursorColor = LavenderPrimary,
+                ),
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -201,7 +196,7 @@ fun WorkspaceScopeSwitcherSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 WorkspaceScopeKind.entries.forEach { kind ->
                     FilterChip(
@@ -215,15 +210,15 @@ fun WorkspaceScopeSwitcherSheet(
                             Icon(
                                 imageVector = scopeIcon(kind),
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(18.dp),
                             )
                         },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = LavenderPrimary,
                             selectedLabelColor = LavenderOnPrimary,
-                            selectedLeadingIconColor = LavenderOnPrimary
+                            selectedLeadingIconColor = LavenderOnPrimary,
                         ),
-                        modifier = Modifier.testTag("workspace_scope_kind_${kind.name.lowercase()}")
+                        modifier = Modifier.testTag("workspace_scope_kind_${kind.name.lowercase()}"),
                     )
                 }
             }
@@ -235,18 +230,18 @@ fun WorkspaceScopeSwitcherSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 28.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "找不到符合的${selectedKind.label}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextMediumEmphasis
+                        color = TextMediumEmphasis,
                     )
                 }
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     items(filteredItems, key = { "${it.kind.name}:${it.id}" }) { item ->
                         val isSelected = selectedScope?.let {
@@ -266,28 +261,28 @@ fun WorkspaceScopeSwitcherSheet(
                             color = if (isSelected) SophisticatedContainer else SophisticatedSurfaceDark,
                             border = androidx.compose.foundation.BorderStroke(
                                 width = 1.dp,
-                                color = if (isSelected) LavenderPrimary else SophisticatedBorder
-                            )
+                                color = if (isSelected) LavenderPrimary else SophisticatedBorder,
+                            ),
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(CircleShape)
                                         .background(SophisticatedBg),
-                                    contentAlignment = Alignment.Center
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     Icon(
                                         imageVector = scopeIcon(item.kind),
                                         contentDescription = null,
                                         tint = if (isSelected) LavenderPrimary else TextMediumEmphasis,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
 
@@ -297,14 +292,14 @@ fun WorkspaceScopeSwitcherSheet(
                                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                                         color = TextHighEmphasis,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
                                         text = item.subtitle,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TextMediumEmphasis,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                 }
 
@@ -313,7 +308,7 @@ fun WorkspaceScopeSwitcherSheet(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = "目前工作範圍",
                                         tint = LavenderPrimary,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
                             }

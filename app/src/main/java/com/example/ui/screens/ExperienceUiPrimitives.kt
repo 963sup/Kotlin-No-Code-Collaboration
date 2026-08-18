@@ -28,7 +28,11 @@ fun ScopeOperationalSummaryCard(summary: ScopeOperationalSummary) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Text(summary.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text("健康度 ${summary.healthScore}%", color = MaterialTheme.colorScheme.primary)
-            Text(summary.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                summary.detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

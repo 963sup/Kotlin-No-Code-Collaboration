@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,8 +43,6 @@ import com.example.ui.components.PolicyVerdictBadge
 import com.example.ui.theme.LavenderOnPrimary
 import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.LavenderSubtle
-import com.example.ui.theme.PinkAccent
-import com.example.ui.theme.SophisticatedBg
 import com.example.ui.theme.SophisticatedBorder
 import com.example.ui.theme.SophisticatedBorderSubtle
 import com.example.ui.theme.SophisticatedContainer
@@ -62,9 +56,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun AuditLogScreen(
-    auditLogs: List<AuditLog>
-) {
+fun AuditLogScreen(auditLogs: List<AuditLog>) {
     var searchQuery by remember { mutableStateOf("") }
     var filterBlockedOnly by remember { mutableStateOf<Boolean?>(null) } // null = All, false = Allowed, true = Denied
 
@@ -75,9 +67,9 @@ fun AuditLogScreen(
             true -> log.verdict != PolicyVerdict.ALLOWED
         }
         val matchesQuery = log.actionName.contains(searchQuery, ignoreCase = true) ||
-                log.actorDisplayName.contains(searchQuery, ignoreCase = true) ||
-                (log.repoName?.contains(searchQuery, ignoreCase = true) ?: false) ||
-                log.reasoning.contains(searchQuery, ignoreCase = true)
+            log.actorDisplayName.contains(searchQuery, ignoreCase = true) ||
+            (log.repoName?.contains(searchQuery, ignoreCase = true) ?: false) ||
+            log.reasoning.contains(searchQuery, ignoreCase = true)
         matchesVerdict && matchesQuery
     }
 
@@ -86,7 +78,7 @@ fun AuditLogScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp),
         contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         // Header
         item {
@@ -94,36 +86,41 @@ fun AuditLogScreen(
                 colors = CardDefaults.cardColors(containerColor = SophisticatedSurface),
                 shape = RoundedCornerShape(18.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(SophisticatedContainer),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Icon(Icons.Default.History, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(20.dp))
+                            Icon(
+                                Icons.Default.History,
+                                contentDescription = null,
+                                tint = LavenderPrimary,
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
                         Column {
                             Text(
                                 text = "企業稽核軌跡與監測",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = TextHighEmphasis
+                                color = TextHighEmphasis,
                             )
                             Text(
                                 text = "不可任意竄改的即時治理紀錄",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     letterSpacing = 0.8.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
                                 ),
-                                color = TextMediumEmphasis
+                                color = TextMediumEmphasis,
                             )
                         }
                     }
@@ -146,11 +143,11 @@ fun AuditLogScreen(
                     focusedBorderColor = LavenderPrimary,
                     unfocusedBorderColor = SophisticatedBorder,
                     focusedTextColor = TextHighEmphasis,
-                    unfocusedTextColor = TextHighEmphasis
+                    unfocusedTextColor = TextHighEmphasis,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag("search_audit_input")
+                    .testTag("search_audit_input"),
             )
         }
 
@@ -158,22 +155,22 @@ fun AuditLogScreen(
         item {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 AuditFilterChip(
                     label = "All 個事件 (${auditLogs.size})",
                     isSelected = filterBlockedOnly == null,
-                    onClick = { filterBlockedOnly = null }
+                    onClick = { filterBlockedOnly = null },
                 )
                 AuditFilterChip(
                     label = "Allowed (${auditLogs.count { it.verdict == PolicyVerdict.ALLOWED }})",
                     isSelected = filterBlockedOnly == false,
-                    onClick = { filterBlockedOnly = false }
+                    onClick = { filterBlockedOnly = false },
                 )
                 AuditFilterChip(
                     label = "Denied (${auditLogs.count { it.verdict != PolicyVerdict.ALLOWED }})",
                     isSelected = filterBlockedOnly == true,
-                    onClick = { filterBlockedOnly = true }
+                    onClick = { filterBlockedOnly = true },
                 )
             }
         }
@@ -194,23 +191,23 @@ fun AuditLogScreen(
                     border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("audit_log_item_${log.id}")
+                        .testTag("audit_log_item_${log.id}"),
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
                                 text = log.actionName,
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = TextHighEmphasis
+                                color = TextHighEmphasis,
                             )
 
                             PolicyVerdictBadge(verdict = log.verdict)
@@ -220,7 +217,7 @@ fun AuditLogScreen(
                             text = log.reasoning,
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis,
-                            lineHeight = 18.sp
+                            lineHeight = 18.sp,
                         )
 
                         Row(
@@ -231,18 +228,18 @@ fun AuditLogScreen(
                                 .border(1.dp, SophisticatedBorderSubtle, RoundedCornerShape(8.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
                                 text = "執行者：${log.actorDisplayName} • 儲存庫：${log.repoName ?: "N/A"}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = LavenderSubtle
+                                color = LavenderSubtle,
                             )
 
                             Text(
                                 text = dateStr,
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                color = TextLowEmphasis
+                                color = TextLowEmphasis,
                             )
                         }
                     }
@@ -253,11 +250,7 @@ fun AuditLogScreen(
 }
 
 @Composable
-fun AuditFilterChip(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
+fun AuditFilterChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
@@ -265,17 +258,17 @@ fun AuditFilterChip(
             .border(
                 1.dp,
                 if (isSelected) LavenderPrimary else SophisticatedBorder,
-                RoundedCornerShape(10.dp)
+                RoundedCornerShape(10.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 7.dp)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             ),
-            color = if (isSelected) LavenderOnPrimary else TextMediumEmphasis
+            color = if (isSelected) LavenderOnPrimary else TextMediumEmphasis,
         )
     }
 }

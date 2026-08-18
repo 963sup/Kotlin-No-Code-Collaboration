@@ -39,7 +39,7 @@ interface CollaborationExperienceDao {
 
     @Query(
         "SELECT * FROM user_follows " +
-            "WHERE followerUserId = :followerUserId AND followedUserId = :followedUserId LIMIT 1"
+            "WHERE followerUserId = :followerUserId AND followedUserId = :followedUserId LIMIT 1",
     )
     suspend fun getUserFollow(followerUserId: String, followedUserId: String): UserFollow?
 
@@ -51,7 +51,7 @@ interface CollaborationExperienceDao {
 
     @Query(
         "DELETE FROM user_follows " +
-            "WHERE followerUserId = :followerUserId AND followedUserId = :followedUserId"
+            "WHERE followerUserId = :followerUserId AND followedUserId = :followedUserId",
     )
     suspend fun deleteUserFollow(followerUserId: String, followedUserId: String)
 
@@ -63,14 +63,14 @@ interface CollaborationExperienceDao {
 
     @Query(
         "SELECT * FROM sync_outbox " +
-            "WHERE state IN ('PENDING', 'FAILED', 'AUTH_REQUIRED') ORDER BY queuedAt ASC LIMIT :limit"
+            "WHERE state IN ('PENDING', 'FAILED', 'AUTH_REQUIRED') ORDER BY queuedAt ASC LIMIT :limit",
     )
     suspend fun getPendingOutbox(limit: Int = 50): List<SyncOutbox>
 
     @Query(
         "SELECT COUNT(*) FROM sync_outbox " +
             "WHERE entityType = :entityType AND entityId = :entityId " +
-            "AND state != 'SYNCED'"
+            "AND state != 'SYNCED'",
     )
     suspend fun countUnsynced(entityType: String, entityId: String): Int
 
@@ -79,25 +79,20 @@ interface CollaborationExperienceDao {
 
     @Query(
         "UPDATE sync_outbox SET state = :state, updatedAt = :updatedAt, " +
-            "lastError = :lastError WHERE id = :id"
+            "lastError = :lastError WHERE id = :id",
     )
     suspend fun markOutboxState(
         id: String,
         state: String,
         updatedAt: Long = System.currentTimeMillis(),
-        lastError: String? = null
+        lastError: String? = null,
     )
 
     @Query(
         "UPDATE sync_outbox SET attemptCount = attemptCount + 1, state = :state, " +
-            "updatedAt = :updatedAt, lastError = :lastError WHERE id = :id"
+            "updatedAt = :updatedAt, lastError = :lastError WHERE id = :id",
     )
-    suspend fun failOutbox(
-        id: String,
-        state: String,
-        lastError: String,
-        updatedAt: Long = System.currentTimeMillis()
-    )
+    suspend fun failOutbox(id: String, state: String, lastError: String, updatedAt: Long = System.currentTimeMillis())
 
     @Query("DELETE FROM sync_outbox WHERE id = :id")
     suspend fun deleteOutbox(id: String)

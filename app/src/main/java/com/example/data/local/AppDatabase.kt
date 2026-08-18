@@ -27,10 +27,13 @@ import com.example.data.model.SyncCursor
 import com.example.data.model.SyncMetadata
 import com.example.data.model.SyncOutbox
 import com.example.data.model.SyncRuntimeState
+import com.example.data.model.TaskChecklist
 import com.example.data.model.Team
 import com.example.data.model.TeamMembership
 import com.example.data.model.User
 import com.example.data.model.UserFollow
+import com.example.data.model.WorkEvidence
+import com.example.data.model.WorkVerification
 
 @Database(
     entities = [
@@ -41,6 +44,9 @@ import com.example.data.model.UserFollow
         TeamMembership::class,
         OrgMembership::class,
         Repository::class,
+        WorkEvidence::class,
+        WorkVerification::class,
+        TaskChecklist::class,
         RepoAccessRule::class,
         NoCodeArtifact::class,
         ArtifactReview::class,
@@ -59,10 +65,10 @@ import com.example.data.model.UserFollow
         SyncCursor::class,
         SyncConflict::class,
         PushRegistration::class,
-        SyncRuntimeState::class
+        SyncRuntimeState::class,
     ],
     version = AppMigrations.CURRENT_VERSION,
-    exportSchema = false
+    exportSchema = false,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -73,19 +79,17 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "repo_governance_db"
-                )
-                    .addMigrations(AppMigrations.MIGRATION_4_5)
-                    .addCallback(DatabaseSyncTriggers.callback)
-                    .build()
-                INSTANCE = instance
-                instance
-            }
+        fun getInstance(context: Context): AppDatabase = INSTANCE ?: synchronized(this) {
+            val instance = Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                "repo_governance_db",
+            )
+                .addMigrations(AppMigrations.MIGRATION_4_5, AppMigrations.MIGRATION_5_6)
+                .addCallback(DatabaseSyncTriggers.callback)
+                .build()
+            INSTANCE = instance
+            instance
         }
     }
 }

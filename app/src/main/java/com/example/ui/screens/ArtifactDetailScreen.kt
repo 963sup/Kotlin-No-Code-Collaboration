@@ -22,11 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Shield
@@ -75,17 +72,12 @@ import com.example.ui.components.PolicyTraceDialog
 import com.example.ui.theme.AmberWarning
 import com.example.ui.theme.CardSurfaceDark
 import com.example.ui.theme.CyanAccent
-import com.example.ui.theme.CyanGlow
 import com.example.ui.theme.EmeraldSuccess
 import com.example.ui.theme.IndigoLight
 import com.example.ui.theme.IndigoPrimary
 import com.example.ui.theme.PurpleGlow
 import com.example.ui.theme.RoseError
-import com.example.ui.theme.SlateDark800
 import com.example.ui.theme.SlateDark900
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun ArtifactDetailScreen(
@@ -101,32 +93,36 @@ fun ArtifactDetailScreen(
     onPublishAndLock: () -> Unit,
     onInspectPolicy: (GovernanceAction) -> Unit,
     simulationResult: PolicyEvaluationDetail?,
-    onClearSimulation: () -> Unit
+    onClearSimulation: () -> Unit,
 ) {
     var showReviewDialog by remember { mutableStateOf(false) }
 
-    val distinctApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+    val distinctApprovalsCount = approvals.filter {
+        it.status == ApprovalStatus.APPROVED
+    }.distinctBy { it.approverUserId }.size
     val requiredApprovers = repo.requiredApproverCount
-    val isAlreadySignedByActiveUser = activeUser != null && approvals.any { it.approverUserId == activeUser.id && it.status == ApprovalStatus.APPROVED }
+    val isAlreadySignedByActiveUser =
+        activeUser != null &&
+            approvals.any { it.approverUserId == activeUser.id && it.status == ApprovalStatus.APPROVED }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             // Header
             ArtifactHeader(
                 artifact = artifact,
                 repo = repo,
-                onBack = onBack
+                onBack = onBack,
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Lifecycle Stepper Pipeline
                 LifecyclePipelineView(currentState = artifact.lifecycleState)
@@ -145,14 +141,14 @@ fun ArtifactDetailScreen(
                     onOpenReviewDialog = { showReviewDialog = true },
                     onSubmitApproverSignOff = onSubmitApproverSignOff,
                     onPublishAndLock = onPublishAndLock,
-                    onInspectPolicy = onInspectPolicy
+                    onInspectPolicy = onInspectPolicy,
                 )
 
                 // Approver Signatures & Formal Review Feedback Section
                 SignaturesAndReviewsSection(
                     approvals = approvals,
                     reviews = reviews,
-                    requiredApprovers = requiredApprovers
+                    requiredApprovers = requiredApprovers,
                 )
             }
         }
@@ -165,38 +161,34 @@ fun ArtifactDetailScreen(
             onSubmit = { decision, feedback ->
                 onSubmitReview(decision, feedback)
                 showReviewDialog = false
-            }
+            },
         )
     }
 
     if (simulationResult != null) {
         PolicyTraceDialog(
             evaluation = simulationResult,
-            onDismiss = onClearSimulation
+            onDismiss = onClearSimulation,
         )
     }
 }
 
 @Composable
-fun ArtifactHeader(
-    artifact: NoCodeArtifact,
-    repo: Repository,
-    onBack: () -> Unit
-) {
+fun ArtifactHeader(artifact: NoCodeArtifact, repo: Repository, onBack: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = SlateDark900),
         shape = RoundedCornerShape(0.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF24334D)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 IconButton(
                     onClick = onBack,
-                    modifier = Modifier.size(32.dp).testTag("back_from_artifact_button")
+                    modifier = Modifier.size(32.dp).testTag("back_from_artifact_button"),
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "返回", tint = IndigoLight)
                 }
@@ -205,7 +197,7 @@ fun ArtifactHeader(
                     text = "${repo.displayName} > ${artifact.type.label}",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFF94A3B8),
-                    maxLines = 1
+                    maxLines = 1,
                 )
             }
 
@@ -214,18 +206,18 @@ fun ArtifactHeader(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = artifact.title,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        color = Color.White,
                     )
                     Text(
                         text = "作者：${artifact.authorDisplayName} • 版本 ${artifact.version}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = CyanAccent
+                        color = CyanAccent,
                     )
                 }
 
@@ -242,7 +234,7 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
         LifecycleState.IN_REVIEW,
         LifecycleState.PENDING_APPROVAL,
         LifecycleState.APPROVED,
-        LifecycleState.PUBLISHED
+        LifecycleState.PUBLISHED,
     )
 
     val currentIndex = steps.indexOf(currentState).coerceAtLeast(0)
@@ -251,17 +243,17 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
         colors = CardDefaults.cardColors(containerColor = CardSurfaceDark),
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF24334D)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(14.dp),
         ) {
             Text(
                 text = "階層治理生命週期流程",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
+                color = Color.White,
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -269,7 +261,7 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 steps.forEachIndexed { index, state ->
                     val isPast = index < currentIndex
@@ -287,15 +279,20 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
                                 .clip(CircleShape)
                                 .background(color.copy(alpha = 0.25f))
                                 .border(1.5.dp, color, CircleShape),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             if (isPast) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = EmeraldSuccess, modifier = Modifier.size(14.dp))
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = EmeraldSuccess,
+                                    modifier = Modifier.size(14.dp),
+                                )
                             } else {
                                 Text(
                                     text = "${index + 1}",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = color
+                                    color = color,
                                 )
                             }
                         }
@@ -304,10 +301,10 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
                             text = state.label,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 9.sp,
-                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
                             ),
                             color = if (isCurrent) Color.White else Color(0xFF94A3B8),
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp),
                         )
                     }
                 }
@@ -322,17 +319,17 @@ fun NoCodeBlueprintViewer(artifact: NoCodeArtifact) {
         colors = CardDefaults.cardColors(containerColor = CardSurfaceDark),
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF24334D)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(14.dp),
         ) {
             Text(
                 text = "無程式碼藍圖規格",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = CyanAccent
+                color = CyanAccent,
             )
 
             Text(
@@ -340,7 +337,7 @@ fun NoCodeBlueprintViewer(artifact: NoCodeArtifact) {
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White,
                 modifier = Modifier.padding(vertical = 6.dp),
-                lineHeight = 18.sp
+                lineHeight = 18.sp,
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -352,14 +349,14 @@ fun NoCodeBlueprintViewer(artifact: NoCodeArtifact) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF090D16))
                     .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(8.dp))
-                    .padding(12.dp)
+                    .padding(12.dp),
             ) {
                 Text(
                     text = artifact.structuredContent,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                     color = Color(0xFFA5F3FC),
-                    lineHeight = 18.sp
+                    lineHeight = 18.sp,
                 )
             }
         }
@@ -377,35 +374,35 @@ fun GovernanceActionPanel(
     onOpenReviewDialog: () -> Unit,
     onSubmitApproverSignOff: () -> Unit,
     onPublishAndLock: () -> Unit,
-    onInspectPolicy: (GovernanceAction) -> Unit
+    onInspectPolicy: (GovernanceAction) -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = SlateDark900),
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, IndigoLight.copy(alpha = 0.4f)),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = "治理簽核與生命週期關卡",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color = Color.White,
                 )
 
                 Text(
                     text = "目前身分：${activeUser?.displayName ?: "Guest"}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = CyanAccent
+                    color = CyanAccent,
                 )
             }
 
@@ -414,7 +411,7 @@ fun GovernanceActionPanel(
                     Text(
                         text = "此藍圖目前為草稿；協作者或維護者可送出以開始正式同儕審查。",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF94A3B8)
+                        color = Color(0xFF94A3B8),
                     )
 
                     Button(
@@ -423,7 +420,7 @@ fun GovernanceActionPanel(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("submit_for_review_button")
+                            .testTag("submit_for_review_button"),
                     ) {
                         Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
@@ -435,7 +432,7 @@ fun GovernanceActionPanel(
                     Text(
                         text = "此藍圖正在審查中；指定審查者可核准或要求修改。",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF94A3B8)
+                        color = Color(0xFF94A3B8),
                     )
 
                     Button(
@@ -444,7 +441,7 @@ fun GovernanceActionPanel(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("open_review_dialog_button")
+                            .testTag("open_review_dialog_button"),
                     ) {
                         Icon(Icons.Default.RateReview, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
@@ -456,7 +453,7 @@ fun GovernanceActionPanel(
                     Text(
                         text = "多重簽核關卡：已取得 $collectedApprovals / $requiredApprovers 個必要簽核。",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (collectedApprovals >= requiredApprovers) EmeraldSuccess else PurpleGlow
+                        color = if (collectedApprovals >= requiredApprovers) EmeraldSuccess else PurpleGlow,
                     )
 
                     if (collectedApprovals < requiredApprovers) {
@@ -467,11 +464,14 @@ fun GovernanceActionPanel(
                             enabled = !isAlreadySigned,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag("submit_approver_signoff_button")
+                                .testTag("submit_approver_signoff_button"),
                         ) {
                             Icon(Icons.Default.Gavel, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(if (isAlreadySigned) "Signature Already Recorded" else "Grant Approver Signature", fontWeight = FontWeight.Bold)
+                            Text(
+                                if (isAlreadySigned) "Signature Already Recorded" else "Grant Approver Signature",
+                                fontWeight = FontWeight.Bold,
+                            )
                         }
                     }
 
@@ -482,9 +482,14 @@ fun GovernanceActionPanel(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag("publish_and_lock_button")
+                                .testTag("publish_and_lock_button"),
                         ) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(16.dp),
+                            )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("發布並鎖定藍圖", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
@@ -497,17 +502,17 @@ fun GovernanceActionPanel(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFF064E3B).copy(alpha = 0.5f))
-                            .padding(10.dp)
+                            .padding(10.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = EmeraldSuccess)
                             Text(
                                 text = "成果已依企業簽核政策正式發布並鎖定。",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
+                                color = Color.White,
                             )
                         }
                     }
@@ -533,9 +538,14 @@ fun GovernanceActionPanel(
                     .fillMaxWidth()
                     .testTag("inspect_artifact_policy_button"),
                 shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CyanAccent)
+                border = androidx.compose.foundation.BorderStroke(1.dp, CyanAccent),
             ) {
-                Icon(Icons.Default.Shield, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(16.dp))
+                Icon(
+                    Icons.Default.Shield,
+                    contentDescription = null,
+                    tint = CyanAccent,
+                    modifier = Modifier.size(16.dp),
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("檢視此動作的存取控制政策", color = CyanAccent, fontSize = 12.sp)
             }
@@ -547,14 +557,16 @@ fun GovernanceActionPanel(
 fun SignaturesAndReviewsSection(
     approvals: List<ArtifactApproval>,
     reviews: List<ArtifactReview>,
-    requiredApprovers: Int
+    requiredApprovers: Int,
 ) {
-    val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+    val validApprovalsCount = approvals.filter {
+        it.status == ApprovalStatus.APPROVED
+    }.distinctBy { it.approverUserId }.size
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "核准與簽章（$validApprovalsCount / $requiredApprovers）",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = Color.White
+            color = Color.White,
         )
 
         if (approvals.isEmpty()) {
@@ -565,27 +577,44 @@ fun SignaturesAndReviewsSection(
                     colors = CardDefaults.cardColors(containerColor = CardSurfaceDark),
                     shape = RoundedCornerShape(8.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF24334D)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldSuccess, modifier = Modifier.size(18.dp))
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = EmeraldSuccess,
+                                modifier = Modifier.size(18.dp),
+                            )
                             Column {
-                                Text(approval.approverDisplayName, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = Color.White)
-                                Text(approval.approverTitle, style = MaterialTheme.typography.labelSmall, color = Color(0xFF94A3B8))
+                                Text(
+                                    approval.approverDisplayName,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White,
+                                )
+                                Text(
+                                    approval.approverTitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF94A3B8),
+                                )
                             }
                         }
 
-                        Text(approval.signatureProof, style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace), color = CyanAccent)
+                        Text(
+                            approval.signatureProof,
+                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                            color = CyanAccent,
+                        )
                     }
                 }
             }
@@ -596,7 +625,7 @@ fun SignaturesAndReviewsSection(
         Text(
             text = "同儕審查決定（${reviews.size}）",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = Color.White
+            color = Color.White,
         )
 
         if (reviews.isEmpty()) {
@@ -607,22 +636,26 @@ fun SignaturesAndReviewsSection(
                     colors = CardDefaults.cardColors(containerColor = CardSurfaceDark),
                     shape = RoundedCornerShape(8.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF24334D)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp)
+                            .padding(10.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text(review.reviewerDisplayName, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                            Text(
+                                review.reviewerDisplayName,
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White,
+                            )
                             Text(
                                 text = review.decision.name,
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = if (review.decision == ReviewDecision.APPROVED) EmeraldSuccess else RoseError
+                                color = if (review.decision == ReviewDecision.APPROVED) EmeraldSuccess else RoseError,
                             )
                         }
                         if (review.feedbackNote.isNotBlank()) {
@@ -630,7 +663,7 @@ fun SignaturesAndReviewsSection(
                                 text = "\"${review.feedbackNote}\"",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFFCBD5E1),
-                                modifier = Modifier.padding(top = 4.dp)
+                                modifier = Modifier.padding(top = 4.dp),
                             )
                         }
                     }
@@ -641,11 +674,7 @@ fun SignaturesAndReviewsSection(
 }
 
 @Composable
-fun SubmitReviewDialog(
-    artifact: NoCodeArtifact,
-    onDismiss: () -> Unit,
-    onSubmit: (ReviewDecision, String) -> Unit
-) {
+fun SubmitReviewDialog(artifact: NoCodeArtifact, onDismiss: () -> Unit, onSubmit: (ReviewDecision, String) -> Unit) {
     var selectedDecision by remember { mutableStateOf(ReviewDecision.APPROVED) }
     var feedback by remember { mutableStateOf("") }
 
@@ -655,24 +684,24 @@ fun SubmitReviewDialog(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp)),
             color = SlateDark900,
-            tonalElevation = 8.dp
+            tonalElevation = 8.dp,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
                     text = "送出審查者簽核",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color = Color.White,
                 )
 
                 Text(
                     text = "評估中：${artifact.title}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = CyanAccent
+                    color = CyanAccent,
                 )
 
                 // Decision Radio options
@@ -680,7 +709,7 @@ fun SubmitReviewDialog(
                     listOf(
                         Pair(ReviewDecision.APPROVED, "Approve (Promotes to Approver Gate)"),
                         Pair(ReviewDecision.CHANGES_REQUESTED, "Request Changes (Returns to Draft)"),
-                        Pair(ReviewDecision.COMMENTED, "Comment Only")
+                        Pair(ReviewDecision.COMMENTED, "Comment Only"),
                     ).forEach { (decision, label) ->
                         val isSelected = selectedDecision == decision
                         Row(
@@ -690,12 +719,12 @@ fun SubmitReviewDialog(
                                 .background(if (isSelected) Color(0xFF1E1B4B) else Color(0xFF0F172A))
                                 .clickable { selectedDecision = decision }
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(
                                 selected = isSelected,
                                 onClick = { selectedDecision = decision },
-                                colors = RadioButtonDefaults.colors(selectedColor = IndigoLight)
+                                colors = RadioButtonDefaults.colors(selectedColor = IndigoLight),
                             )
                             Text(label, style = MaterialTheme.typography.bodySmall, color = Color.White)
                         }
@@ -707,19 +736,19 @@ fun SubmitReviewDialog(
                     onValueChange = { feedback = it },
                     label = { Text("審查備註與驗證回饋") },
                     maxLines = 3,
-                    modifier = Modifier.fillMaxWidth().testTag("review_feedback_input")
+                    modifier = Modifier.fillMaxWidth().testTag("review_feedback_input"),
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = onDismiss) { Text("取消", color = Color(0xFF94A3B8)) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onSubmit(selectedDecision, feedback) },
                         colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary),
-                        modifier = Modifier.testTag("submit_review_decision_button")
+                        modifier = Modifier.testTag("submit_review_decision_button"),
                     ) {
                         Text("送出決定")
                     }

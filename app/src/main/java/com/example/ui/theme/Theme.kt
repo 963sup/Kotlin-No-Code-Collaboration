@@ -26,7 +26,7 @@ private val DarkColorScheme = darkColorScheme(
     outline = Color(0xFF8C9199),
     outlineVariant = Color(0xFF42474F),
     error = Color(0xFFFFB4AB),
-    onError = Color(0xFF690005)
+    onError = Color(0xFF690005),
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -49,19 +49,15 @@ private val LightColorScheme = lightColorScheme(
     outline = SophisticatedBorder,
     outlineVariant = Color(0xFFE3E8F0),
     error = RoseError,
-    onError = Color.White
+    onError = Color.White,
 )
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
-fun MyApplicationTheme(
-    darkTheme: Boolean = false,
-    dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
-) {
+fun MyApplicationTheme(darkTheme: Boolean = false, dynamicColor: Boolean = false, content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

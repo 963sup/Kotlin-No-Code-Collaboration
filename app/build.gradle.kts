@@ -69,13 +69,13 @@ android {
 detekt {
   buildUponDefaultConfig = true
   allRules = false
+  autoCorrect = true
   parallel = true
   source.setFrom("src/main/java", "src/main/kotlin")
   config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+  baseline = rootProject.file("config/detekt/baseline.xml")
   basePath.set(rootProject.projectDir)
-  // Advisory rollout: existing debt stays visible without blocking AI Studio or web delivery.
-  // Konsist remains the hard architecture gate in unit tests.
-  ignoreFailures = true
+  ignoreFailures = false
 }
 
 googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }
@@ -120,4 +120,6 @@ dependencies {
 
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
+
+  detektPlugins(libs.detekt.formatting)
 }

@@ -39,7 +39,7 @@ object HierarchicalPolicyEngine {
         orgMemberships: List<OrgMembership>,
         teamMemberships: List<TeamMembership>,
         teams: List<Team>,
-        accessRules: List<RepoAccessRule>
+        accessRules: List<RepoAccessRule>,
     ): Pair<RepoRole, String> {
         // 1. Is User direct Owner of Personal Repo?
         if (repo.ownerType == OwnerType.USER && repo.ownerId == actor.id) {
@@ -58,10 +58,12 @@ object HierarchicalPolicyEngine {
                         highestRole = RepoRole.MAINTAINER
                         roleSource = "Inherited from Organization ${orgMembership.role.name} (${repo.ownerDisplayName})"
                     }
+
                     OrgRole.MEMBER -> {
                         highestRole = RepoRole.COLLABORATOR
                         roleSource = "Default Organization Member Access"
                     }
+
                     OrgRole.BILLING_MANAGER -> {
                         highestRole = RepoRole.VIEWER
                         roleSource = "Organization Billing Manager (Read-Only)"
@@ -72,8 +74,11 @@ object HierarchicalPolicyEngine {
 
         // 3. Team-level inheritance
         val userTeamIds = teamMemberships.filter { it.userId == actor.id }.map { it.teamId }.toSet()
-        val teamRules = accessRules.filter { it.repoId == repo.id && it.granteeType == GranteeType.TEAM && it.granteeId in userTeamIds }
-        
+        val teamRules = accessRules.filter {
+            it.repoId == repo.id && it.granteeType == GranteeType.TEAM &&
+                it.granteeId in userTeamIds
+        }
+
         for (tRule in teamRules) {
             if (tRule.role.rank > highestRole.rank) {
                 highestRole = tRule.role
@@ -83,7 +88,10 @@ object HierarchicalPolicyEngine {
         }
 
         // 4. Direct User-level Access Rule on Repo
-        val userRule = accessRules.firstOrNull { it.repoId == repo.id && it.granteeType == GranteeType.USER && it.granteeId == actor.id }
+        val userRule = accessRules.firstOrNull {
+            it.repoId == repo.id && it.granteeType == GranteeType.USER &&
+                it.granteeId == actor.id
+        }
         if (userRule != null && userRule.role.rank >= highestRole.rank) {
             highestRole = userRule.role
             roleSource = "Direct Repository Role Assignment (${userRule.role.name})"
@@ -113,7 +121,7 @@ object HierarchicalPolicyEngine {
         teamMemberships: List<TeamMembership> = emptyList(),
         teams: List<Team> = emptyList(),
         accessRules: List<RepoAccessRule> = emptyList(),
-        action: GovernanceAction
+        action: GovernanceAction,
     ): PolicyEvaluationDetail {
         val (effectiveRole, roleSource) = resolveEffectiveRole(
             actor = actor,
@@ -121,7 +129,7 @@ object HierarchicalPolicyEngine {
             orgMemberships = orgMemberships,
             teamMemberships = teamMemberships,
             teams = teams,
-            accessRules = accessRules
+            accessRules = accessRules,
         )
 
         val enterpriseChecks = mutableListOf<PolicyCheckItem>()
@@ -135,9 +143,12 @@ object HierarchicalPolicyEngine {
                 PolicyCheckItem(
                     title = "Enterprise User-Owned Repository Policy",
                     passed = userRepoAllowed,
-                    detail = if (userRepoAllowed) "Enterprise allows individual User-owned repositories" 
-                             else "Enterprise policy strictly restricts repositories to Organization ownership"
-                )
+                    detail = if (userRepoAllowed) {
+                        "Enterprise allows individual User-owned repositories"
+                    } else {
+                        "Enterprise policy strictly restricts repositories to Organization ownership"
+                    },
+                ),
             )
             if (!userRepoAllowed && action != GovernanceAction.VIEW_ARTIFACT) {
                 return PolicyEvaluationDetail(
@@ -150,7 +161,7 @@ object HierarchicalPolicyEngine {
                     roleSource = roleSource,
                     enterpriseChecks = enterpriseChecks,
                     repositoryChecks = repositoryChecks,
-                    finalExplanation = "Enterprise governance policy prohibits mutations on User-owned repositories."
+                    finalExplanation = "Enterprise governance policy prohibits mutations on User-owned repositories.",
                 )
             }
         } else {
@@ -158,8 +169,8 @@ object HierarchicalPolicyEngine {
                 PolicyCheckItem(
                     title = "Enterprise Valid Owner Verification",
                     passed = true,
-                    detail = "Repository is properly owned by an Organization (${repo.ownerDisplayName})"
-                )
+                    detail = "Repository is properly owned by an Organization (${repo.ownerDisplayName})",
+                ),
             )
         }
 
@@ -169,16 +180,19 @@ object HierarchicalPolicyEngine {
             val isSignOffAction = action in listOf(
                 GovernanceAction.SUBMIT_FINAL_APPROVAL,
                 GovernanceAction.SUBMIT_REVIEW,
-                GovernanceAction.PUBLISH_AND_LOCK
+                GovernanceAction.PUBLISH_AND_LOCK,
             )
             val passesSegregation = !enforceSegregation || !isSignOffAction
             enterpriseChecks.add(
                 PolicyCheckItem(
                     title = "Segregation of Duties Policy (Anti-Self-Approval)",
                     passed = passesSegregation,
-                    detail = if (passesSegregation) "Actor is not self-approving their own author draft" 
-                             else "Actor '${actor.displayName}' is the original author of '${artifact.title}'. Self-approval or self-review is strictly barred by governance policy."
-                )
+                    detail = if (passesSegregation) {
+                        "Actor is not self-approving their own author draft"
+                    } else {
+                        "Actor '${actor.displayName}' is the original author of '${artifact.title}'. Self-approval or self-review is strictly barred by governance policy."
+                    },
+                ),
             )
             if (!passesSegregation) {
                 return PolicyEvaluationDetail(
@@ -191,7 +205,7 @@ object HierarchicalPolicyEngine {
                     roleSource = roleSource,
                     enterpriseChecks = enterpriseChecks,
                     repositoryChecks = repositoryChecks,
-                    finalExplanation = "Policy Violation: Segregation of Duties forbids author '${actor.displayName}' from reviewing or approving their own artifact."
+                    finalExplanation = "Policy Violation: Segregation of Duties forbids author '${actor.displayName}' from reviewing or approving their own artifact.",
                 )
             }
         }
@@ -203,8 +217,8 @@ object HierarchicalPolicyEngine {
             PolicyCheckItem(
                 title = "Hierarchical Role Authority Check",
                 passed = roleHasAuthority,
-                detail = "Effective Role '${effectiveRole.name}' (Rank ${effectiveRole.rank}) vs Required Role '${action.minimumRole.name}' (Rank ${action.minimumRole.rank}) for action '${action.label}'"
-            )
+                detail = "Effective Role '${effectiveRole.name}' (Rank ${effectiveRole.rank}) vs Required Role '${action.minimumRole.name}' (Rank ${action.minimumRole.rank}) for action '${action.label}'",
+            ),
         )
         if (!roleHasAuthority) {
             return PolicyEvaluationDetail(
@@ -217,23 +231,31 @@ object HierarchicalPolicyEngine {
                 roleSource = roleSource,
                 enterpriseChecks = enterpriseChecks,
                 repositoryChecks = repositoryChecks,
-                finalExplanation = "Access Denied: Effective role '${effectiveRole.name}' via $roleSource lacks the '${action.minimumRole.name}' permission required for '${action.label}'."
+                finalExplanation = "Access Denied: Effective role '${effectiveRole.name}' via $roleSource lacks the '${action.minimumRole.name}' permission required for '${action.label}'.",
             )
         }
 
         // 4. Artifact Reviewer Pipeline Gate Check
-        if (artifact != null && (action == GovernanceAction.SUBMIT_FINAL_APPROVAL || action == GovernanceAction.PUBLISH_AND_LOCK)) {
+        if (artifact != null &&
+            (action == GovernanceAction.SUBMIT_FINAL_APPROVAL || action == GovernanceAction.PUBLISH_AND_LOCK)
+        ) {
             val requireReviewGate = enterprise.enforceReviewerBeforeApprover || repo.requireReviewerPass
-            val hasPassedReview = artifact.lifecycleState in listOf(LifecycleState.PENDING_APPROVAL, LifecycleState.APPROVED) ||
-                    reviews.any { it.decision == ReviewDecision.APPROVED }
-            
+            val hasPassedReview = artifact.lifecycleState in listOf(
+                LifecycleState.PENDING_APPROVAL,
+                LifecycleState.APPROVED,
+            ) ||
+                reviews.any { it.decision == ReviewDecision.APPROVED }
+
             repositoryChecks.add(
                 PolicyCheckItem(
                     title = "Mandatory Reviewer Peer Gate",
                     passed = !requireReviewGate || hasPassedReview,
-                    detail = if (hasPassedReview) "Artifact has satisfied peer review quality gate"
-                             else "Artifact must complete Reviewer sign-off before Approver can sign off."
-                )
+                    detail = if (hasPassedReview) {
+                        "Artifact has satisfied peer review quality gate"
+                    } else {
+                        "Artifact must complete Reviewer sign-off before Approver can sign off."
+                    },
+                ),
             )
             if (requireReviewGate && !hasPassedReview) {
                 return PolicyEvaluationDetail(
@@ -246,24 +268,36 @@ object HierarchicalPolicyEngine {
                     roleSource = roleSource,
                     enterpriseChecks = enterpriseChecks,
                     repositoryChecks = repositoryChecks,
-                    finalExplanation = "Governance Gate: Peer Reviewer must complete review before Approver sign-off is permitted."
+                    finalExplanation = "Governance Gate: Peer Reviewer must complete review before Approver sign-off is permitted.",
                 )
             }
         }
 
         // 5. Dual Approval Requirement for Publish & Lock
         if (artifact != null && action == GovernanceAction.PUBLISH_AND_LOCK) {
-            val requiredApprovers = if (enterprise.enforceDualApproval) maxOf(repo.requiredApproverCount, 2) else repo.requiredApproverCount
-            val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+            val requiredApprovers = if (enterprise.enforceDualApproval) {
+                maxOf(
+                    repo.requiredApproverCount,
+                    2,
+                )
+            } else {
+                repo.requiredApproverCount
+            }
+            val validApprovalsCount = approvals.filter {
+                it.status == ApprovalStatus.APPROVED
+            }.distinctBy { it.approverUserId }.size
             val hasEnoughApprovals = validApprovalsCount >= requiredApprovers
 
             repositoryChecks.add(
                 PolicyCheckItem(
                     title = "Multi-Signature Approver Quorum ($validApprovalsCount of $requiredApprovers required)",
                     passed = hasEnoughApprovals,
-                    detail = if (hasEnoughApprovals) "Required $requiredApprovers distinct approver signatures verified"
-                             else "Artifact requires $requiredApprovers distinct Approver signatures, but currently has $validApprovalsCount."
-                )
+                    detail = if (hasEnoughApprovals) {
+                        "Required $requiredApprovers distinct approver signatures verified"
+                    } else {
+                        "Artifact requires $requiredApprovers distinct Approver signatures, but currently has $validApprovalsCount."
+                    },
+                ),
             )
             if (!hasEnoughApprovals) {
                 return PolicyEvaluationDetail(
@@ -276,7 +310,7 @@ object HierarchicalPolicyEngine {
                     roleSource = roleSource,
                     enterpriseChecks = enterpriseChecks,
                     repositoryChecks = repositoryChecks,
-                    finalExplanation = "Quorum Deficit: Publish & Lock requires $requiredApprovers distinct Approver sign-offs. Currently signed: $validApprovalsCount."
+                    finalExplanation = "Quorum Deficit: Publish & Lock requires $requiredApprovers distinct Approver sign-offs. Currently signed: $validApprovalsCount.",
                 )
             }
         }
@@ -292,7 +326,7 @@ object HierarchicalPolicyEngine {
             roleSource = roleSource,
             enterpriseChecks = enterpriseChecks,
             repositoryChecks = repositoryChecks,
-            finalExplanation = "Access Granted: Policy evaluation succeeded. Actor has '${effectiveRole.name}' authority and satisfied all hierarchical enterprise & repository compliance policies."
+            finalExplanation = "Access Granted: Policy evaluation succeeded. Actor has '${effectiveRole.name}' authority and satisfied all hierarchical enterprise & repository compliance policies.",
         )
     }
 }

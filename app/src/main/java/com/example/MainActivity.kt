@@ -50,17 +50,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.GranteeType
-import com.example.data.model.NoCodeArtifact
 import com.example.data.model.OwnerType
 import com.example.data.model.Repository
 import com.example.data.model.User
+import com.example.navigation.CollaborationTarget
 import com.example.ui.components.PersonaSwitcherDialog
 import com.example.ui.components.RepositoryWorkBoardDialog
 import com.example.ui.components.WorkspaceScopeKind
@@ -72,8 +71,11 @@ import com.example.ui.screens.InboxScreen
 import com.example.ui.screens.KanbanBoardScreen
 import com.example.ui.screens.MeScreen
 import com.example.ui.screens.MeSubTab
+import com.example.ui.screens.PersonalCenterSwitchScreen
 import com.example.ui.screens.RepoDetailScreen
-import com.example.ui.screens.RepositoriesScreen
+import com.example.ui.screens.UnifiedExploreScreen
+import com.example.ui.screens.VerificationScreen
+import com.example.ui.screens.WorkItemDetailScreen
 import com.example.ui.theme.LavenderOnPrimary
 import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.LavenderSubtle
@@ -84,41 +86,38 @@ import com.example.ui.theme.SophisticatedContainer
 import com.example.ui.theme.SophisticatedSurfaceDark
 import com.example.ui.theme.TextHighEmphasis
 import com.example.ui.theme.TextMediumEmphasis
-import com.example.ui.viewmodel.GovernanceViewModel
-import com.example.navigation.CollaborationTarget
-import com.example.ui.screens.UnifiedExploreScreen
-import com.example.ui.screens.PersonalCenterSwitchScreen
 import com.example.ui.viewmodel.CollaborationExperienceViewModel
+import com.example.ui.viewmodel.GovernanceViewModel
 
 enum class MainNavigationTab {
     HOME,
     INBOX,
-    KANBAN,
+    WORK,
     EXPLORE,
-    ME
+    PROFILE,
 }
 
 internal val PrimaryBottomNavigationTabs = listOf(
     MainNavigationTab.HOME,
     MainNavigationTab.INBOX,
-    MainNavigationTab.KANBAN,
-    MainNavigationTab.EXPLORE
+    MainNavigationTab.WORK,
+    MainNavigationTab.EXPLORE,
 )
 
 internal fun MainNavigationTab.bottomNavigationLabel(): String = when (this) {
     MainNavigationTab.HOME -> "首頁"
     MainNavigationTab.INBOX -> "收件匣"
-    MainNavigationTab.KANBAN -> "工作"
+    MainNavigationTab.WORK -> "工作"
     MainNavigationTab.EXPLORE -> "探索"
-    MainNavigationTab.ME -> "個人"
+    MainNavigationTab.PROFILE -> "個人"
 }
 
 internal fun MainNavigationTab.bottomNavigationTestTag(): String = when (this) {
     MainNavigationTab.HOME -> "nav_tab_home"
     MainNavigationTab.INBOX -> "nav_tab_inbox"
-    MainNavigationTab.KANBAN -> "nav_tab_kanban"
+    MainNavigationTab.WORK -> "nav_tab_work"
     MainNavigationTab.EXPLORE -> "nav_tab_explore"
-    MainNavigationTab.ME -> "nav_tab_me"
+    MainNavigationTab.PROFILE -> "nav_tab_profile"
 }
 
 class MainActivity : ComponentActivity() {
@@ -170,6 +169,10 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
     val syncStatus by experienceViewModel.syncStatus.collectAsState()
 
     val allIssues by viewModel.allIssues.collectAsState()
+    val selectedIssueEvidence by viewModel.selectedIssueEvidence.collectAsState()
+    val selectedIssueChecklist by viewModel.selectedIssueChecklist.collectAsState()
+    val selectedEvidenceVerifications by viewModel.selectedEvidenceVerifications.collectAsState()
+
     val allDiscussions by viewModel.allDiscussions.collectAsState()
     val allDependencies by viewModel.allDependencies.collectAsState()
     val allReviews by viewModel.allReviews.collectAsState()
@@ -188,6 +191,8 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
     var showPersonaSwitcher by remember { mutableStateOf(false) }
     var showWorkBoard by remember { mutableStateOf(false) }
     var showWorkspaceScopeSwitcher by remember { mutableStateOf(false) }
+    var selectedIssueDetail by remember { mutableStateOf<com.example.data.model.RepoIssue?>(null) }
+    var verificationIssueId by remember { mutableStateOf<String?>(null) }
     var selectedWorkspaceScope by remember { mutableStateOf<WorkspaceScopeSelection?>(null) }
 
     LaunchedEffect(activeUser?.id) {
@@ -196,19 +201,25 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                 kind = WorkspaceScopeKind.USER,
                 id = activeUser!!.id,
                 name = activeUser!!.displayName,
-                subtitle = "@${activeUser!!.username} • ${activeUser!!.title}"
+                subtitle = "@${activeUser!!.username} • ${activeUser!!.title}",
             )
         }
     }
 
     val selectedScopeEnterpriseId = when (selectedWorkspaceScope?.kind) {
         WorkspaceScopeKind.ENTERPRISE -> selectedWorkspaceScope?.id
-        WorkspaceScopeKind.ORGANIZATION -> organizations.firstOrNull { it.id == selectedWorkspaceScope?.id }?.enterpriseId
+
+        WorkspaceScopeKind.ORGANIZATION -> organizations.firstOrNull {
+            it.id == selectedWorkspaceScope?.id
+        }?.enterpriseId
+
         WorkspaceScopeKind.TEAM -> {
             val team = teams.firstOrNull { it.id == selectedWorkspaceScope?.id }
             organizations.firstOrNull { it.id == team?.orgId }?.enterpriseId
         }
+
         WorkspaceScopeKind.USER -> users.firstOrNull { it.id == selectedWorkspaceScope?.id }?.enterpriseId
+
         null -> activeUser?.enterpriseId ?: enterprise?.id
     }
 
@@ -216,16 +227,20 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
 
     val scopedOrganizations = when (selectedWorkspaceScope?.kind) {
         WorkspaceScopeKind.ENTERPRISE -> organizations.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.ORGANIZATION -> organizations.filter { it.id == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.TEAM -> {
             val orgId = teams.firstOrNull { it.id == selectedWorkspaceScope?.id }?.orgId
             organizations.filter { it.id == orgId }
         }
+
         WorkspaceScopeKind.USER -> {
             val userId = selectedWorkspaceScope?.id
             val orgIds = allOrgMemberships.filter { it.userId == userId }.map { it.orgId }.toSet()
             organizations.filter { it.id in orgIds }
         }
+
         null -> organizations
     }
 
@@ -234,35 +249,47 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
             val orgIds = organizations.filter { it.enterpriseId == selectedWorkspaceScope?.id }.map { it.id }.toSet()
             teams.filter { it.orgId in orgIds }
         }
+
         WorkspaceScopeKind.ORGANIZATION -> teams.filter { it.orgId == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.TEAM -> teams.filter { it.id == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.USER -> {
             val userId = selectedWorkspaceScope?.id
             val teamIds = allTeamMemberships.filter { it.userId == userId }.map { it.teamId }.toSet()
             teams.filter { it.id in teamIds }
         }
+
         null -> teams
     }
 
     val scopedUsers = when (selectedWorkspaceScope?.kind) {
         WorkspaceScopeKind.ENTERPRISE -> users.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.ORGANIZATION -> {
             val userIds = allOrgMemberships.filter { it.orgId == selectedWorkspaceScope?.id }.map { it.userId }.toSet()
             users.filter { it.id in userIds }
         }
+
         WorkspaceScopeKind.TEAM -> {
-            val userIds = allTeamMemberships.filter { it.teamId == selectedWorkspaceScope?.id }.map { it.userId }.toSet()
+            val userIds = allTeamMemberships.filter {
+                it.teamId == selectedWorkspaceScope?.id
+            }.map { it.userId }.toSet()
             users.filter { it.id in userIds }
         }
+
         WorkspaceScopeKind.USER -> users.filter { it.id == selectedWorkspaceScope?.id }
+
         null -> users
     }
 
     val scopedRepositories = when (selectedWorkspaceScope?.kind) {
         WorkspaceScopeKind.ENTERPRISE -> repositories.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+
         WorkspaceScopeKind.ORGANIZATION -> repositories.filter {
             it.ownerType == OwnerType.ORGANIZATION && it.ownerId == selectedWorkspaceScope?.id
         }
+
         WorkspaceScopeKind.TEAM -> {
             val teamId = selectedWorkspaceScope?.id
             val repoIds = allAccessRules
@@ -271,6 +298,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                 .toSet()
             repositories.filter { it.id in repoIds }
         }
+
         WorkspaceScopeKind.USER -> {
             val userId = selectedWorkspaceScope?.id
             val orgIds = allOrgMemberships.filter { it.userId == userId }.map { it.orgId }.toSet()
@@ -286,6 +314,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                     it.id in grantedRepoIds
             }
         }
+
         null -> repositories
     }
 
@@ -319,20 +348,20 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(30.dp)
                                 .clip(RoundedCornerShape(9.dp))
                                 .background(LavenderPrimary),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Security,
                                 contentDescription = null,
                                 tint = LavenderOnPrimary,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
                         }
                         Column(modifier = Modifier.weight(1f, fill = false)) {
@@ -340,17 +369,17 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                                 text = selectedWorkspaceScope?.name ?: scopedEnterprise?.name ?: "存取治理",
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = (-0.2).sp
+                                    letterSpacing = (-0.2).sp,
                                 ),
                                 color = TextHighEmphasis,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                             Text(
                                 text = selectedWorkspaceScope?.kind?.label ?: "企業",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                                 color = TextMediumEmphasis,
-                                maxLines = 1
+                                maxLines = 1,
                             )
                         }
                     }
@@ -362,12 +391,12 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                             viewModel.selectRepository(null)
                             currentTab = MainNavigationTab.EXPLORE
                         },
-                        modifier = Modifier.testTag("topbar_search_btn")
+                        modifier = Modifier.testTag("topbar_search_btn"),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "搜尋",
-                            tint = TextHighEmphasis
+                            tint = TextHighEmphasis,
                         )
                     }
 
@@ -377,108 +406,107 @@ fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: Collabora
                             meSubTab = MeSubTab.PROFILE
                             viewModel.selectArtifact(null)
                             viewModel.selectRepository(null)
-                            currentTab = MainNavigationTab.ME
+                            currentTab = MainNavigationTab.PROFILE
                         },
-                        modifier = Modifier.testTag("topbar_profile_btn")
+                        modifier = Modifier.testTag("topbar_profile_btn"),
                     ) {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "我的帳號",
-                            tint = if (currentTab == MainNavigationTab.ME) LavenderPrimary else TextHighEmphasis
+                            tint = if (currentTab == MainNavigationTab.PROFILE) LavenderPrimary else TextHighEmphasis,
                         )
                     }
 
                     IconButton(
                         onClick = { showWorkspaceScopeSwitcher = true },
-                        modifier = Modifier.testTag("topbar_scope_switcher_btn")
+                        modifier = Modifier.testTag("topbar_scope_switcher_btn"),
                     ) {
                         Icon(
                             imageVector = Icons.Default.SwapHoriz,
                             contentDescription = "切換企業、組織、團隊或用戶範圍",
-                            tint = LavenderPrimary
+                            tint = LavenderPrimary,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = SophisticatedSurfaceDark,
-                    titleContentColor = TextHighEmphasis
-                )
+                    titleContentColor = TextHighEmphasis,
+                ),
             )
         },
         bottomBar = {
             if (selectedRepo == null && selectedArtifact == null) {
                 Surface(
                     color = SophisticatedSurfaceDark,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
                 ) {
-
-NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) {
-    PrimaryBottomNavigationTabs.forEach { tab ->
-        NavigationBarItem(
-            selected = currentTab == tab,
-            onClick = {
-                viewModel.selectArtifact(null)
-                viewModel.selectRepository(null)
-                currentTab = tab
-            },
-            icon = {
-                val icon = when (tab) {
-                    MainNavigationTab.HOME -> Icons.Default.Home
-                    MainNavigationTab.INBOX -> Icons.Default.Notifications
-                    MainNavigationTab.KANBAN -> Icons.Default.Dashboard
-                    MainNavigationTab.EXPLORE -> Icons.Default.Search
-                    MainNavigationTab.ME -> Icons.Default.AccountCircle
-                }
-                if (tab == MainNavigationTab.INBOX) {
-                    BadgedBox(
-                        badge = {
-                            if (unreadNotificationCount > 0) {
-                                Badge(
-                                    containerColor = LavenderPrimary,
-                                    contentColor = LavenderOnPrimary
-                                ) {
-                                    Text("$unreadNotificationCount")
-                                }
-                            }
+                    NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) {
+                        PrimaryBottomNavigationTabs.forEach { tab ->
+                            NavigationBarItem(
+                                selected = currentTab == tab,
+                                onClick = {
+                                    viewModel.selectArtifact(null)
+                                    viewModel.selectRepository(null)
+                                    currentTab = tab
+                                },
+                                icon = {
+                                    val icon = when (tab) {
+                                        MainNavigationTab.HOME -> Icons.Default.Home
+                                        MainNavigationTab.INBOX -> Icons.Default.Notifications
+                                        MainNavigationTab.WORK -> Icons.Default.Dashboard
+                                        MainNavigationTab.EXPLORE -> Icons.Default.Search
+                                        MainNavigationTab.PROFILE -> Icons.Default.AccountCircle
+                                    }
+                                    if (tab == MainNavigationTab.INBOX) {
+                                        BadgedBox(
+                                            badge = {
+                                                if (unreadNotificationCount > 0) {
+                                                    Badge(
+                                                        containerColor = LavenderPrimary,
+                                                        contentColor = LavenderOnPrimary,
+                                                    ) {
+                                                        Text("$unreadNotificationCount")
+                                                    }
+                                                }
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = tab.bottomNavigationLabel(),
+                                            )
+                                        }
+                                    } else {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = tab.bottomNavigationLabel(),
+                                        )
+                                    }
+                                },
+                                label = {
+                                    Text(
+                                        text = tab.bottomNavigationLabel(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = LavenderOnPrimary,
+                                    selectedTextColor = LavenderPrimary,
+                                    unselectedIconColor = TextMediumEmphasis,
+                                    unselectedTextColor = TextMediumEmphasis,
+                                    indicatorColor = LavenderPrimary,
+                                ),
+                                modifier = Modifier.testTag(tab.bottomNavigationTestTag()),
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = tab.bottomNavigationLabel()
-                        )
                     }
-                } else {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = tab.bottomNavigationLabel()
-                    )
-                }
-            },
-            label = {
-                Text(
-                    text = tab.bottomNavigationLabel(),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = LavenderOnPrimary,
-                selectedTextColor = LavenderPrimary,
-                unselectedIconColor = TextMediumEmphasis,
-                unselectedTextColor = TextMediumEmphasis,
-                indicatorColor = LavenderPrimary
-            ),
-            modifier = Modifier.testTag(tab.bottomNavigationTestTag())
-        )
-    }
-}
                 }
             }
-        }
+        },
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
         ) {
             when {
                 selectedArtifact != null && selectedRepo != null -> {
@@ -507,12 +535,12 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                     actor = activeUser!!,
                                     repo = selectedRepo!!,
                                     artifact = selectedArtifact,
-                                    action = action
+                                    action = action,
                                 )
                             }
                         },
                         simulationResult = simulationResult,
-                        onClearSimulation = { viewModel.clearSimulationResult() }
+                        onClearSimulation = { viewModel.clearSimulationResult() },
                     )
                 }
 
@@ -533,6 +561,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         allTeamMemberships = allTeamMemberships,
                         allAuditLogs = auditLogs,
                         activeUser = activeUser,
+                        onNavigateToIssue = { selectedIssueDetail = it },
                         onBack = {
                             showWorkBoard = false
                             viewModel.selectRepository(null)
@@ -548,7 +577,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                 type = type,
                                 summary = summary,
                                 content = content,
-                                onComplete = callback
+                                onComplete = callback,
                             )
                         },
                         onAddAccessRule = { granteeType, granteeId, granteeName, role ->
@@ -557,7 +586,19 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         onRemoveAccessRule = { rule ->
                             viewModel.removeRepoAccessRule(rule)
                         },
-                        onCreateIssue = { title, desc, priority, assigneeType, assigneeId, assigneeName, linkedArtifactId, linkedArtifactTitle, parentIssueId, labels, callback ->
+                        onCreateIssue = {
+                                title,
+                                desc,
+                                priority,
+                                assigneeType,
+                                assigneeId,
+                                assigneeName,
+                                linkedArtifactId,
+                                linkedArtifactTitle,
+                                parentIssueId,
+                                labels,
+                                callback,
+                            ->
                             viewModel.createIssue(
                                 repoId = selectedRepo!!.id,
                                 title = title,
@@ -570,7 +611,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                 linkedArtifactTitle = linkedArtifactTitle,
                                 parentIssueId = parentIssueId,
                                 labels = labels,
-                                onSuccess = callback
+                                onSuccess = callback,
                             )
                         },
                         onLinkParentIssue = { issueId, parentIssueId, callback ->
@@ -603,7 +644,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                 title = title,
                                 category = category,
                                 body = body,
-                                onSuccess = callback
+                                onSuccess = callback,
                             )
                         },
                         onAddDiscussionComment = { discussionId, content, callback ->
@@ -623,7 +664,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         },
                         onLoadDiscussionComments = { discussionId ->
                             viewModel.loadDiscussionComments(discussionId)
-                        }
+                        },
                     )
                 }
 
@@ -664,20 +705,25 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                     currentTab = MainNavigationTab.EXPLORE
                                 },
                                 onNavigateToMe = {
-                                    currentTab = MainNavigationTab.ME
+                                    currentTab = MainNavigationTab.PROFILE
                                 },
                                 onSwitchPersonaClick = {
                                     showPersonaSwitcher = true
-                                }
+                                },
                             )
                         }
 
-                        MainNavigationTab.KANBAN -> {
+                        MainNavigationTab.WORK -> {
                             KanbanBoardScreen(
                                 repositories = scopedRepositories,
                                 allIssues = scopedIssues,
-                                onUpdateIssueStatus = { issueId, status -> viewModel.updateIssueStatus(issueId, status) },
-                                onOpenRepository = { repo -> viewModel.selectRepository(repo) }
+                                onUpdateIssueStatus = { issueId, status ->
+                                    viewModel.updateIssueStatus(
+                                        issueId,
+                                        status,
+                                    )
+                                },
+                                onOpenRepository = { repo -> viewModel.selectRepository(repo) },
                             )
                         }
 
@@ -694,39 +740,80 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                 savedTargets = savedTargets,
                                 onOpenTarget = { target ->
                                     when (target) {
-                                        is CollaborationTarget.Repository -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
+                                        is CollaborationTarget.Repository -> repositories.firstOrNull {
+                                            it.id ==
+                                                target.repositoryId
+                                        }?.let(
+                                            viewModel::selectRepository,
+                                        )
+
                                         is CollaborationTarget.Artifact -> {
                                             val repo = repositories.firstOrNull { it.id == target.repositoryId }
-                                            val artifact = allArtifacts.firstOrNull { it.id == target.artifactId && it.repoId == target.repositoryId }
+                                            val artifact = allArtifacts.firstOrNull {
+                                                it.id == target.artifactId &&
+                                                    it.repoId == target.repositoryId
+                                            }
                                             if (repo != null && artifact != null) {
                                                 viewModel.selectRepository(repo)
                                                 viewModel.selectArtifact(artifact)
                                             }
                                         }
-                                        is CollaborationTarget.Issue -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
-                                        is CollaborationTarget.Discussion -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
+
+                                        is CollaborationTarget.Issue -> repositories.firstOrNull {
+                                            it.id ==
+                                                target.repositoryId
+                                        }?.let(
+                                            viewModel::selectRepository,
+                                        )
+
+                                        is CollaborationTarget.Discussion -> repositories.firstOrNull {
+                                            it.id ==
+                                                target.repositoryId
+                                        }?.let(
+                                            viewModel::selectRepository,
+                                        )
+
                                         is CollaborationTarget.Organization -> {
                                             organizations.firstOrNull { it.id == target.organizationId }?.let { org ->
-                                                selectedWorkspaceScope = WorkspaceScopeSelection(WorkspaceScopeKind.ORGANIZATION, org.id, org.name, org.description)
+                                                selectedWorkspaceScope = WorkspaceScopeSelection(
+                                                    WorkspaceScopeKind.ORGANIZATION,
+                                                    org.id,
+                                                    org.name,
+                                                    org.description,
+                                                )
                                                 currentTab = MainNavigationTab.HOME
                                             }
                                         }
+
                                         is CollaborationTarget.Team -> {
                                             teams.firstOrNull { it.id == target.teamId }?.let { team ->
-                                                selectedWorkspaceScope = WorkspaceScopeSelection(WorkspaceScopeKind.TEAM, team.id, team.name, team.description)
+                                                selectedWorkspaceScope = WorkspaceScopeSelection(
+                                                    WorkspaceScopeKind.TEAM,
+                                                    team.id,
+                                                    team.name,
+                                                    team.description,
+                                                )
                                                 currentTab = MainNavigationTab.HOME
                                             }
                                         }
+
                                         is CollaborationTarget.UserProfile -> {
                                             users.firstOrNull { it.id == target.userId }?.let { profile ->
                                                 viewModel.selectProfileUser(profile)
                                                 meSubTab = MeSubTab.PROFILE
-                                                currentTab = MainNavigationTab.ME
+                                                currentTab = MainNavigationTab.PROFILE
                                             }
                                         }
                                     }
                                 },
-                                onToggleSaved = { target -> activeUser?.let { experienceViewModel.toggleSaved(it.id, target) } }
+                                onToggleSaved = { target ->
+                                    activeUser?.let {
+                                        experienceViewModel.toggleSaved(
+                                            it.id,
+                                            target,
+                                        )
+                                    }
+                                },
                             )
                         }
 
@@ -749,17 +836,17 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                 },
                                 onNavigateToOrg = { orgId ->
                                     meSubTab = MeSubTab.ORGS_AND_TEAMS
-                                    currentTab = MainNavigationTab.ME
+                                    currentTab = MainNavigationTab.PROFILE
                                 },
                                 onNavigateToUserProfile = { user ->
                                     viewModel.selectProfileUser(user)
                                     meSubTab = MeSubTab.PROFILE
-                                    currentTab = MainNavigationTab.ME
-                                }
+                                    currentTab = MainNavigationTab.PROFILE
+                                },
                             )
                         }
 
-                        MainNavigationTab.ME -> {
+                        MainNavigationTab.PROFILE -> {
                             val currentActiveUser = activeUser
                             val profile = inspectedProfileUser ?: currentActiveUser
                             if (profile != null && currentActiveUser != null) {
@@ -774,98 +861,159 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                     onToggleFollow = { experienceViewModel.toggleFollow(currentActiveUser.id, it) },
                                     onSyncNow = experienceViewModel::syncNow,
                                     governanceContent = {
-
-                            MeScreen(
-                                currentSubTab = meSubTab,
-                                onSubTabChange = { meSubTab = it },
-                                activeUser = activeUser,
-                                inspectedProfileUser = inspectedProfileUser,
-                                allUsers = users,
-                                enterprise = enterprise,
-                                enterprises = enterprises,
-                                organizations = organizations,
-                                teams = teams,
-                                repositories = repositories,
-                                allAccessRules = allAccessRules,
-                                allOrgMemberships = allOrgMemberships,
-                                allTeamMemberships = allTeamMemberships,
-                                allArtifacts = allArtifacts,
-                                profileUserArtifacts = profileUserArtifacts,
-                                profileUserReviews = profileUserReviews,
-                                profileUserApprovals = profileUserApprovals,
-                                profileUserAuditLogs = profileUserAuditLogs,
-                                profileUserIssues = profileUserIssues,
-                                profileUserDiscussions = profileUserDiscussions,
-                                auditLogs = auditLogs,
-                                simulationResult = simulationResult,
-                                onSelectUserToInspect = { u ->
-                                    viewModel.selectProfileUser(u)
-                                    meSubTab = MeSubTab.PROFILE
-                                },
-                                onSwitchActivePersona = { u ->
-                                    viewModel.switchActiveUser(u)
-                                },
-                                onSelectRepository = { repo ->
-                                    viewModel.selectRepository(repo)
-                                },
-                                onSelectArtifact = { art ->
-                                    val repo = repositories.firstOrNull { it.id == art.repoId }
-                                    if (repo != null) {
-                                        viewModel.selectRepository(repo)
-                                        viewModel.selectArtifact(art)
-                                    }
-                                },
-                                onUpdateProfile = { target, displayName, title, bio, loc, pronouns, avatarColor, notifPrefs ->
-                                    viewModel.updateUserProfile(
-                                        targetUser = target,
-                                        displayName = displayName,
-                                        title = title,
-                                        bio = bio,
-                                        location = loc,
-                                        pronouns = pronouns,
-                                        avatarColorHex = avatarColor,
-                                        notificationPreferences = notifPrefs
-                                    )
-                                },
-                                onCreateEnterprise = { name, slug, desc, dualApp, allowUserRepos, revGate, segDuties ->
-                                    viewModel.createEnterprise(name, slug, desc, dualApp, allowUserRepos, revGate, segDuties)
-                                },
-                                onUpdateEnterprisePolicies = { updated ->
-                                    viewModel.updateEnterpriseSecurityPolicies(updated)
-                                },
-                                onCreateEnterpriseUser = { entId, username, displayName, email, title, isAdmin, avatarColor ->
-                                    viewModel.createEnterpriseUser(entId, username, displayName, email, title, isAdmin, avatarColor)
-                                },
-                                onCreateOrganization = { entId, name, slug, desc, colorHex, defaultRole, ownerId ->
-                                    viewModel.createOrganization(entId, name, slug, desc, colorHex, defaultRole, ownerId)
-                                },
-                                onUpdateOrganization = { updated ->
-                                    viewModel.updateOrganization(updated)
-                                },
-                                onAddOrgMember = { orgId, userId, role ->
-                                    viewModel.addOrgMember(orgId, userId, role)
-                                },
-                                onRemoveOrgMember = { orgId, userId ->
-                                    viewModel.removeOrgMember(orgId, userId)
-                                },
-                                onCreateTeam = { orgId, name, slug, desc, parentTeamId ->
-                                    viewModel.createTeam(orgId, name, slug, desc, parentTeamId)
-                                },
-                                onAddTeamMember = { teamId, userId, role ->
-                                    viewModel.addTeamMember(teamId, userId, role)
-                                },
-                                onRemoveTeamMember = { teamId, userId ->
-                                    viewModel.removeTeamMember(teamId, userId)
-                                },
-                                onRunPolicySimulation = { actor, repo, artifact, action ->
-                                    viewModel.runPolicySimulation(actor, repo, artifact, action)
-                                },
-                                onClearPolicySimulation = { viewModel.clearSimulationResult() },
-                                onUpdatePolicySettings = { dualApp, allowUserRepos, revGate, segDuties ->
-                                    viewModel.updateEnterprisePolicies(dualApp, allowUserRepos, revGate, segDuties)
-                                }
-                            )
-                                    }
+                                        MeScreen(
+                                            currentSubTab = meSubTab,
+                                            onSubTabChange = { meSubTab = it },
+                                            activeUser = activeUser,
+                                            inspectedProfileUser = inspectedProfileUser,
+                                            allUsers = users,
+                                            enterprise = enterprise,
+                                            enterprises = enterprises,
+                                            organizations = organizations,
+                                            teams = teams,
+                                            repositories = repositories,
+                                            allAccessRules = allAccessRules,
+                                            allOrgMemberships = allOrgMemberships,
+                                            allTeamMemberships = allTeamMemberships,
+                                            allArtifacts = allArtifacts,
+                                            profileUserArtifacts = profileUserArtifacts,
+                                            profileUserReviews = profileUserReviews,
+                                            profileUserApprovals = profileUserApprovals,
+                                            profileUserAuditLogs = profileUserAuditLogs,
+                                            profileUserIssues = profileUserIssues,
+                                            profileUserDiscussions = profileUserDiscussions,
+                                            auditLogs = auditLogs,
+                                            simulationResult = simulationResult,
+                                            onSelectUserToInspect = { u ->
+                                                viewModel.selectProfileUser(u)
+                                                meSubTab = MeSubTab.PROFILE
+                                            },
+                                            onSwitchActivePersona = { u ->
+                                                viewModel.switchActiveUser(u)
+                                            },
+                                            onSelectRepository = { repo ->
+                                                viewModel.selectRepository(repo)
+                                            },
+                                            onSelectArtifact = { art ->
+                                                val repo = repositories.firstOrNull { it.id == art.repoId }
+                                                if (repo != null) {
+                                                    viewModel.selectRepository(repo)
+                                                    viewModel.selectArtifact(art)
+                                                }
+                                            },
+                                            onUpdateProfile = {
+                                                    target,
+                                                    displayName,
+                                                    title,
+                                                    bio,
+                                                    loc,
+                                                    pronouns,
+                                                    avatarColor,
+                                                    notifPrefs,
+                                                ->
+                                                viewModel.updateUserProfile(
+                                                    targetUser = target,
+                                                    displayName = displayName,
+                                                    title = title,
+                                                    bio = bio,
+                                                    location = loc,
+                                                    pronouns = pronouns,
+                                                    avatarColorHex = avatarColor,
+                                                    notificationPreferences = notifPrefs,
+                                                )
+                                            },
+                                            onCreateEnterprise = {
+                                                    name,
+                                                    slug,
+                                                    desc,
+                                                    dualApp,
+                                                    allowUserRepos,
+                                                    revGate,
+                                                    segDuties,
+                                                ->
+                                                viewModel.createEnterprise(
+                                                    name,
+                                                    slug,
+                                                    desc,
+                                                    dualApp,
+                                                    allowUserRepos,
+                                                    revGate,
+                                                    segDuties,
+                                                )
+                                            },
+                                            onUpdateEnterprisePolicies = { updated ->
+                                                viewModel.updateEnterpriseSecurityPolicies(updated)
+                                            },
+                                            onCreateEnterpriseUser = {
+                                                    entId,
+                                                    username,
+                                                    displayName,
+                                                    email,
+                                                    title,
+                                                    isAdmin,
+                                                    avatarColor,
+                                                ->
+                                                viewModel.createEnterpriseUser(
+                                                    entId,
+                                                    username,
+                                                    displayName,
+                                                    email,
+                                                    title,
+                                                    isAdmin,
+                                                    avatarColor,
+                                                )
+                                            },
+                                            onCreateOrganization = {
+                                                    entId,
+                                                    name,
+                                                    slug,
+                                                    desc,
+                                                    colorHex,
+                                                    defaultRole,
+                                                    ownerId,
+                                                ->
+                                                viewModel.createOrganization(
+                                                    entId,
+                                                    name,
+                                                    slug,
+                                                    desc,
+                                                    colorHex,
+                                                    defaultRole,
+                                                    ownerId,
+                                                )
+                                            },
+                                            onUpdateOrganization = { updated ->
+                                                viewModel.updateOrganization(updated)
+                                            },
+                                            onAddOrgMember = { orgId, userId, role ->
+                                                viewModel.addOrgMember(orgId, userId, role)
+                                            },
+                                            onRemoveOrgMember = { orgId, userId ->
+                                                viewModel.removeOrgMember(orgId, userId)
+                                            },
+                                            onCreateTeam = { orgId, name, slug, desc, parentTeamId ->
+                                                viewModel.createTeam(orgId, name, slug, desc, parentTeamId)
+                                            },
+                                            onAddTeamMember = { teamId, userId, role ->
+                                                viewModel.addTeamMember(teamId, userId, role)
+                                            },
+                                            onRemoveTeamMember = { teamId, userId ->
+                                                viewModel.removeTeamMember(teamId, userId)
+                                            },
+                                            onRunPolicySimulation = { actor, repo, artifact, action ->
+                                                viewModel.runPolicySimulation(actor, repo, artifact, action)
+                                            },
+                                            onClearPolicySimulation = { viewModel.clearSimulationResult() },
+                                            onUpdatePolicySettings = { dualApp, allowUserRepos, revGate, segDuties ->
+                                                viewModel.updateEnterprisePolicies(
+                                                    dualApp,
+                                                    allowUserRepos,
+                                                    revGate,
+                                                    segDuties,
+                                                )
+                                            },
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -875,6 +1023,51 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
         }
     }
 
+    LaunchedEffect(selectedIssueDetail?.id) {
+        if (selectedIssueDetail != null) {
+            viewModel.loadIssueDetailData(selectedIssueDetail!!.id)
+        }
+    }
+
+    LaunchedEffect(verificationIssueId) {
+        if (verificationIssueId != null) {
+            viewModel.loadIssueDetailData(verificationIssueId!!)
+            val evidence = selectedIssueEvidence.firstOrNull()
+            if (evidence != null) {
+                viewModel.loadEvidenceVerifications(evidence.id)
+            }
+        }
+    }
+    if (verificationIssueId != null) {
+        val verIssue = allIssues.firstOrNull { it.id == verificationIssueId }
+        if (verIssue != null) {
+            VerificationScreen(
+                evidenceList = selectedIssueEvidence,
+                verifications = selectedEvidenceVerifications,
+                onVerifySubmit = { isAccepted, comment ->
+                    val evidenceId = selectedIssueEvidence.firstOrNull()?.id ?: "evd_${verIssue.id}"
+                    viewModel.submitVerification(evidenceId, verIssue.id, isAccepted, comment, activeUser)
+                    verificationIssueId = null
+                    selectedIssueDetail = null
+                },
+                issue = verIssue,
+                onBack = { verificationIssueId = null },
+            )
+        }
+    } else if (selectedIssueDetail != null) {
+        WorkItemDetailScreen(
+            evidenceList = selectedIssueEvidence,
+            checklist = selectedIssueChecklist,
+            onToggleChecklist = { id, done -> viewModel.toggleChecklistItem(id, done, activeUser) },
+            onAddChecklistItem = { title -> viewModel.addChecklistItem(selectedIssueDetail!!.id, title, activeUser) },
+            onAddEvidence = { desc -> viewModel.addWorkEvidence(selectedIssueDetail!!.id, desc, activeUser) },
+            issue = selectedIssueDetail!!,
+            activeUser = activeUser,
+            onBack = { selectedIssueDetail = null },
+            onNavigateToVerification = { issueId -> verificationIssueId = issueId },
+        )
+    }
+
     if (showWorkBoard && selectedRepo != null && selectedArtifact == null) {
         RepositoryWorkBoardDialog(
             repo = selectedRepo!!,
@@ -882,7 +1075,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
             onUpdateIssueStatus = { issueId, newStatus ->
                 viewModel.updateIssueStatus(issueId, newStatus)
             },
-            onDismiss = { showWorkBoard = false }
+            onDismiss = { showWorkBoard = false },
         )
     }
 
@@ -893,7 +1086,7 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
             onSelectUser = { user ->
                 viewModel.switchActiveUser(user)
             },
-            onDismiss = { showPersonaSwitcher = false }
+            onDismiss = { showPersonaSwitcher = false },
         )
     }
 
@@ -910,23 +1103,16 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                 viewModel.selectRepository(null)
                 currentTab = MainNavigationTab.HOME
             },
-            onDismiss = { showWorkspaceScopeSwitcher = false }
+            onDismiss = { showWorkspaceScopeSwitcher = false },
         )
     }
 }
 
 @Composable
-fun ActivePersonaPill(
-    user: User?,
-    onClick: () -> Unit
-) {
+fun ActivePersonaPill(user: User?, onClick: () -> Unit) {
     if (user == null) return
 
-    val avatarColor = try {
-        Color(android.graphics.Color.parseColor(user.avatarColorHex))
-    } catch (e: Exception) {
-        LavenderPrimary
-    }
+    val avatarColor = com.example.ui.theme.parseHexColor(user.avatarColorHex)
 
     Surface(
         onClick = onClick,
@@ -935,12 +1121,12 @@ fun ActivePersonaPill(
         border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
         modifier = Modifier
             .padding(end = 8.dp)
-            .testTag("active_persona_trigger")
+            .testTag("active_persona_trigger"),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
                 modifier = Modifier
@@ -948,12 +1134,12 @@ fun ActivePersonaPill(
                     .clip(CircleShape)
                     .background(LavenderPrimary.copy(alpha = 0.2f))
                     .border(1.dp, LavenderPrimary.copy(alpha = 0.5f), CircleShape),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = user.displayName.take(1),
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = LavenderPrimary
+                    color = LavenderPrimary,
                 )
             }
 
@@ -961,12 +1147,12 @@ fun ActivePersonaPill(
                 Text(
                     text = user.displayName,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextHighEmphasis
+                    color = TextHighEmphasis,
                 )
                 Text(
                     text = user.title.take(18),
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                    color = LavenderSubtle
+                    color = LavenderSubtle,
                 )
             }
 
@@ -974,7 +1160,7 @@ fun ActivePersonaPill(
                 imageVector = Icons.Default.SwapHoriz,
                 contentDescription = "切換身分",
                 tint = LavenderPrimary,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
     }

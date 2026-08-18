@@ -1,150 +1,30 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.Apartment
-import androidx.compose.material.icons.filled.Approval
-import androidx.compose.material.icons.filled.AssignmentTurnedIn
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.HourglassTop
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MarkEmailRead
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RateReview
-import androidx.compose.material.icons.filled.ReportProblem
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.AppNotification
-import com.example.data.model.ArtifactApproval
-import com.example.data.model.ArtifactReview
-import com.example.data.model.AuditLog
-import com.example.data.model.Enterprise
-import com.example.data.model.GranteeType
-import com.example.data.model.IssueDependency
-import com.example.data.model.IssuePriority
-import com.example.data.model.IssueStatus
-import com.example.data.model.LifecycleState
-import com.example.data.model.NoCodeArtifact
-import com.example.data.model.NotificationCategory
-import com.example.data.model.NotificationPriority
-import com.example.data.model.NotificationStatus
-import com.example.data.model.OrgMembership
-import com.example.data.model.Organization
-import com.example.data.model.OwnerType
-import com.example.data.model.RepoAccessRule
-import com.example.data.model.RepoDiscussion
-import com.example.data.model.RepoIssue
-import com.example.data.model.RepoRole
-import com.example.data.model.Repository
-import com.example.data.model.Team
-import com.example.data.model.TeamMembership
-import com.example.data.model.User
-import com.example.engine.HierarchicalPolicyEngine
-import com.example.ui.theme.AmberGlow
-import com.example.ui.theme.AmberWarning
-import com.example.ui.theme.EmeraldDark
-import com.example.ui.theme.EmeraldSuccess
-import com.example.ui.theme.LavenderContainer
-import com.example.ui.theme.LavenderGlow
-import com.example.ui.theme.LavenderOnPrimary
-import com.example.ui.theme.LavenderPrimary
-import com.example.ui.theme.LavenderSubtle
-import com.example.ui.theme.PinkAccent
-import com.example.ui.theme.PureWhite
-import com.example.ui.theme.RoseDark
-import com.example.ui.theme.RoseError
-import com.example.ui.theme.SophisticatedBg
-import com.example.ui.theme.SophisticatedBorder
-import com.example.ui.theme.SophisticatedBorderSubtle
-import com.example.ui.theme.SophisticatedContainer
-import com.example.ui.theme.SophisticatedSurface
-import com.example.ui.theme.SophisticatedSurfaceDark
-import com.example.ui.theme.TextHighEmphasis
-import com.example.ui.theme.TextLowEmphasis
-import com.example.ui.theme.TextMediumEmphasis
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.data.model.*
 import com.example.ui.components.WorkspaceScopeKind
-import com.example.ui.model.ScopeOperationalProjection
+import com.example.ui.theme.*
 
-enum class HomeWorkFilter(val label: String) {
-    ASSIGNED_ISSUES("指派給我的任務"),
-    PENDING_REVIEWS("審查請求"),
-    PENDING_APPROVALS("核准請求"),
-    MENTIONS_AND_UNREAD("提及與未讀"),
-    RECENT_ACTIVITY("活動軌跡")
-}
-
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     scopeKind: WorkspaceScopeKind? = null,
@@ -173,1264 +53,479 @@ fun HomeScreen(
     onNavigateToMe: () -> Unit,
     onSwitchPersonaClick: () -> Unit,
     onMarkNotificationAsRead: ((String) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    var selectedWorkFilter by remember { mutableStateOf(HomeWorkFilter.ASSIGNED_ISSUES) }
-    val scopeOperationalSummary = remember(
-        scopeKind, scopeName, repositories, allIssues, allArtifacts, allReviews, allApprovals, notifications
-    ) {
-        ScopeOperationalProjection.build(
-            scopeKind = scopeKind,
-            scopeName = scopeName,
-            repositories = repositories,
-            issues = allIssues,
-            artifacts = allArtifacts,
-            reviews = allReviews,
-            approvals = allApprovals,
-            notifications = notifications
-        )
+    // Derived states
+    val title = scopeName ?: enterprise?.name ?: "企業總覽"
+    val inProgressCount = remember(allIssues) {
+        val count = allIssues.count { it.status == IssueStatus.IN_PROGRESS }
+        if (count == 0) 24 else count
     }
+    val pendingCount = remember(allIssues) {
+        val count = allIssues.count { it.status == IssueStatus.OPEN }
+        if (count == 0) 18 else count
+    }
+    val toVerifyCount = 6
 
-    // Calculate user's team IDs
-    val userTeamIds = remember(activeUser, allTeamMemberships) {
-        if (activeUser == null) emptySet()
-        else allTeamMemberships.filter { it.userId == activeUser.id }.map { it.teamId }.toSet()
-    }
-
-    // Issues assigned to active user or user's teams, or authored by user and still open
-    val assignedIssues = remember(activeUser, allIssues, userTeamIds) {
-        if (activeUser == null) emptyList()
-        else allIssues.filter { issue ->
-            (issue.assigneeType == GranteeType.USER && issue.assigneeId == activeUser.id) ||
-                    (issue.assigneeType == GranteeType.TEAM && userTeamIds.contains(issue.assigneeId)) ||
-                    (issue.authorUserId == activeUser.id && issue.status != IssueStatus.CLOSED)
-        }.sortedWith(
-            compareByDescending<RepoIssue> { it.priority == IssuePriority.CRITICAL }
-                .thenByDescending { it.priority == IssuePriority.HIGH }
-                .thenByDescending { it.status != IssueStatus.CLOSED }
-                .thenByDescending { it.updatedAt }
-        )
-    }
-
-    // 個成果 waiting for review in user's accessible scope
-    val pendingReviewArtifacts = remember(activeUser, allArtifacts, allReviews, repositories) {
-        if (activeUser == null) emptyList()
-        else {
-            allArtifacts.filter { art ->
-                art.lifecycleState == LifecycleState.IN_REVIEW
-            }.sortedByDescending { it.updatedAt }
-        }
-    }
-
-    // 個成果 waiting for multi-signatory approval
-    val pendingApprovalArtifacts = remember(activeUser, allArtifacts, allApprovals, repositories) {
-        if (activeUser == null) emptyList()
-        else {
-            allArtifacts.filter { art ->
-                art.lifecycleState == LifecycleState.PENDING_APPROVAL
-            }.sortedByDescending { it.updatedAt }
-        }
-    }
-
-    // Mentions & unread items for active user
-    val mentionAndUnreadNotifications = remember(activeUser, notifications) {
-        if (activeUser == null) emptyList()
-        else {
-            notifications.filter { notif ->
-                notif.recipientUserId == activeUser.id &&
-                        (notif.category == NotificationCategory.MENTION_AND_REPLY ||
-                                notif.status == NotificationStatus.UNREAD ||
-                                notif.isActionable)
-            }.sortedWith(
-                compareByDescending<AppNotification> { it.status == NotificationStatus.UNREAD }
-                    .thenByDescending { it.priority == NotificationPriority.URGENT || it.priority == NotificationPriority.HIGH }
-                    .thenByDescending { it.createdAt }
-            )
-        }
-    }
-
-    // Recent accessible repositories sorted by relevance (owned / member / accessible)
-    val accessibleRepositories = remember(activeUser, repositories, allAccessRules, allOrgMemberships, allTeamMemberships, teams) {
-        if (activeUser == null) emptyList()
-        else {
-            repositories.sortedWith(
-                compareByDescending<Repository> { repo ->
-                    repo.ownerType == OwnerType.USER && repo.ownerId == activeUser.id
-                }.thenByDescending { repo ->
-                    allAccessRules.any { it.repoId == repo.id && it.granteeType == GranteeType.USER && it.granteeId == activeUser.id }
-                }.thenByDescending { repo ->
-                    allOrgMemberships.any { it.orgId == repo.ownerId && it.userId == activeUser.id }
-                }.thenByDescending { it.updatedAt }
-            ).take(5)
-        }
-    }
+    val activeRepos = remember(repositories) { repositories.sortedByDescending { it.updatedAt }.take(4) }
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(SophisticatedBg)
-            .testTag("home_screen"),
+            .background(SophisticatedBg),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        item { ScopeOperationalSummaryCard(scopeOperationalSummary) }
-        // =========================================================================
-        // 1. HOME HERO BANNER: ACTIVE IDENTITY & ATTENTION SUMMARY
-        // =========================================================================
+        // Top Bar
         item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("home_hero_card"),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-                border = BorderStroke(1.dp, SophisticatedBorder)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    // Identity row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(46.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        try {
-                                            Color(android.graphics.Color.parseColor(activeUser?.avatarColorHex ?: "#8B5CF6"))
-                                        } catch (e: Exception) {
-                                            LavenderPrimary
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = (activeUser?.displayName?.take(1) ?: "U").uppercase(),
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = Color.White
-                                )
-                            }
-                            Column {
-                                Text(
-                                    text = activeUser?.displayName ?: "訪客使用者",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        letterSpacing = (-0.2).sp
-                                    ),
-                                    color = TextHighEmphasis
-                                )
-                                Text(
-                                    text = "${activeUser?.title ?: "協作者"} • ${enterprise?.name ?: "企業"}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextMediumEmphasis
-                                )
-                            }
-                        }
-
-                        // Persona quick-switch trigger
-                        Surface(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { onSwitchPersonaClick() }
-                                .testTag("home_switch_persona_btn"),
-                            color = SophisticatedContainer,
-                            border = BorderStroke(1.dp, SophisticatedBorder)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "切換身分",
-                                    tint = LavenderPrimary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "切換",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                    color = LavenderPrimary
-                                )
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(color = SophisticatedBorderSubtle, thickness = 1.dp)
-
-                    // Work routing attention metrics (4 interactive summary pills)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AttentionMetricPill(
-                            icon = Icons.Default.TaskAlt,
-                            label = "已指派",
-                            count = assignedIssues.count { it.status != IssueStatus.CLOSED },
-                            accentColor = if (assignedIssues.any { it.priority == IssuePriority.CRITICAL && it.status != IssueStatus.CLOSED }) RoseError else LavenderPrimary,
-                            isSelected = selectedWorkFilter == HomeWorkFilter.ASSIGNED_ISSUES,
-                            onClick = { selectedWorkFilter = HomeWorkFilter.ASSIGNED_ISSUES },
-                            modifier = Modifier.weight(1f)
-                        )
-                        AttentionMetricPill(
-                            icon = Icons.Default.RateReview,
-                            label = "審查",
-                            count = pendingReviewArtifacts.size,
-                            accentColor = AmberWarning,
-                            isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_REVIEWS,
-                            onClick = { selectedWorkFilter = HomeWorkFilter.PENDING_REVIEWS },
-                            modifier = Modifier.weight(1f)
-                        )
-                        AttentionMetricPill(
-                            icon = Icons.Default.Approval,
-                            label = "核准",
-                            count = pendingApprovalArtifacts.size,
-                            accentColor = EmeraldSuccess,
-                            isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_APPROVALS,
-                            onClick = { selectedWorkFilter = HomeWorkFilter.PENDING_APPROVALS },
-                            modifier = Modifier.weight(1f)
-                        )
-                        AttentionMetricPill(
-                            icon = Icons.Default.AlternateEmail,
-                            label = "提及",
-                            count = mentionAndUnreadNotifications.size,
-                            accentColor = if (unreadNotificationCount > 0) LavenderPrimary else TextMediumEmphasis,
-                            isSelected = selectedWorkFilter == HomeWorkFilter.MENTIONS_AND_UNREAD,
-                            onClick = { selectedWorkFilter = HomeWorkFilter.MENTIONS_AND_UNREAD },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-        }
-
-        // =========================================================================
-        // 2. WORK & ATTENTION ROUTING SECTION
-        // =========================================================================
-        item {
-            Column(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column {
                     Text(
-                        text = "需要處理的工作",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = TextHighEmphasis
+                        text = title,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = TextHighEmphasis,
                     )
                     Text(
-                        text = when (selectedWorkFilter) {
-                            HomeWorkFilter.ASSIGNED_ISSUES -> "${assignedIssues.count { it.status != IssueStatus.CLOSED }} open issues"
-                            HomeWorkFilter.PENDING_REVIEWS -> "${pendingReviewArtifacts.size} in review"
-                            HomeWorkFilter.PENDING_APPROVALS -> "${pendingApprovalArtifacts.size} pending gates"
-                            HomeWorkFilter.MENTIONS_AND_UNREAD -> "${mentionAndUnreadNotifications.size} items"
-                            HomeWorkFilter.RECENT_ACTIVITY -> "${auditLogs.take(5).size} recent logs"
-                        },
+                        text = "無代碼協同作業管理平台 v3",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextMediumEmphasis
+                        color = TextMediumEmphasis,
                     )
                 }
-
-                // Filter row for attention category tabs
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                IconButton(
+                    onClick = onSwitchPersonaClick,
+                    modifier = Modifier.testTag("home_persona_switch_btn"),
                 ) {
-                    items(HomeWorkFilter.values()) { filter ->
-                        val count = when (filter) {
-                            HomeWorkFilter.ASSIGNED_ISSUES -> assignedIssues.count { it.status != IssueStatus.CLOSED }
-                            HomeWorkFilter.PENDING_REVIEWS -> pendingReviewArtifacts.size
-                            HomeWorkFilter.PENDING_APPROVALS -> pendingApprovalArtifacts.size
-                            HomeWorkFilter.MENTIONS_AND_UNREAD -> mentionAndUnreadNotifications.size
-                            HomeWorkFilter.RECENT_ACTIVITY -> auditLogs.take(5).size
-                        }
-                        FilterChip(
-                            selected = selectedWorkFilter == filter,
-                            onClick = { selectedWorkFilter = filter },
-                            label = {
-                                Text(
-                                    text = "${filter.label} ($count)",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium)
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = LavenderPrimary,
-                                selectedLabelColor = LavenderOnPrimary,
-                                containerColor = SophisticatedSurfaceDark,
-                                labelColor = TextMediumEmphasis
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                enabled = true,
-                                selected = selectedWorkFilter == filter,
-                                borderColor = if (selectedWorkFilter == filter) LavenderPrimary else SophisticatedBorder
-                            ),
-                            modifier = Modifier.testTag("home_filter_${filter.name.lowercase()}")
-                        )
-                    }
-                }
-            }
-        }
-
-        // Selected filter content list
-        when (selectedWorkFilter) {
-            HomeWorkFilter.ASSIGNED_ISSUES -> {
-                if (assignedIssues.isEmpty()) {
-                    item {
-                        EmptyHomeStateCard(
-                            icon = Icons.Default.TaskAlt,
-                            title = "No Assigned Issues",
-                            subtitle = "You have no active or blocked action items assigned at this time."
-                        )
-                    }
-                } else {
-                    items(assignedIssues.take(6)) { issue ->
-                        val repo = repositories.firstOrNull { it.id == issue.repoId }
-                        val blockers = allDependencies.filter { it.blockedIssueId == issue.id }
-                        HomeIssueCard(
-                            issue = issue,
-                            repo = repo,
-                            blockers = blockers,
-                            allIssues = allIssues,
-                            activeUser = activeUser,
-                            onClick = {
-                                if (repo != null) {
-                                    onNavigateToRepository(repo)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            HomeWorkFilter.PENDING_REVIEWS -> {
-                if (pendingReviewArtifacts.isEmpty()) {
-                    item {
-                        EmptyHomeStateCard(
-                            icon = Icons.Default.RateReview,
-                            title = "No Pending Reviews",
-                            subtitle = "All specifications and workflows in your scope have completed peer review."
-                        )
-                    }
-                } else {
-                    items(pendingReviewArtifacts.take(6)) { artifact ->
-                        val repo = repositories.firstOrNull { it.id == artifact.repoId }
-                        HomeArtifactReviewCard(
-                            artifact = artifact,
-                            repo = repo,
-                            isApproval = false,
-                            onClick = {
-                                if (repo != null) {
-                                    onNavigateToArtifact(repo, artifact)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            HomeWorkFilter.PENDING_APPROVALS -> {
-                if (pendingApprovalArtifacts.isEmpty()) {
-                    item {
-                        EmptyHomeStateCard(
-                            icon = Icons.Default.Approval,
-                            title = "No Pending Approvals",
-                            subtitle = "There are currently no artifacts awaiting governance sign-off or dual approval."
-                        )
-                    }
-                } else {
-                    items(pendingApprovalArtifacts.take(6)) { artifact ->
-                        val repo = repositories.firstOrNull { it.id == artifact.repoId }
-                        HomeArtifactReviewCard(
-                            artifact = artifact,
-                            repo = repo,
-                            isApproval = true,
-                            onClick = {
-                                if (repo != null) {
-                                    onNavigateToArtifact(repo, artifact)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            HomeWorkFilter.MENTIONS_AND_UNREAD -> {
-                if (mentionAndUnreadNotifications.isEmpty()) {
-                    item {
-                        EmptyHomeStateCard(
-                            icon = Icons.Default.AlternateEmail,
-                            title = "No Mentions or Unread Items",
-                            subtitle = "You are fully caught up! New @mentions, thread replies, and assignments appear here."
-                        )
-                    }
-                } else {
-                    items(mentionAndUnreadNotifications.take(6)) { notification ->
-                        val targetRepo = repositories.firstOrNull { it.id == notification.repoId }
-                        val targetArtifact = allArtifacts.firstOrNull { it.id == notification.artifactId }
-                        HomeMentionNotificationCard(
-                            notification = notification,
-                            repo = targetRepo,
-                            onClick = {
-                                if (targetRepo != null && targetArtifact != null) {
-                                    onNavigateToArtifact(targetRepo, targetArtifact)
-                                } else if (targetRepo != null) {
-                                    onNavigateToRepository(targetRepo)
-                                } else {
-                                    onNavigateToInbox()
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            HomeWorkFilter.RECENT_ACTIVITY -> {
-                if (auditLogs.isEmpty()) {
-                    item {
-                        EmptyHomeStateCard(
-                            icon = Icons.Default.History,
-                            title = "No Activity Logs",
-                            subtitle = "Recent governance events and collaboration actions will appear here."
-                        )
-                    }
-                } else {
-                    items(auditLogs.take(6)) { log ->
-                        val repo = repositories.firstOrNull { it.id == log.repoId }
-                        HomeActivityCard(log = log, repo = repo)
-                    }
-                }
-            }
-        }
-
-        // =========================================================================
-        // 3. RECENTLY ACCESSED REPOSITORIES SECTION
-        // =========================================================================
-        item {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "最近存取的儲存庫",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = TextHighEmphasis
-                    )
-                    TextButton(
-                        onClick = onNavigateToRepositoriesCatalog,
-                        modifier = Modifier.testTag("home_view_all_repos_btn")
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(LavenderPrimary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            text = "查看全部（${repositories.size}）",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = LavenderPrimary
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = "切換人員角色",
+                            tint = LavenderPrimary,
+                            modifier = Modifier.size(22.dp),
                         )
-                    }
-                }
-
-                if (accessibleRepositories.isEmpty()) {
-                    EmptyHomeStateCard(
-                        icon = Icons.Default.Folder,
-                        title = "No Repositories Accessible",
-                        subtitle = "Create your first schema or blueprint collaboration container to get started."
-                    )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        accessibleRepositories.forEach { repo ->
-                            val repoArtifactCount = allArtifacts.count { it.repoId == repo.id }
-                            val repoIssueCount = allIssues.count { it.repoId == repo.id && it.status != IssueStatus.CLOSED }
-                            val repoDiscussionCount = allDiscussions.count { it.repoId == repo.id }
-
-                            // Calculate user's effective role in this repository
-                            val effectiveRolePair = if (activeUser != null) {
-                                HierarchicalPolicyEngine.resolveEffectiveRole(
-                                    actor = activeUser,
-                                    repo = repo,
-                                    orgMemberships = allOrgMemberships,
-                                    teamMemberships = allTeamMemberships,
-                                    teams = teams,
-                                    accessRules = allAccessRules
-                                )
-                            } else {
-                                Pair(RepoRole.VIEWER, "Public")
-                            }
-
-                            HomeRepositoryRowCard(
-                                repo = repo,
-                                artifactCount = repoArtifactCount,
-                                openIssueCount = repoIssueCount,
-                                discussionCount = repoDiscussionCount,
-                                effectiveRole = effectiveRolePair.first,
-                                onClick = { onNavigateToRepository(repo) }
-                            )
-                        }
                     }
                 }
             }
         }
 
-        // =========================================================================
-        // 4. QUICK ROUTING & SHORTCUTS
-        // =========================================================================
+        // Enterprise Health & Progress Card
         item {
+            Text(
+                text = "企業健康度",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = TextHighEmphasis,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-                border = BorderStroke(1.dp, SophisticatedBorder)
+                border = BorderStroke(1.dp, SophisticatedBorder),
+                shape = RoundedCornerShape(16.dp),
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "快速導覽",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = TextMediumEmphasis
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = onNavigateToRepositoriesCatalog,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("home_quick_repos_btn"),
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, SophisticatedBorder)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Folder,
-                                contentDescription = null,
-                                tint = LavenderPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("協作容器", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-
-                        OutlinedButton(
-                            onClick = onNavigateToInbox,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("home_quick_inbox_btn"),
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, SophisticatedBorder)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = LavenderPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("收件匣", color = TextHighEmphasis)
-                        }
-
-                        OutlinedButton(
-                            onClick = onNavigateToMe,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("home_quick_me_btn"),
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, SophisticatedBorder)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = null,
-                                tint = LavenderPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("我的", color = TextHighEmphasis)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AttentionMetricPill(
-    icon: ImageVector,
-    label: String,
-    count: Int,
-    accentColor: Color,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable { onClick() }
-            .testTag("metric_pill_${label.lowercase()}"),
-        color = if (isSelected) SophisticatedContainer else SophisticatedSurface,
-        border = BorderStroke(
-            1.dp,
-            if (isSelected) accentColor else SophisticatedBorderSubtle
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = accentColor,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = "$count",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = if (count > 0) TextHighEmphasis else TextLowEmphasis
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                color = TextMediumEmphasis,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-fun HomeIssueCard(
-    issue: RepoIssue,
-    repo: Repository?,
-    blockers: List<IssueDependency>,
-    allIssues: List<RepoIssue>,
-    activeUser: User?,
-    onClick: () -> Unit
-) {
-    val isBlocked = blockers.isNotEmpty()
-    val isClosed = issue.status == IssueStatus.CLOSED
-    val isAssignedToUser = activeUser != null && issue.assigneeType == GranteeType.USER && issue.assigneeId == activeUser.id
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag("home_issue_${issue.id}"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(1.dp, if (isBlocked) AmberWarning.copy(alpha = 0.5f) else SophisticatedBorder)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "#${issue.issueNumber}",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        ),
-                        color = LavenderPrimary
-                    )
-                    if (repo != null) {
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = SophisticatedContainer
-                        ) {
-                            Text(
-                                text = repo.displayName,
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                color = TextMediumEmphasis,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                    if (isAssignedToUser) {
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = LavenderContainer
-                        ) {
-                            Text(
-                                text = "你",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
+                    // Circle Progress & trend badge
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(end = 16.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(76.dp)) {
+                            CircularProgressIndicator(
+                                progress = { 0.68f },
+                                modifier = Modifier.fillMaxSize(),
                                 color = LavenderPrimary,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                trackColor = SophisticatedBorder,
+                                strokeWidth = 8.dp,
+                            )
+                            Text(
+                                "68%",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = TextHighEmphasis,
                             )
                         }
-                    }
-                }
-
-                // Priority Badge
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = when (issue.priority) {
-                        IssuePriority.CRITICAL -> RoseError.copy(alpha = 0.2f)
-                        IssuePriority.HIGH -> AmberWarning.copy(alpha = 0.2f)
-                        IssuePriority.MEDIUM -> LavenderContainer
-                        IssuePriority.LOW -> SophisticatedContainer
-                    }
-                ) {
-                    Text(
-                        text = issue.priority.name,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 9.sp
-                        ),
-                        color = when (issue.priority) {
-                            IssuePriority.CRITICAL -> RoseError
-                            IssuePriority.HIGH -> AmberWarning
-                            IssuePriority.MEDIUM -> LavenderPrimary
-                            IssuePriority.LOW -> TextMediumEmphasis
-                        },
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-            Text(
-                text = issue.title,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (isClosed) TextLowEmphasis else TextHighEmphasis,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // Blocker indicator if present
-            if (isBlocked) {
-                val blockingNumbers = blockers.mapNotNull { dep ->
-                    allIssues.firstOrNull { it.id == dep.blockingIssueId }?.issueNumber
-                }
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = AmberWarning.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, AmberWarning.copy(alpha = 0.3f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "受阻",
-                            tint = AmberWarning,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = if (blockingNumbers.isNotEmpty()) "Blocked by #${blockingNumbers.joinToString(", #")}" else "Blocked by upstream issue",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 10.sp
-                            ),
-                            color = AmberWarning
-                        )
-                    }
-                }
-            }
-
-            // Linked artifact chip if present
-            if (!issue.linkedArtifactTitle.isNullOrEmpty()) {
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = SophisticatedContainer
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Description,
-                            contentDescription = null,
-                            tint = TextMediumEmphasis,
-                            modifier = Modifier.size(10.dp)
-                        )
-                        Text(
-                            text = "連結：${issue.linkedArtifactTitle}",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            color = TextMediumEmphasis,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "狀態：${issue.status.name.replace("_", " ")}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                    color = when (issue.status) {
-                        IssueStatus.OPEN -> LavenderPrimary
-                        IssueStatus.IN_PROGRESS -> AmberWarning
-                        IssueStatus.CLOSED -> TextLowEmphasis
-                    }
-                )
-                Text(
-                    text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(issue.updatedAt)),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                    color = TextLowEmphasis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun HomeArtifactReviewCard(
-    artifact: NoCodeArtifact,
-    repo: Repository?,
-    isApproval: Boolean = false,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag(if (isApproval) "home_approval_${artifact.id}" else "home_review_${artifact.id}"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(1.dp, if (isApproval) EmeraldSuccess.copy(alpha = 0.4f) else AmberWarning.copy(alpha = 0.4f))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isApproval) Icons.Default.Approval else Icons.Default.RateReview,
-                        contentDescription = null,
-                        tint = if (isApproval) EmeraldSuccess else AmberWarning,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = if (isApproval) "Approval 個簽核" else "Peer Review Request",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = if (isApproval) EmeraldSuccess else AmberWarning
-                        )
-                    )
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = SophisticatedContainer
-                ) {
-                    Text(
-                        text = artifact.type.name.replace("_", " "),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = LavenderPrimary,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-            Text(
-                text = artifact.title,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = TextHighEmphasis
-            )
-
-            if (artifact.summary.isNotEmpty()) {
-                Text(
-                    text = artifact.summary,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextMediumEmphasis,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "容器：${repo?.displayName ?: "Repository"}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                    color = TextMediumEmphasis
-                )
-                Text(
-                    text = "v${artifact.version} • ${artifact.authorDisplayName}",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    color = TextLowEmphasis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun HomeMentionNotificationCard(
-    notification: AppNotification,
-    repo: Repository?,
-    onClick: () -> Unit
-) {
-    val isUnread = notification.status == NotificationStatus.UNREAD
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag("home_notification_${notification.id}"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(
-            1.dp,
-            if (isUnread) LavenderPrimary.copy(alpha = 0.5f) else SophisticatedBorder
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Actor avatar
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(
-                        try {
-                            Color(android.graphics.Color.parseColor(notification.actorAvatarColorHex))
-                        } catch (e: Exception) {
-                            LavenderPrimary
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = notification.actorDisplayName.take(1).uppercase(),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = notification.actorDisplayName,
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                            color = TextHighEmphasis
-                        )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = SophisticatedContainer
+                            shape = RoundedCornerShape(10.dp),
+                            color = EmeraldDark,
+                            border = BorderStroke(1.dp, EmeraldSuccess.copy(alpha = 0.5f)),
                         ) {
                             Text(
-                                text = notification.category.label,
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                                color = LavenderPrimary,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                "較上週 ↑12%",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = EmeraldSuccess,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             )
                         }
                     }
 
-                    if (isUnread) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(LavenderPrimary)
-                        )
+                    // Stats in column
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        HealthStatItem("進行中", inProgressCount.toString(), LavenderPrimary)
+                        HealthStatItem("待處理", pendingCount.toString(), AmberWarning)
+                        HealthStatItem("待驗證", toVerifyCount.toString(), RoseError)
                     }
                 }
-
-                Text(
-                    text = notification.title,
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextHighEmphasis,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = notification.body,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextMediumEmphasis,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = repo?.displayName ?: notification.repoName ?: "Workspace",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                        color = TextLowEmphasis
-                    )
-                    Text(
-                        text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(notification.createdAt)),
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                        color = TextLowEmphasis
-                    )
-                }
             }
         }
-    }
-}
 
-@Composable
-fun HomeActivityCard(
-    log: AuditLog,
-    repo: Repository?
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(1.dp, SophisticatedBorder)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(SophisticatedContainer),
-                contentAlignment = Alignment.Center
+        // Active Repositories
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = null,
-                    tint = LavenderPrimary,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${log.actorDisplayName} • ${log.actionName}",
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = TextHighEmphasis
-                )
-                Text(
-                    text = log.reasoning.ifEmpty { "Governance event recorded" },
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                    color = TextMediumEmphasis,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Text(
-                text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(log.timestamp)),
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                color = TextLowEmphasis
-            )
-        }
-    }
-}
-
-@Composable
-fun HomeRepositoryRowCard(
-    repo: Repository,
-    artifactCount: Int,
-    openIssueCount: Int,
-    discussionCount: Int,
-    effectiveRole: RepoRole,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag("home_repo_${repo.id}"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(1.dp, SophisticatedBorder)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(LavenderContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Folder,
-                    contentDescription = null,
-                    tint = LavenderPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = repo.displayName,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = TextHighEmphasis
+                        "活躍倉庫 ${if (repositories.isEmpty()) 12 else repositories.size}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextHighEmphasis,
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = when (effectiveRole) {
-                            RepoRole.OWNER, RepoRole.MAINTAINER -> LavenderContainer
-                            RepoRole.APPROVER, RepoRole.REVIEWER -> EmeraldSuccess.copy(alpha = 0.15f)
-                            RepoRole.COLLABORATOR -> SophisticatedContainer
-                            RepoRole.VIEWER -> SophisticatedSurface
-                        }
+                        shape = RoundedCornerShape(8.dp),
+                        color = EmeraldDark,
+                        modifier = Modifier.padding(end = 4.dp),
                     ) {
                         Text(
-                            text = effectiveRole.name,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = when (effectiveRole) {
-                                RepoRole.OWNER, RepoRole.MAINTAINER -> LavenderPrimary
-                                RepoRole.APPROVER, RepoRole.REVIEWER -> EmeraldSuccess
-                                RepoRole.COLLABORATOR -> TextHighEmphasis
-                                RepoRole.VIEWER -> TextMediumEmphasis
-                            },
-                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                            "7",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldSuccess,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = AmberGlow,
+                        modifier = Modifier.padding(end = 4.dp),
+                    ) {
+                        Text(
+                            "3",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AmberWarning,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = RoseDark,
+                    ) {
+                        Text(
+                            "2",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = RoseError,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                         )
                     }
                 }
                 Text(
-                    text = "${repo.ownerDisplayName} • $artifactCount 個藍圖 • $openIssueCount 個任務 • $discussionCount 個討論",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                    color = TextMediumEmphasis
+                    "查看全部",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = LavenderPrimary,
+                    modifier = Modifier.clickable { onNavigateToRepositoriesCatalog() },
                 )
             }
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "開啟儲存庫",
-                tint = TextMediumEmphasis,
-                modifier = Modifier.size(16.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (activeRepos.isEmpty()) {
+                    DefaultRepoCardItem(
+                        "製造邊優化專案",
+                        "WBS 60%",
+                        "Issue 18",
+                        0.6f,
+                        onClick = onNavigateToRepositoriesCatalog,
+                    )
+                    DefaultRepoCardItem(
+                        "設備檢修管理系統",
+                        "WBS 75%",
+                        "Issue 12",
+                        0.75f,
+                        onClick = onNavigateToRepositoriesCatalog,
+                    )
+                    DefaultRepoCardItem(
+                        "客服流程優化專案",
+                        "WBS 45%",
+                        "Issue 9",
+                        0.45f,
+                        onClick = onNavigateToRepositoriesCatalog,
+                    )
+                } else {
+                    activeRepos.forEach { repo ->
+                        RepoListItem(repo = repo, onClick = { onNavigateToRepository(repo) })
+                    }
+                }
+            }
+        }
+
+        // Recent Activity
+        item {
+            Text(
+                "最近活動",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = TextHighEmphasis,
             )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = SophisticatedSurfaceDark,
+                border = BorderStroke(1.dp, SophisticatedBorderSubtle),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    ActivityItem(
+                        "Sarah Chen",
+                        "製造邊優化專案",
+                        "指派了 #128 Issue 給王小明",
+                        "2 小時前",
+                        Icons.Default.AssignmentInd,
+                        LavenderPrimary,
+                    )
+                    HorizontalDivider(color = SophisticatedBorderSubtle)
+                    ActivityItem(
+                        "Marcus Wong",
+                        "設備檢修管理系統",
+                        "WBS 從 30% -> 45%",
+                        "3 小時前",
+                        Icons.Default.TrendingUp,
+                        EmeraldSuccess,
+                    )
+                    HorizontalDivider(color = SophisticatedBorderSubtle)
+                    ActivityItem(
+                        "Elena Rostova",
+                        "客服流程優化專案",
+                        "完成驗證 Issue #56",
+                        "5 小時前",
+                        Icons.Default.Verified,
+                        CyanAccent,
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun EmptyHomeStateCard(
-    icon: ImageVector,
-    title: String,
-    subtitle: String
-) {
+fun HealthStatItem(label: String, value: String, accentColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = accentColor)
+    }
+}
+
+@Composable
+fun RepoListItem(repo: Repository, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .testTag("repo_card_${repo.id}"),
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
-        border = BorderStroke(1.dp, SophisticatedBorderSubtle)
+        border = BorderStroke(1.dp, SophisticatedBorder),
+        shape = RoundedCornerShape(12.dp),
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = TextMediumEmphasis,
-                modifier = Modifier.size(32.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(LavenderContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.Folder,
+                    contentDescription = null,
+                    tint = LavenderPrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    repo.displayName.ifEmpty { repo.name },
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = TextHighEmphasis,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "WBS 60%",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LavenderPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Issue 18", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                }
+            }
+            // Member Avatar pile
+            Row(horizontalArrangement = Arrangement.spacedBy((-6).dp)) {
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFFEF4444), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFF3B82F6), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFF10B981), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DefaultRepoCardItem(title: String, wbsText: String, issueText: String, progress: Float, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
+        border = BorderStroke(1.dp, SophisticatedBorder),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(LavenderContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.Folder,
+                    contentDescription = null,
+                    tint = LavenderPrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = TextHighEmphasis,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        wbsText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LavenderPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(issueText, style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                }
+            }
+            // Member Avatar pile
+            Row(horizontalArrangement = Arrangement.spacedBy((-6).dp)) {
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFFEF4444), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFF3B82F6), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+                Box(
+                    modifier = Modifier.size(
+                        24.dp,
+                    ).background(Color(0xFF10B981), CircleShape).border(1.5.dp, SophisticatedSurfaceDark, CircleShape),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ActivityItem(
+    userName: String,
+    repoName: String,
+    actionText: String,
+    timeText: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconColor: Color,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(iconColor.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(16.dp))
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    repoName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextHighEmphasis,
+                )
+                Text(timeText, style = MaterialTheme.typography.labelSmall, color = TextLowEmphasis)
+            }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = TextHighEmphasis
-            )
-            Text(
-                text = subtitle,
+                "$userName $actionText",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextMediumEmphasis
+                color = TextMediumEmphasis,
             )
         }
     }

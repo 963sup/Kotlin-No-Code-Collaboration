@@ -6,7 +6,7 @@ import com.example.data.model.TeamMembership
 
 internal enum class WorkAssignmentScope(val label: String) {
     MINE("我的工作"),
-    ALL("全部工作")
+    ALL("全部工作"),
 }
 
 internal fun projectWorkIssues(
@@ -14,7 +14,7 @@ internal fun projectWorkIssues(
     activeUserId: String?,
     teamMemberships: List<TeamMembership>,
     assignmentScope: WorkAssignmentScope,
-    repositoryId: String?
+    repositoryId: String?,
 ): List<RepoIssue> {
     val activeTeamIds = if (activeUserId == null) {
         emptySet()
@@ -29,6 +29,7 @@ internal fun projectWorkIssues(
         val matchesRepository = repositoryId == null || issue.repoId == repositoryId
         val matchesAssignment = when (assignmentScope) {
             WorkAssignmentScope.ALL -> true
+
             WorkAssignmentScope.MINE -> when (issue.assigneeType) {
                 GranteeType.USER -> activeUserId != null && issue.assigneeId == activeUserId
                 GranteeType.TEAM -> issue.assigneeId != null && issue.assigneeId in activeTeamIds

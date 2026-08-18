@@ -3,11 +3,9 @@ package com.example.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apartment
@@ -29,8 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,9 +34,7 @@ import com.example.data.model.LifecycleState
 import com.example.data.model.OwnerType
 import com.example.data.model.PolicyVerdict
 import com.example.data.model.RepoRole
-import com.example.ui.theme.AmberGlow
 import com.example.ui.theme.AmberWarning
-import com.example.ui.theme.CyanAccent
 import com.example.ui.theme.EmeraldDark
 import com.example.ui.theme.EmeraldSuccess
 import com.example.ui.theme.LavenderContainer
@@ -75,27 +69,30 @@ fun RoleBadge(role: RepoRole, modifier: Modifier = Modifier) {
             .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
             .then(
-                if (!hasSolidPill) Modifier.border(1.dp, SophisticatedBorder, RoundedCornerShape(12.dp))
-                else Modifier
+                if (!hasSolidPill) {
+                    Modifier.border(1.dp, SophisticatedBorder, RoundedCornerShape(12.dp))
+                } else {
+                    Modifier
+                },
             )
             .padding(horizontal = 8.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = textColor,
-            modifier = Modifier.size(12.dp)
+            modifier = Modifier.size(12.dp),
         )
         Text(
             text = role.name,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
-                letterSpacing = 0.5.sp
+                letterSpacing = 0.5.sp,
             ),
-            color = textColor
+            color = textColor,
         )
     }
 }
@@ -104,7 +101,7 @@ fun RoleBadge(role: RepoRole, modifier: Modifier = Modifier) {
 fun RoleBadge(roleName: String, modifier: Modifier = Modifier) {
     val role = try {
         RepoRole.valueOf(roleName)
-    } catch (e: Exception) {
+    } catch (_: IllegalArgumentException) {
         RepoRole.VIEWER
     }
     RoleBadge(role = role, modifier = modifier)
@@ -126,21 +123,21 @@ fun OwnerTypeTag(ownerType: OwnerType, ownerDisplayName: String, modifier: Modif
             .border(1.dp, SophisticatedBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 9.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(14.dp)
+            modifier = Modifier.size(14.dp),
         )
         Text(
             text = "${ownerType.displayName()}: $ownerDisplayName",
             style = MaterialTheme.typography.bodySmall.copy(
                 fontWeight = FontWeight.Medium,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             ),
-            color = TextHighEmphasis
+            color = TextHighEmphasis,
         )
     }
 }
@@ -163,21 +160,21 @@ fun LifecycleBadge(state: LifecycleState, modifier: Modifier = Modifier) {
             .border(1.dp, SophisticatedBorder, RoundedCornerShape(10.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = textColor,
-            modifier = Modifier.size(13.dp)
+            modifier = Modifier.size(13.dp),
         )
         Text(
             text = state.label,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp
+                fontSize = 11.sp,
             ),
-            color = textColor
+            color = textColor,
         )
     }
 }
@@ -196,21 +193,21 @@ fun PolicyVerdictBadge(verdict: PolicyVerdict, modifier: Modifier = Modifier) {
             .border(1.dp, textColor.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
             .padding(horizontal = 10.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = textColor,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(16.dp),
         )
         Text(
             text = if (isAllowed) "POLICY PASSED: ALLOWED" else "POLICY BLOCKED: ${verdict.name}",
             style = MaterialTheme.typography.labelMedium.copy(
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 0.3.sp
+                letterSpacing = 0.3.sp,
             ),
-            color = textColor
+            color = textColor,
         )
     }
 }

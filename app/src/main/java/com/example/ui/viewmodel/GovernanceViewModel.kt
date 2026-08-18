@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.AppDatabase
 import com.example.data.model.AppNotification
-import com.example.data.model.ApprovalStatus
 import com.example.data.model.ArtifactApproval
 import com.example.data.model.ArtifactReview
 import com.example.data.model.ArtifactType
@@ -17,12 +16,10 @@ import com.example.data.model.GovernanceAction
 import com.example.data.model.GranteeType
 import com.example.data.model.IssueComment
 import com.example.data.model.IssueDependency
-import com.example.data.model.DependencyType
 import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
 import com.example.data.model.NoCodeArtifact
 import com.example.data.model.NotificationCategory
-import com.example.data.model.NotificationPriority
 import com.example.data.model.NotificationStatus
 import com.example.data.model.OrgMembership
 import com.example.data.model.Organization
@@ -35,10 +32,13 @@ import com.example.data.model.RepoIssue
 import com.example.data.model.RepoRole
 import com.example.data.model.Repository
 import com.example.data.model.ReviewDecision
+import com.example.data.model.TaskChecklist
 import com.example.data.model.Team
 import com.example.data.model.TeamMembership
 import com.example.data.model.TeamRole
 import com.example.data.model.User
+import com.example.data.model.WorkEvidence
+import com.example.data.model.WorkVerification
 import com.example.data.repository.GovernanceRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,10 +50,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class UiMessage(
-    val text: String,
-    val isError: Boolean = false
-)
+data class UiMessage(val text: String, val isError: Boolean = false)
 
 class GovernanceViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -89,7 +86,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
     val notificationFilterCategory: StateFlow<NotificationCategory?> = _notificationFilterCategory.asStateFlow()
 
     private val _notificationFilterStatus = MutableStateFlow<NotificationStatus?>(null)
-    val notificationFilterStatus:StateFlow<NotificationStatus?> = _notificationFilterStatus.asStateFlow()
+    val notificationFilterStatus: StateFlow<NotificationStatus?> = _notificationFilterStatus.asStateFlow()
 
     private val _inspectedProfileUser = MutableStateFlow<User?>(null)
     val inspectedProfileUser: StateFlow<User?> = _inspectedProfileUser.asStateFlow()
@@ -157,20 +154,56 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
 
         enterprise = repository.enterprise.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
         enterprises = repository.enterprises.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        organizations = repository.organizations.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        organizations = repository.organizations.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
         users = repository.users.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
         teams = repository.teams.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        repositories = repository.repositories.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        repositories = repository.repositories.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
         auditLogs = repository.auditLogs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allAccessRules = repository.allAccessRules.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allOrgMemberships = repository.allOrgMemberships.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allTeamMemberships = repository.allTeamMemberships.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allArtifacts = repository.allArtifacts.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        allAccessRules = repository.allAccessRules.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
+        allOrgMemberships = repository.allOrgMemberships.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
+        allTeamMemberships = repository.allTeamMemberships.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
+        allArtifacts = repository.allArtifacts.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
         allIssues = repository.allIssues.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allDiscussions = repository.allDiscussions.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        allDiscussions = repository.allDiscussions.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
         allReviews = repository.allReviews.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allApprovals = repository.allApprovals.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-        allDependencies = repository.allDependencies.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        allApprovals = repository.allApprovals.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
+        allDependencies = repository.allDependencies.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList(),
+        )
 
         viewModelScope.launch {
             repository.initializeIfEmpty()
@@ -308,7 +341,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         ownerDisplayName: String,
         description: String,
         category: String,
-        onComplete: (Boolean) -> Unit
+        onComplete: (Boolean) -> Unit,
     ) {
         val user = _activeUser.value ?: return
         val ent = enterprise.value ?: return
@@ -323,7 +356,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 enterpriseId = ent.id,
                 description = description,
                 category = category,
-                creatorUser = user
+                creatorUser = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             onComplete(success)
@@ -336,7 +369,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         type: ArtifactType,
         summary: String,
         content: String,
-        onComplete: (Boolean) -> Unit
+        onComplete: (Boolean) -> Unit,
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -346,7 +379,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 type = type,
                 summary = summary,
                 content = content,
-                author = user
+                author = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             onComplete(success)
@@ -407,7 +440,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         granteeType: GranteeType,
         granteeId: String,
         granteeName: String,
-        role: RepoRole
+        role: RepoRole,
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -428,14 +461,14 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         enforceDualApproval: Boolean,
         allowUserOwnedRepos: Boolean,
         enforceReviewerBeforeApprover: Boolean,
-        enforceSegregationOfDuties: Boolean
+        enforceSegregationOfDuties: Boolean,
     ) {
         val ent = enterprise.value ?: return
         val updated = ent.copy(
             enforceDualApproval = enforceDualApproval,
             allowUserOwnedRepos = allowUserOwnedRepos,
             enforceReviewerBeforeApprover = enforceReviewerBeforeApprover,
-            enforceSegregationOfDuties = enforceSegregationOfDuties
+            enforceSegregationOfDuties = enforceSegregationOfDuties,
         )
         viewModelScope.launch {
             repository.updateEnterprise(updated)
@@ -443,12 +476,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun runPolicySimulation(
-        actor: User,
-        repo: Repository,
-        artifact: NoCodeArtifact?,
-        action: GovernanceAction
-    ) {
+    fun runPolicySimulation(actor: User, repo: Repository, artifact: NoCodeArtifact?, action: GovernanceAction) {
         viewModelScope.launch {
             val detail = repository.evaluateAction(actor, repo, artifact, action)
             _simulationResult.value = detail
@@ -495,7 +523,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         linkedArtifactTitle: String?,
         parentIssueId: String? = null,
         labels: String,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -511,7 +539,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 linkedArtifactTitle = linkedArtifactTitle,
                 parentIssueId = parentIssueId,
                 labels = labels,
-                author = user
+                author = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
@@ -531,7 +559,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         repoId: String,
         blockedIssueId: String,
         blockingIssueId: String,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -559,7 +587,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun updateIssueStatus(issueId: String, newStatus:IssueStatus) {
+    fun updateIssueStatus(issueId: String, newStatus: IssueStatus) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.updateIssueStatus(issueId, newStatus, user)
@@ -575,14 +603,13 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-
     fun updateIssuePlan(
         issueId: String,
         sortOrder: Int,
         plannedStartAt: Long?,
         plannedEndAt: Long?,
         wbsWeight: Double,
-        progressPercent: Int
+        progressPercent: Int,
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -593,7 +620,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 plannedEndAt = plannedEndAt,
                 wbsWeight = wbsWeight,
                 progressPercent = progressPercent,
-                actor = user
+                actor = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
         }
@@ -613,7 +640,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         title: String,
         category: DiscussionCategory,
         body: String,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -622,7 +649,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 title = title,
                 category = category,
                 body = body,
-                author = user
+                author = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
@@ -678,7 +705,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         allowUserOwnedRepos: Boolean = true,
         enforceReviewerBeforeApprover: Boolean = true,
         enforceSegregationOfDuties: Boolean = true,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -690,17 +717,14 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 allowUserOwnedRepos = allowUserOwnedRepos,
                 enforceReviewerBeforeApprover = enforceReviewerBeforeApprover,
                 enforceSegregationOfDuties = enforceSegregationOfDuties,
-                creatorUser = user
+                creatorUser = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
         }
     }
 
-    fun updateEnterpriseSecurityPolicies(
-        enterprise: Enterprise,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun updateEnterpriseSecurityPolicies(enterprise: Enterprise, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.updateEnterpriseSecurityPolicies(enterprise, user)
@@ -717,7 +741,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         title: String,
         isEnterpriseAdmin: Boolean,
         avatarColorHex: String = "#8B5CF6",
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -729,7 +753,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 title = title,
                 isEnterpriseAdmin = isEnterpriseAdmin,
                 avatarColorHex = avatarColorHex,
-                actor = user
+                actor = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
@@ -748,7 +772,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         badgeColorHex: String = "#4F46E5",
         defaultMemberRole: RepoRole = RepoRole.COLLABORATOR,
         ownerUserId: String = "",
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -760,17 +784,14 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 badgeColorHex = badgeColorHex,
                 defaultMemberRole = defaultMemberRole,
                 creatorUser = user,
-                ownerUserId = ownerUserId
+                ownerUserId = ownerUserId,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
         }
     }
 
-    fun updateOrganization(
-        org: Organization,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun updateOrganization(org: Organization, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.updateOrganization(org, user)
@@ -779,12 +800,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun addOrgMember(
-        orgId: String,
-        userId: String,
-        role: com.example.data.model.OrgRole,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun addOrgMember(orgId: String, userId: String, role: com.example.data.model.OrgRole, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.addOrgMember(orgId, userId, role, user)
@@ -793,11 +809,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun removeOrgMember(
-        orgId: String,
-        userId: String,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun removeOrgMember(orgId: String, userId: String, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.removeOrgMember(orgId, userId, user)
@@ -816,7 +828,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         slug: String,
         description: String,
         parentTeamId: String? = null,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
@@ -826,19 +838,14 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 slug = slug,
                 description = description,
                 parentTeamId = parentTeamId,
-                creatorUser = user
+                creatorUser = user,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) onSuccess()
         }
     }
 
-    fun addTeamMember(
-        teamId: String,
-        userId: String,
-        role: TeamRole = TeamRole.MEMBER,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun addTeamMember(teamId: String, userId: String, role: TeamRole = TeamRole.MEMBER, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.addTeamMember(teamId, userId, role, user)
@@ -847,11 +854,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun removeTeamMember(
-        teamId: String,
-        userId: String,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun removeTeamMember(teamId: String, userId: String, onSuccess: () -> Unit = {}) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.removeTeamMember(teamId, userId, user)
@@ -873,7 +876,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         pronouns: String,
         avatarColorHex: String,
         notificationPreferences: String,
-        onSuccess: () -> Unit = {}
+        onSuccess: () -> Unit = {},
     ) {
         val actor = _activeUser.value ?: return
         viewModelScope.launch {
@@ -886,7 +889,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                 pronouns = pronouns,
                 avatarColorHex = avatarColorHex,
                 notificationPreferences = notificationPreferences,
-                actor = actor
+                actor = actor,
             )
             _uiMessages.emit(UiMessage(msg, isError = !success))
             if (success) {
@@ -899,22 +902,26 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
                         location = location.trim(),
                         pronouns = pronouns.trim(),
                         avatarColorHex = avatarColorHex,
-                        notificationPreferences = notificationPreferences
+                        notificationPreferences = notificationPreferences,
                     )
                 }
-                selectProfileUser(_inspectedProfileUser.value?.let { inspected ->
-                    if (inspected.id == targetUser.id) {
-                        targetUser.copy(
-                            displayName = displayName.trim().ifEmpty { targetUser.displayName },
-                            title = title.trim().ifEmpty { targetUser.title },
-                            bio = bio.trim(),
-                            location = location.trim(),
-                            pronouns = pronouns.trim(),
-                            avatarColorHex = avatarColorHex,
-                            notificationPreferences = notificationPreferences
-                        )
-                    } else inspected
-                })
+                selectProfileUser(
+                    _inspectedProfileUser.value?.let { inspected ->
+                        if (inspected.id == targetUser.id) {
+                            targetUser.copy(
+                                displayName = displayName.trim().ifEmpty { targetUser.displayName },
+                                title = title.trim().ifEmpty { targetUser.title },
+                                bio = bio.trim(),
+                                location = location.trim(),
+                                pronouns = pronouns.trim(),
+                                avatarColorHex = avatarColorHex,
+                                notificationPreferences = notificationPreferences,
+                            )
+                        } else {
+                            inspected
+                        }
+                    },
+                )
                 onSuccess()
             }
         }
@@ -963,6 +970,136 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
     fun markNotificationActionCompleted(id: String) {
         viewModelScope.launch {
             repository.markActionCompleted(id)
+        }
+    }
+
+    // --- Work Item Detail Extensions ---
+    private val _selectedIssueEvidence = MutableStateFlow<List<WorkEvidence>>(emptyList())
+    val selectedIssueEvidence: StateFlow<List<WorkEvidence>> = _selectedIssueEvidence.asStateFlow()
+
+    private val _selectedIssueChecklist = MutableStateFlow<List<TaskChecklist>>(emptyList())
+    val selectedIssueChecklist: StateFlow<List<TaskChecklist>> = _selectedIssueChecklist.asStateFlow()
+
+    private val _selectedEvidenceVerifications = MutableStateFlow<List<WorkVerification>>(emptyList())
+    val selectedEvidenceVerifications: StateFlow<List<WorkVerification>> = _selectedEvidenceVerifications.asStateFlow()
+
+    fun loadIssueDetailData(issueId: String) {
+        viewModelScope.launch {
+            repository.dao.getWorkEvidenceForIssue(issueId).collect {
+                _selectedIssueEvidence.value = it
+            }
+        }
+        viewModelScope.launch {
+            repository.dao.getChecklistForIssue(issueId).collect {
+                _selectedIssueChecklist.value = it
+            }
+        }
+    }
+
+    fun toggleChecklistItem(id: String, isCompleted: Boolean, activeUser: User?) {
+        viewModelScope.launch {
+            val completedBy = if (isCompleted) activeUser?.id else null
+            val completedName = if (isCompleted) activeUser?.displayName else null
+            val completedAt = if (isCompleted) System.currentTimeMillis() else null
+            repository.dao.updateTaskChecklistStatus(id, isCompleted, completedBy, completedName, completedAt)
+        }
+    }
+
+    fun addChecklistItem(issueId: String, title: String, activeUser: User?) {
+        viewModelScope.launch {
+            val item = TaskChecklist(
+                issueId = issueId,
+                title = title.trim(),
+                isCompleted = false,
+                completedByDisplayName = activeUser?.displayName ?: "待分配",
+            )
+            repository.dao.insertTaskChecklist(item)
+            _uiMessages.emit(UiMessage("已新增任務: $title"))
+        }
+    }
+
+    fun addWorkEvidence(issueId: String, description: String, activeUser: User?) {
+        viewModelScope.launch {
+            val evd = WorkEvidence(
+                issueId = issueId,
+                submitterUserId = activeUser?.id ?: "usr_unknown",
+                submitterDisplayName = activeUser?.displayName ?: "王小明",
+                description = description.trim(),
+                status = "PENDING",
+            )
+            repository.dao.insertWorkEvidence(evd)
+            _uiMessages.emit(UiMessage("已提交 Evidence 成果物"))
+        }
+    }
+
+    fun loadEvidenceVerifications(evidenceId: String) {
+        viewModelScope.launch {
+            repository.dao.getVerificationsForEvidence(evidenceId).collect {
+                _selectedEvidenceVerifications.value = it
+            }
+        }
+    }
+
+    fun submitVerification(
+        evidenceId: String,
+        issueId: String,
+        isAccepted: Boolean,
+        comment: String,
+        activeUser: User?,
+    ) {
+        viewModelScope.launch {
+            val currentUser = _activeUser.value ?: users.value.firstOrNull()
+            val ver = WorkVerification(
+                evidenceId = evidenceId,
+                issueId = issueId,
+                reviewerUserId = currentUser?.id ?: "usr_reviewer",
+                reviewerDisplayName = currentUser?.displayName ?: "驗證審查員",
+                decision = if (isAccepted) ReviewDecision.APPROVED else ReviewDecision.CHANGES_REQUESTED,
+                feedbackNote = comment,
+            )
+            repository.dao.insertWorkVerification(ver)
+
+            val issue = allIssues.value.firstOrNull { it.id == issueId }
+            val reviewerUser = currentUser ?: User(
+                id = "usr_reviewer",
+                enterpriseId = enterprise.value?.id ?: "ent_1",
+                username = "reviewer",
+                displayName = "驗證審查員",
+                email = "reviewer@enterprise.internal",
+                title = "驗證委員",
+            )
+            if (issue != null) {
+                val entId = enterprise.value?.id ?: "ent_1"
+                if (isAccepted) {
+                    repository.updateIssueStatus(issueId, IssueStatus.CLOSED, reviewerUser)
+                    repository.dao.insertAuditLog(
+                        AuditLog(
+                            enterpriseId = entId,
+                            actorUserId = reviewerUser.id,
+                            actorDisplayName = reviewerUser.displayName,
+                            actionName = "通過獨立驗證 (ACCEPT)",
+                            repoId = issue.repoId,
+                            verdict = PolicyVerdict.ALLOWED,
+                            reasoning = "Evidence 審查通過: #${issue.issueNumber} ${issue.title}。${if (comment.isNotBlank()) "意見: $comment" else ""}",
+                        ),
+                    )
+                    _uiMessages.emit(UiMessage("驗證通過！已完成工作項目 #${issue.issueNumber}"))
+                } else {
+                    repository.updateIssueStatus(issueId, IssueStatus.IN_PROGRESS, reviewerUser)
+                    repository.dao.insertAuditLog(
+                        AuditLog(
+                            enterpriseId = entId,
+                            actorUserId = reviewerUser.id,
+                            actorDisplayName = reviewerUser.displayName,
+                            actionName = "駁回重行執行 (REJECT)",
+                            repoId = issue.repoId,
+                            verdict = PolicyVerdict.DENIED_REVIEW_GATE_REQUIRED,
+                            reasoning = "Evidence 未通過驗證: #${issue.issueNumber} ${issue.title}。意見: $comment",
+                        ),
+                    )
+                    _uiMessages.emit(UiMessage("已駁回！工作項目 #${issue.issueNumber} 標記為需重新執行 (Rework)", isError = true))
+                }
+            }
         }
     }
 }

@@ -53,14 +53,15 @@ fun UnifiedExploreScreen(
     users: List<User>,
     savedTargets: List<SavedTarget>,
     onOpenTarget: (CollaborationTarget) -> Unit,
-    onToggleSaved: (CollaborationTarget) -> Unit
+    onToggleSaved: (CollaborationTarget) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var categoryName by rememberSaveable { mutableStateOf(ExploreCategory.ALL.name) }
     val selectedCategory = ExploreCategory.valueOf(categoryName)
-    val results = remember(activeUser, repositories, artifacts, issues, discussions, organizations, teams, users, savedTargets) {
-        ExploreProjection.build(activeUser, repositories, artifacts, issues, discussions, organizations, teams, users, savedTargets)
-    }
+    val results =
+        remember(activeUser, repositories, artifacts, issues, discussions, organizations, teams, users, savedTargets) {
+            ExploreProjection.build(activeUser, repositories, artifacts, issues, discussions, organizations, teams, users, savedTargets)
+        }
     val visible = remember(results, query, selectedCategory) {
         val normalizedQuery = query.trim()
         results.filter { result ->
@@ -79,25 +80,25 @@ fun UnifiedExploreScreen(
             onValueChange = { query = it },
             modifier = Modifier.fillMaxWidth().testTag("explore_search"),
             label = { Text("搜尋儲存庫、工作、成果、討論、團隊與用戶") },
-            singleLine = true
+            singleLine = true,
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth().testTag("explore_category_filters")
+            modifier = Modifier.fillMaxWidth().testTag("explore_category_filters"),
         ) {
             items(ExploreCategory.entries, key = { it.name }) { category ->
                 FilterChip(
                     selected = selectedCategory == category,
                     onClick = { categoryName = category.name },
                     label = { Text(category.label) },
-                    modifier = Modifier.testTag("explore_filter_${category.name.lowercase()}")
+                    modifier = Modifier.testTag("explore_filter_${category.name.lowercase()}"),
                 )
             }
         }
         Text(
             text = "${visible.size} 個結果",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (visible.isEmpty()) {
             CollaborationEmptyStateCard("沒有結果", "目前授權範圍內沒有符合條件的協作目標。")
@@ -108,24 +109,24 @@ fun UnifiedExploreScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onOpenTarget(item.target) }
-                            .testTag("explore_result_${item.target.storageKey().hashCode()}")
+                            .testTag("explore_result_${item.target.storageKey().hashCode()}"),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("${item.typeLabel} · ${item.title}", fontWeight = FontWeight.SemiBold)
                                 Text(
                                     item.subtitle,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             IconButton(
                                 onClick = { onToggleSaved(item.target) },
-                                modifier = Modifier.testTag("explore_save_${item.target.storageKey().hashCode()}")
+                                modifier = Modifier.testTag("explore_save_${item.target.storageKey().hashCode()}"),
                             ) {
                                 Text(if (item.isSaved) "★" else "☆", color = MaterialTheme.colorScheme.primary)
                             }

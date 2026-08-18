@@ -39,7 +39,7 @@ class MobileCollaborationV2RulesTest {
     @Test
     fun explicitMigrationContainsWbsAndSyncTables() {
         val sql = AppMigrations.MIGRATION_4_5_STATEMENTS.joinToString("\n")
-        assertEquals(5, AppMigrations.CURRENT_VERSION)
+        assertEquals(6, AppMigrations.CURRENT_VERSION)
         assertTrue(sql.contains("ALTER TABLE repo_issues ADD COLUMN sortOrder"))
         assertTrue(sql.contains("ALTER TABLE repo_issues ADD COLUMN progressPercent"))
         assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS saved_targets"))

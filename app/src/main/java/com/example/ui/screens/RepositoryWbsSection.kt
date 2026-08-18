@@ -28,10 +28,7 @@ import java.util.Locale
 import kotlin.math.min
 
 @Composable
-fun RepositoryWbsSection(
-    issues: List<RepoIssue>,
-    onUpdatePlan: (String, Int, Long?, Long?, Double, Int) -> Unit
-) {
+fun RepositoryWbsSection(issues: List<RepoIssue>, onUpdatePlan: (String, Int, Long?, Long?, Double, Int) -> Unit) {
     val rows = remember(issues) { IssueHierarchyRules.wbsProjection(issues) }
     val overallProgress = remember(issues) { IssueHierarchyRules.overallProgress(issues) }
     val parentIds = remember(issues) { issues.mapNotNull { it.parentIssueId }.toSet() }
@@ -43,13 +40,13 @@ fun RepositoryWbsSection(
     }
     LazyColumn(
         Modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "wbs_summary") {
             Card(Modifier.fillMaxWidth().testTag("repo_wbs_summary")) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
@@ -57,18 +54,18 @@ fun RepositoryWbsSection(
                             Text(
                                 "${rows.size} 個工作節點 · ${rows.count { it.depth == 0 }} 個根工作",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         Text(
                             "${(overallProgress * 100).toInt()}%",
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                     LinearProgressIndicator(
                         progress = { overallProgress },
-                        modifier = Modifier.fillMaxWidth().testTag("repo_wbs_overall_progress")
+                        modifier = Modifier.fillMaxWidth().testTag("repo_wbs_overall_progress"),
                     )
                 }
             }
@@ -79,7 +76,7 @@ fun RepositoryWbsSection(
                 Modifier
                     .fillMaxWidth()
                     .padding(start = (row.depth.coerceAtMost(6) * 12).dp)
-                    .testTag("repo_wbs_${issue.id}")
+                    .testTag("repo_wbs_${issue.id}"),
             ) {
                 Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -90,12 +87,14 @@ fun RepositoryWbsSection(
                     Text(
                         "${issue.status.label} · ${row.completedCount}/${row.totalCount} 完成 · 權重 ${issue.wbsWeight}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        "計畫 ${formatPlanDate(issue.plannedStartAt)} → ${formatPlanDate(issue.plannedEndAt)} · 排序 ${issue.sortOrder}",
+                        "計畫 ${formatPlanDate(
+                            issue.plannedStartAt,
+                        )} → ${formatPlanDate(issue.plannedEndAt)} · 排序 ${issue.sortOrder}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (issue.id !in parentIds && issue.status != IssueStatus.CLOSED) {
                         Button(
@@ -106,10 +105,10 @@ fun RepositoryWbsSection(
                                     issue.plannedStartAt,
                                     issue.plannedEndAt,
                                     issue.wbsWeight,
-                                    min(100, issue.progressPercent + 10)
+                                    min(100, issue.progressPercent + 10),
                                 )
                             },
-                            modifier = Modifier.testTag("repo_wbs_progress_${issue.id}")
+                            modifier = Modifier.testTag("repo_wbs_progress_${issue.id}"),
                         ) { Text("完成率 +10%") }
                     }
                 }

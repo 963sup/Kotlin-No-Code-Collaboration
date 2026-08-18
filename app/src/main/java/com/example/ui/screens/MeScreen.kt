@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CorporateFare
@@ -48,16 +47,14 @@ import com.example.data.model.TeamRole
 import com.example.data.model.User
 import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.SophisticatedBg
-import com.example.ui.theme.SophisticatedBorder
 import com.example.ui.theme.SophisticatedSurfaceDark
-import com.example.ui.theme.TextHighEmphasis
 import com.example.ui.theme.TextMediumEmphasis
 
 enum class MeSubTab(val label: String, val icon: ImageVector, val tag: String) {
     PROFILE("Profile & Identity", Icons.Default.Person, "me_tab_profile"),
     ORGS_AND_TEAMS("Orgs & 個團隊", Icons.Default.CorporateFare, "me_tab_orgs"),
     POLICIES("Policies & Security", Icons.Default.Policy, "me_tab_policies"),
-    AUDIT("Audit Trail", Icons.Default.History, "me_tab_audit")
+    AUDIT("Audit Trail", Icons.Default.History, "me_tab_audit"),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,13 +100,13 @@ fun MeScreen(
     onRunPolicySimulation: (User, Repository, NoCodeArtifact?, GovernanceAction) -> Unit,
     onClearPolicySimulation: () -> Unit,
     onUpdatePolicySettings: (Boolean, Boolean, Boolean, Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(SophisticatedBg)
-            .testTag("me_screen")
+            .testTag("me_screen"),
     ) {
         // Top Sub-Navigation Tab Row
         ScrollableTabRow(
@@ -120,11 +117,11 @@ fun MeScreen(
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[currentSubTab.ordinal]),
-                    color = LavenderPrimary
+                    color = LavenderPrimary,
                 )
             },
             divider = {},
-            modifier = Modifier.fillMaxWidth().testTag("me_sub_tab_row")
+            modifier = Modifier.fillMaxWidth().testTag("me_sub_tab_row"),
         ) {
             MeSubTab.values().forEach { tab ->
                 val selected = currentSubTab == tab
@@ -136,9 +133,9 @@ fun MeScreen(
                             text = tab.label,
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
                             ),
-                            color = if (selected) LavenderPrimary else TextMediumEmphasis
+                            color = if (selected) LavenderPrimary else TextMediumEmphasis,
                         )
                     },
                     icon = {
@@ -146,10 +143,10 @@ fun MeScreen(
                             imageVector = tab.icon,
                             contentDescription = tab.label,
                             modifier = Modifier.size(16.dp),
-                            tint = if (selected) LavenderPrimary else TextMediumEmphasis
+                            tint = if (selected) LavenderPrimary else TextMediumEmphasis,
                         )
                     },
-                    modifier = Modifier.testTag(tab.tag)
+                    modifier = Modifier.testTag(tab.tag),
                 )
             }
         }
@@ -182,7 +179,7 @@ fun MeScreen(
                             onSwitchActivePersona = onSwitchActivePersona,
                             onSelectRepository = onSelectRepository,
                             onSelectArtifact = onSelectArtifact,
-                            onUpdateProfile = onUpdateProfile
+                            onUpdateProfile = onUpdateProfile,
                         )
                     }
                 }
@@ -209,7 +206,7 @@ fun MeScreen(
                         onCreateTeam = onCreateTeam,
                         onAddTeamMember = onAddTeamMember,
                         onRemoveTeamMember = onRemoveTeamMember,
-                        onNavigateToRepo = onSelectRepository
+                        onNavigateToRepo = onSelectRepository,
                     )
                 }
 
@@ -222,13 +219,13 @@ fun MeScreen(
                         simulationResult = simulationResult,
                         onRunSimulation = onRunPolicySimulation,
                         onClearSimulation = onClearPolicySimulation,
-                        onUpdateEnterprisePolicies = onUpdatePolicySettings
+                        onUpdateEnterprisePolicies = onUpdatePolicySettings,
                     )
                 }
 
                 MeSubTab.AUDIT -> {
                     AuditLogScreen(
-                        auditLogs = auditLogs
+                        auditLogs = auditLogs,
                     )
                 }
             }

@@ -7,13 +7,13 @@ import com.example.data.model.ArtifactApproval
 import com.example.data.model.ArtifactReview
 import com.example.data.model.ArtifactType
 import com.example.data.model.AuditLog
+import com.example.data.model.DependencyType
 import com.example.data.model.DiscussionCategory
 import com.example.data.model.DiscussionComment
 import com.example.data.model.Enterprise
 import com.example.data.model.GranteeType
 import com.example.data.model.IssueComment
 import com.example.data.model.IssueDependency
-import com.example.data.model.DependencyType
 import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
 import com.example.data.model.LifecycleState
@@ -52,7 +52,7 @@ object SampleDataSeeder {
             enforceDualApproval = true,
             allowUserOwnedRepos = true,
             enforceReviewerBeforeApprover = true,
-            enforceSegregationOfDuties = true
+            enforceSegregationOfDuties = true,
         )
         dao.insertEnterprise(enterprise)
 
@@ -67,7 +67,7 @@ object SampleDataSeeder {
                 title = "VP of Architecture & Org Owner",
                 avatarColorHex = "#8B5CF6",
                 isEnterpriseAdmin = true,
-                canOwnerRepository = true
+                canOwnerRepository = true,
             ),
             User(
                 id = "usr_marcus_vance",
@@ -78,7 +78,7 @@ object SampleDataSeeder {
                 title = "Principal Security Approver",
                 avatarColorHex = "#EC4899",
                 isEnterpriseAdmin = false,
-                canOwnerRepository = true
+                canOwnerRepository = true,
             ),
             User(
                 id = "usr_elena_rostova",
@@ -89,7 +89,7 @@ object SampleDataSeeder {
                 title = "Senior Governance Reviewer",
                 avatarColorHex = "#3B82F6",
                 isEnterpriseAdmin = false,
-                canOwnerRepository = true
+                canOwnerRepository = true,
             ),
             User(
                 id = "usr_david_kim",
@@ -100,7 +100,7 @@ object SampleDataSeeder {
                 title = "No-Code Workflow Builder",
                 avatarColorHex = "#10B981",
                 isEnterpriseAdmin = false,
-                canOwnerRepository = true
+                canOwnerRepository = true,
             ),
             User(
                 id = "usr_maya_lin",
@@ -111,7 +111,7 @@ object SampleDataSeeder {
                 title = "Product Stakeholder & Viewer",
                 avatarColorHex = "#F59E0B",
                 isEnterpriseAdmin = false,
-                canOwnerRepository = true
+                canOwnerRepository = true,
             ),
             User(
                 id = "usr_alex_rivera",
@@ -122,8 +122,8 @@ object SampleDataSeeder {
                 title = "Independent Solutions Specialist",
                 avatarColorHex = "#06B6D4",
                 isEnterpriseAdmin = false,
-                canOwnerRepository = true
-            )
+                canOwnerRepository = true,
+            ),
         )
         dao.insertUsers(users)
 
@@ -136,7 +136,7 @@ object SampleDataSeeder {
             description = "Enterprise core infrastructure, AI orchestration workflows, and architecture specifications.",
             badgeColorHex = "#4F46E5",
             defaultMemberRole = RepoRole.COLLABORATOR,
-            canOwnerRepository = true
+            canOwnerRepository = true,
         )
         val orgFintech = Organization(
             id = "org_fintech_solutions",
@@ -146,7 +146,7 @@ object SampleDataSeeder {
             description = "Mission-critical financial transaction workflows, compliance forms, and audit gates.",
             badgeColorHex = "#059669",
             defaultMemberRole = RepoRole.VIEWER,
-            canOwnerRepository = true
+            canOwnerRepository = true,
         )
         dao.insertOrganizations(listOf(orgCloud, orgFintech))
 
@@ -159,7 +159,7 @@ object SampleDataSeeder {
             OrgMembership(orgId = orgCloud.id, userId = "usr_maya_lin", role = OrgRole.MEMBER),
             OrgMembership(orgId = orgFintech.id, userId = "usr_sarah_chen", role = OrgRole.ADMIN),
             OrgMembership(orgId = orgFintech.id, userId = "usr_marcus_vance", role = OrgRole.OWNER),
-            OrgMembership(orgId = orgFintech.id, userId = "usr_elena_rostova", role = OrgRole.MEMBER)
+            OrgMembership(orgId = orgFintech.id, userId = "usr_elena_rostova", role = OrgRole.MEMBER),
         )
         dao.insertOrgMemberships(orgMemberships)
 
@@ -170,7 +170,7 @@ object SampleDataSeeder {
             name = "Core Infrastructure Team",
             slug = "core-infra",
             description = "Manages enterprise architectural blueprints and system integration specs.",
-            canOwnerRepository = false
+            canOwnerRepository = false,
         )
         val teamSecurity = Team(
             id = "team_security_governance",
@@ -178,7 +178,7 @@ object SampleDataSeeder {
             name = "Security & Governance Team",
             slug = "security-gov",
             description = "Provides mandatory compliance reviews and cryptographic approval sign-offs.",
-            canOwnerRepository = false
+            canOwnerRepository = false,
         )
         val teamProductEngineering = Team(
             id = "team_product_eng",
@@ -186,7 +186,7 @@ object SampleDataSeeder {
             name = "Product Engineering Team",
             slug = "product-eng",
             description = "Designs no-code workflow automations and customer journey schemas.",
-            canOwnerRepository = false
+            canOwnerRepository = false,
         )
         dao.insertTeams(listOf(teamCoreInfra, teamSecurity, teamProductEngineering))
 
@@ -197,7 +197,7 @@ object SampleDataSeeder {
             TeamMembership(teamId = teamSecurity.id, userId = "usr_marcus_vance", role = TeamRole.MAINTAINER),
             TeamMembership(teamId = teamSecurity.id, userId = "usr_sarah_chen", role = TeamRole.MEMBER),
             TeamMembership(teamId = teamProductEngineering.id, userId = "usr_david_kim", role = TeamRole.MAINTAINER),
-            TeamMembership(teamId = teamProductEngineering.id, userId = "usr_maya_lin", role = TeamRole.MEMBER)
+            TeamMembership(teamId = teamProductEngineering.id, userId = "usr_maya_lin", role = TeamRole.MEMBER),
         )
         dao.insertTeamMemberships(teamMemberships)
 
@@ -214,7 +214,7 @@ object SampleDataSeeder {
             category = "Process Automation",
             requiredApproverCount = 2,
             requireReviewerPass = true,
-            preventSelfApproval = true
+            preventSelfApproval = true,
         )
         val repo2 = Repository(
             id = "repo_payment_compliance_specs",
@@ -228,7 +228,7 @@ object SampleDataSeeder {
             category = "Governance & RFCs",
             requiredApproverCount = 2,
             requireReviewerPass = true,
-            preventSelfApproval = true
+            preventSelfApproval = true,
         )
         val repo3 = Repository(
             id = "repo_alex_design_tokens",
@@ -242,7 +242,7 @@ object SampleDataSeeder {
             category = "Design Architecture",
             requiredApproverCount = 1,
             requireReviewerPass = true,
-            preventSelfApproval = false
+            preventSelfApproval = false,
         )
         dao.insertRepositories(listOf(repo1, repo2, repo3))
 
@@ -255,7 +255,7 @@ object SampleDataSeeder {
                 granteeId = teamSecurity.id,
                 granteeName = teamSecurity.name,
                 role = RepoRole.APPROVER,
-                grantedByUserId = "usr_sarah_chen"
+                grantedByUserId = "usr_sarah_chen",
             ),
             RepoAccessRule(
                 repoId = repo1.id,
@@ -263,7 +263,7 @@ object SampleDataSeeder {
                 granteeId = teamCoreInfra.id,
                 granteeName = teamCoreInfra.name,
                 role = RepoRole.REVIEWER,
-                grantedByUserId = "usr_sarah_chen"
+                grantedByUserId = "usr_sarah_chen",
             ),
             RepoAccessRule(
                 repoId = repo1.id,
@@ -271,7 +271,7 @@ object SampleDataSeeder {
                 granteeId = "usr_david_kim",
                 granteeName = "David Kim",
                 role = RepoRole.COLLABORATOR,
-                grantedByUserId = "usr_sarah_chen"
+                grantedByUserId = "usr_sarah_chen",
             ),
             RepoAccessRule(
                 repoId = repo1.id,
@@ -279,7 +279,7 @@ object SampleDataSeeder {
                 granteeId = "usr_marcus_vance",
                 granteeName = "Marcus Vance",
                 role = RepoRole.APPROVER,
-                grantedByUserId = "usr_sarah_chen"
+                grantedByUserId = "usr_sarah_chen",
             ),
             // Repo 2 mappings:
             RepoAccessRule(
@@ -288,7 +288,7 @@ object SampleDataSeeder {
                 granteeId = teamSecurity.id,
                 granteeName = teamSecurity.name,
                 role = RepoRole.MAINTAINER,
-                grantedByUserId = "usr_marcus_vance"
+                grantedByUserId = "usr_marcus_vance",
             ),
             RepoAccessRule(
                 repoId = repo2.id,
@@ -296,7 +296,7 @@ object SampleDataSeeder {
                 granteeId = "usr_elena_rostova",
                 granteeName = "Elena Rostova",
                 role = RepoRole.REVIEWER,
-                grantedByUserId = "usr_marcus_vance"
+                grantedByUserId = "usr_marcus_vance",
             ),
             RepoAccessRule(
                 repoId = repo2.id,
@@ -304,7 +304,7 @@ object SampleDataSeeder {
                 granteeId = "usr_sarah_chen",
                 granteeName = "Sarah Chen",
                 role = RepoRole.APPROVER,
-                grantedByUserId = "usr_marcus_vance"
+                grantedByUserId = "usr_marcus_vance",
             ),
             // Repo 3 (User Owned) mappings:
             RepoAccessRule(
@@ -313,8 +313,8 @@ object SampleDataSeeder {
                 granteeId = "usr_david_kim",
                 granteeName = "David Kim",
                 role = RepoRole.REVIEWER,
-                grantedByUserId = "usr_alex_rivera"
-            )
+                grantedByUserId = "usr_alex_rivera",
+            ),
         )
         dao.insertRepoAccessRules(accessRules)
 
@@ -340,7 +340,7 @@ object SampleDataSeeder {
             authorUserId = "usr_david_kim",
             authorDisplayName = "David Kim",
             version = "v1.3.0",
-            lockedByPolicy = false
+            lockedByPolicy = false,
         )
 
         val artifact2 = NoCodeArtifact(
@@ -361,7 +361,7 @@ object SampleDataSeeder {
             authorUserId = "usr_elena_rostova",
             authorDisplayName = "Elena Rostova",
             version = "v2.0.0",
-            lockedByPolicy = false
+            lockedByPolicy = false,
         )
 
         val artifact3 = NoCodeArtifact(
@@ -383,7 +383,7 @@ object SampleDataSeeder {
             authorUserId = "usr_marcus_vance",
             authorDisplayName = "Marcus Vance",
             version = "v3.1.0",
-            lockedByPolicy = true
+            lockedByPolicy = true,
         )
 
         val artifact4 = NoCodeArtifact(
@@ -405,7 +405,7 @@ object SampleDataSeeder {
             authorUserId = "usr_alex_rivera",
             authorDisplayName = "Alex Rivera",
             version = "v0.9.0",
-            lockedByPolicy = false
+            lockedByPolicy = false,
         )
 
         dao.insertArtifacts(listOf(artifact1, artifact2, artifact3, artifact4))
@@ -416,7 +416,7 @@ object SampleDataSeeder {
             reviewerUserId = "usr_elena_rostova",
             reviewerDisplayName = "Elena Rostova",
             decision = ReviewDecision.APPROVED,
-            feedbackNote = "Thorough escalation logic. SLA triggers verified with platform on-call policy."
+            feedbackNote = "Thorough escalation logic. SLA triggers verified with platform on-call policy.",
         )
         dao.insertReview(review1)
 
@@ -425,7 +425,7 @@ object SampleDataSeeder {
             approverUserId = "usr_sarah_chen",
             approverDisplayName = "Sarah Chen",
             approverTitle = "VP of Architecture (Org Owner)",
-            status = ApprovalStatus.APPROVED
+            status = ApprovalStatus.APPROVED,
         )
         dao.insertApproval(approval1)
 
@@ -434,14 +434,14 @@ object SampleDataSeeder {
             approverUserId = "usr_sarah_chen",
             approverDisplayName = "Sarah Chen",
             approverTitle = "Org Admin",
-            status = ApprovalStatus.APPROVED
+            status = ApprovalStatus.APPROVED,
         )
         val approvalKyc2 = ArtifactApproval(
             artifactId = artifact3.id,
             approverUserId = "usr_marcus_vance",
             approverDisplayName = "Marcus Vance",
             approverTitle = "Principal Security Approver",
-            status = ApprovalStatus.APPROVED
+            status = ApprovalStatus.APPROVED,
         )
         dao.insertApprovals(listOf(approvalKyc1, approvalKyc2))
 
@@ -462,7 +462,7 @@ object SampleDataSeeder {
             assigneeName = teamCoreInfra.name,
             linkedArtifactId = artifact1.id,
             linkedArtifactTitle = artifact1.title,
-            labels = "bug,sla,incident-response"
+            labels = "bug,sla,incident-response",
         )
 
         // Parent Epic Issue in Repo 1
@@ -482,7 +482,7 @@ object SampleDataSeeder {
             assigneeName = teamCoreInfra.name,
             linkedArtifactId = artifact1.id,
             linkedArtifactTitle = artifact1.title,
-            labels = "compliance,security,dual-approval,epic"
+            labels = "compliance,security,dual-approval,epic",
         )
 
         // Sub-Issue 1 of Issue 2
@@ -506,7 +506,7 @@ object SampleDataSeeder {
             closedAt = System.currentTimeMillis() - 86400000L,
             closedByUserId = "usr_sarah_chen",
             closedByDisplayName = "Sarah Chen",
-            labels = "fido2,security,sub-issue"
+            labels = "fido2,security,sub-issue",
         )
 
         // Sub-Issue 2 of Issue 2
@@ -527,7 +527,7 @@ object SampleDataSeeder {
             parentIssueId = issue2.id,
             parentIssueNumber = issue2.issueNumber,
             parentIssueTitle = issue2.title,
-            labels = "cryptography,quorum,sub-issue"
+            labels = "cryptography,quorum,sub-issue",
         )
 
         // Sub-Issue 3 of Issue 2
@@ -548,7 +548,7 @@ object SampleDataSeeder {
             parentIssueId = issue2.id,
             parentIssueNumber = issue2.issueNumber,
             parentIssueTitle = issue2.title,
-            labels = "testing,policy,sub-issue"
+            labels = "testing,policy,sub-issue",
         )
 
         // Independent Issue in Repo 1 that is BLOCKED
@@ -566,7 +566,7 @@ object SampleDataSeeder {
             assigneeType = GranteeType.TEAM,
             assigneeId = teamSecurity.id,
             assigneeName = teamSecurity.name,
-            labels = "emergency,hotfix,governance"
+            labels = "emergency,hotfix,governance",
         )
 
         // Repo 2 Parent Issue
@@ -586,7 +586,7 @@ object SampleDataSeeder {
             assigneeName = teamSecurity.name,
             linkedArtifactId = artifact3.id,
             linkedArtifactTitle = artifact3.title,
-            labels = "aml,kyc,regulatory,epic"
+            labels = "aml,kyc,regulatory,epic",
         )
 
         // Repo 2 Sub-issues
@@ -610,7 +610,7 @@ object SampleDataSeeder {
             closedAt = System.currentTimeMillis() - 172800000L,
             closedByUserId = "usr_marcus_vance",
             closedByDisplayName = "Marcus Vance",
-            labels = "sanctions,ofac,sub-issue"
+            labels = "sanctions,ofac,sub-issue",
         )
 
         val issue9 = RepoIssue(
@@ -630,7 +630,7 @@ object SampleDataSeeder {
             parentIssueId = issue3.id,
             parentIssueNumber = issue3.issueNumber,
             parentIssueTitle = issue3.title,
-            labels = "compliance,override,sub-issue"
+            labels = "compliance,override,sub-issue",
         )
 
         dao.insertIssues(listOf(issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8, issue9))
@@ -645,7 +645,7 @@ object SampleDataSeeder {
                 blockingIssueId = issue5.id,
                 dependencyType = DependencyType.BLOCKS,
                 createdByUserId = "usr_marcus_vance",
-                createdByDisplayName = "Marcus Vance"
+                createdByDisplayName = "Marcus Vance",
             ),
             // In Repo 1: Issue #1 (Incident SLA timeout) is BLOCKED BY Issue #5 (Regression Suite)
             IssueDependency(
@@ -655,7 +655,7 @@ object SampleDataSeeder {
                 blockingIssueId = issue6.id,
                 dependencyType = DependencyType.BLOCKS,
                 createdByUserId = "usr_sarah_chen",
-                createdByDisplayName = "Sarah Chen"
+                createdByDisplayName = "Sarah Chen",
             ),
             // In Repo 2: Issue #3 (Jurisdiction Override) is BLOCKED BY Issue #2 (OFAC Worker)
             IssueDependency(
@@ -665,8 +665,8 @@ object SampleDataSeeder {
                 blockingIssueId = issue8.id,
                 dependencyType = DependencyType.BLOCKS,
                 createdByUserId = "usr_marcus_vance",
-                createdByDisplayName = "Marcus Vance"
-            )
+                createdByDisplayName = "Marcus Vance",
+            ),
         )
         dao.insertIssueDependencies(dependencies)
 
@@ -677,7 +677,7 @@ object SampleDataSeeder {
             authorDisplayName = "David Kim",
             authorRole = "COLLABORATOR",
             content = "Good catch Elena. I've updated the draft state machine to include a 15m timer branch that triggers the PagerDuty fallback webhook.",
-            createdAt = System.currentTimeMillis() - 86400000L
+            createdAt = System.currentTimeMillis() - 86400000L,
         )
         val issueComment2 = IssueComment(
             issueId = issue1.id,
@@ -685,7 +685,7 @@ object SampleDataSeeder {
             authorDisplayName = "Marcus Vance",
             authorRole = "APPROVER",
             content = "Security team confirms this satisfies the SLA failover policy. Once verified, we will sign off.",
-            createdAt = System.currentTimeMillis() - 43200000L
+            createdAt = System.currentTimeMillis() - 43200000L,
         )
         dao.insertIssueComments(listOf(issueComment1, issueComment2))
 
@@ -703,7 +703,7 @@ object SampleDataSeeder {
             isLocked = false,
             isAnswered = true,
             acceptedAnswerCommentId = "dc_answer_schema_v2",
-            upvoteCount = 8
+            upvoteCount = 8,
         )
         val disc2 = RepoDiscussion(
             id = "disc_qna_reviewer_roles",
@@ -718,7 +718,7 @@ object SampleDataSeeder {
             isLocked = false,
             isAnswered = true,
             acceptedAnswerCommentId = "dc_answer_policy_precedence",
-            upvoteCount = 5
+            upvoteCount = 5,
         )
         val disc3 = RepoDiscussion(
             id = "disc_announcement_lockdown",
@@ -732,7 +732,7 @@ object SampleDataSeeder {
             authorRole = "OWNER",
             isLocked = true,
             isAnswered = false,
-            upvoteCount = 12
+            upvoteCount = 12,
         )
         dao.insertDiscussions(listOf(disc1, disc2, disc3))
 
@@ -746,7 +746,7 @@ object SampleDataSeeder {
             content = "We have benchmarked the declarative state schema against v2.0 specs. It fully supports validation hooks for dual-approval constraints.",
             isAcceptedAnswer = true,
             upvotes = 6,
-            createdAt = System.currentTimeMillis() - 72000000L
+            createdAt = System.currentTimeMillis() - 72000000L,
         )
         val discComment2 = DiscussionComment(
             id = "dc_answer_policy_precedence",
@@ -757,7 +757,7 @@ object SampleDataSeeder {
             content = "The Hierarchical Policy Engine resolves the highest rank among Direct Grants, Team Grants, and Org Defaults. Therefore, your Team's REVIEWER grant elevates your effective permission over the base Org Member COLLABORATOR default!",
             isAcceptedAnswer = true,
             upvotes = 9,
-            createdAt = System.currentTimeMillis() - 36000000L
+            createdAt = System.currentTimeMillis() - 36000000L,
         )
         dao.insertDiscussionComments(listOf(discComment1, discComment2))
 
@@ -772,7 +772,7 @@ object SampleDataSeeder {
                 actorDisplayName = "David Kim",
                 actionName = "SUBMIT_FOR_REVIEW",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Collaborator David Kim submitted artifact 'High-Severity Automated Incident Escalation Flow' for peer review."
+                reasoning = "Collaborator David Kim submitted artifact 'High-Severity Automated Incident Escalation Flow' for peer review.",
             ),
             AuditLog(
                 enterpriseId = enterprise.id,
@@ -783,7 +783,7 @@ object SampleDataSeeder {
                 actorDisplayName = "Elena Rostova",
                 actionName = "SUBMIT_REVIEW",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Reviewer Elena Rostova completed peer review with decision APPROVED."
+                reasoning = "Reviewer Elena Rostova completed peer review with decision APPROVED.",
             ),
             AuditLog(
                 enterpriseId = enterprise.id,
@@ -794,7 +794,7 @@ object SampleDataSeeder {
                 actorDisplayName = "Sarah Chen",
                 actionName = "SUBMIT_FINAL_APPROVAL",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Org Owner Sarah Chen granted 1st Approver signature (1 of 2 required signatures)."
+                reasoning = "Org Owner Sarah Chen granted 1st Approver signature (1 of 2 required signatures).",
             ),
             AuditLog(
                 enterpriseId = enterprise.id,
@@ -805,8 +805,8 @@ object SampleDataSeeder {
                 actorDisplayName = "Marcus Vance",
                 actionName = "PUBLISH_AND_LOCK",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "Artifact 'Tier-3 Corporate Customer KYC Onboarding Form Schema' locked and published following 2 distinct approver signatures."
-            )
+                reasoning = "Artifact 'Tier-3 Corporate Customer KYC Onboarding Form Schema' locked and published following 2 distinct approver signatures.",
+            ),
         )
         dao.insertAuditLogs(auditLogs)
 
@@ -834,7 +834,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 artifactId = artifact1.id,
                 artifactTitle = artifact1.title,
-                createdAt = now - 3600000L
+                createdAt = now - 3600000L,
             ),
             AppNotification(
                 id = "notif_sarah_issue_1",
@@ -858,7 +858,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 issueId = issue2.id,
                 issueTitle = issue2.title,
-                createdAt = now - 7200000L
+                createdAt = now - 7200000L,
             ),
             AppNotification(
                 id = "notif_sarah_disc_1",
@@ -881,7 +881,7 @@ object SampleDataSeeder {
                 discussionId = disc2.id,
                 discussionTitle = disc2.title,
                 createdAt = now - 86400000L,
-                readAt = now - 3600000L
+                readAt = now - 3600000L,
             ),
 
             // --- MARCUS VANCE (Security Approver & Fintech Owner) ---
@@ -905,7 +905,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 artifactId = artifact1.id,
                 artifactTitle = artifact1.title,
-                createdAt = now - 1800000L
+                createdAt = now - 1800000L,
             ),
             AppNotification(
                 id = "notif_marcus_gov_alert",
@@ -925,7 +925,7 @@ object SampleDataSeeder {
                 orgName = orgFintech.name,
                 repoId = repo2.id,
                 repoName = repo2.name,
-                createdAt = now - 14400000L
+                createdAt = now - 14400000L,
             ),
             AppNotification(
                 id = "notif_marcus_pub",
@@ -947,7 +947,7 @@ object SampleDataSeeder {
                 artifactId = artifact3.id,
                 artifactTitle = artifact3.title,
                 createdAt = now - 172800000L,
-                readAt = now - 86400000L
+                readAt = now - 86400000L,
             ),
 
             // --- ELENA ROSTOVA (Senior Governance Reviewer) ---
@@ -971,7 +971,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 artifactId = artifact2.id,
                 artifactTitle = artifact2.title,
-                createdAt = now - 900000L
+                createdAt = now - 900000L,
             ),
             AppNotification(
                 id = "notif_elena_membership",
@@ -991,7 +991,7 @@ object SampleDataSeeder {
                 orgName = orgCloud.name,
                 teamId = teamCoreInfra.id,
                 teamName = teamCoreInfra.name,
-                createdAt = now - 43200000L
+                createdAt = now - 43200000L,
             ),
             AppNotification(
                 id = "notif_elena_access",
@@ -1012,7 +1012,7 @@ object SampleDataSeeder {
                 repoId = repo2.id,
                 repoName = repo2.name,
                 createdAt = now - 259200000L,
-                readAt = now - 86400000L
+                readAt = now - 86400000L,
             ),
 
             // --- DAVID KIM (Workflow Builder) ---
@@ -1036,7 +1036,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 artifactId = artifact1.id,
                 artifactTitle = artifact1.title,
-                createdAt = now - 7200000L
+                createdAt = now - 7200000L,
             ),
             AppNotification(
                 id = "notif_david_issue_assigned",
@@ -1058,7 +1058,7 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 issueId = issue1.id,
                 issueTitle = issue1.title,
-                createdAt = now - 18000000L
+                createdAt = now - 18000000L,
             ),
             AppNotification(
                 id = "notif_david_disc_reply",
@@ -1081,7 +1081,7 @@ object SampleDataSeeder {
                 discussionId = disc2.id,
                 discussionTitle = disc2.title,
                 createdAt = now - 50000000L,
-                readAt = now - 20000000L
+                readAt = now - 20000000L,
             ),
 
             // --- MAYA LIN (Cloud Architect) ---
@@ -1103,7 +1103,7 @@ object SampleDataSeeder {
                 orgName = orgCloud.name,
                 repoId = repo1.id,
                 repoName = repo1.name,
-                createdAt = now - 21600000L
+                createdAt = now - 21600000L,
             ),
             AppNotification(
                 id = "notif_maya_disc_reply",
@@ -1125,9 +1125,53 @@ object SampleDataSeeder {
                 repoName = repo1.name,
                 discussionId = disc1.id,
                 discussionTitle = disc1.title,
-                createdAt = now - 10800000L
-            )
+                createdAt = now - 10800000L,
+            ),
         )
+
+        // 9. WORK EVIDENCE, VERIFICATION & CHECKLISTS
+        val mainIssueId = issue1.id // Baseline sinking problem
+        dao.insertTaskChecklist(
+            com.example.data.model.TaskChecklist(
+                id = "chk_001",
+                issueId = mainIssueId,
+                title = "現場測量與數據收集",
+                isCompleted = true,
+                completedByUserId = "usr_marcus_wong",
+                completedByDisplayName = "Marcus Wong",
+                completedAt = System.currentTimeMillis() - 86400000 * 5,
+            ),
+        )
+        dao.insertTaskChecklist(
+            com.example.data.model.TaskChecklist(
+                id = "chk_002",
+                issueId = mainIssueId,
+                title = "根因分析",
+                isCompleted = true,
+                completedByUserId = "usr_sarah_chen",
+                completedByDisplayName = "Sarah Chen",
+                completedAt = System.currentTimeMillis() - 86400000 * 3,
+            ),
+        )
+        dao.insertTaskChecklist(
+            com.example.data.model.TaskChecklist(
+                id = "chk_003",
+                issueId = mainIssueId,
+                title = "提出優化方案",
+                isCompleted = false,
+            ),
+        )
+
+        val evd = com.example.data.model.WorkEvidence(
+            id = "evd_001",
+            issueId = mainIssueId,
+            submitterUserId = "usr_marcus_wong",
+            submitterDisplayName = "Marcus Wong",
+            description = "現場測量數據報告",
+            status = "PENDING",
+        )
+        dao.insertWorkEvidence(evd)
+
         dao.insertNotifications(notifications)
     }
 }

@@ -53,7 +53,7 @@ private enum class SocialProfileTab(val label: String) {
     FOLLOWING("追蹤中"),
     ACTIVITY("追蹤動態"),
     SAVED("收藏"),
-    ACHIEVEMENTS("成就")
+    ACHIEVEMENTS("成就"),
 }
 
 @Composable
@@ -66,7 +66,7 @@ fun SocialProfileScreen(
     savedTargets: List<SavedTarget>,
     syncStatus: SyncStatusSummary,
     onToggleFollow: (String) -> Unit,
-    onSyncNow: () -> Unit
+    onSyncNow: () -> Unit,
 ) {
     val governanceViewModel: GovernanceViewModel = viewModel()
     val users by governanceViewModel.users.collectAsState()
@@ -116,7 +116,7 @@ fun SocialProfileScreen(
         activeUser,
         allOrgMemberships,
         allTeamMemberships,
-        allAccessRules
+        allAccessRules,
     ) {
         repositories.filter { repository ->
             CollaborationTargetAccess.canOpenRepository(
@@ -124,7 +124,7 @@ fun SocialProfileScreen(
                 repository = repository,
                 orgMemberships = allOrgMemberships,
                 teamMemberships = allTeamMemberships,
-                accessRules = allAccessRules
+                accessRules = allAccessRules,
             )
         }.associateBy { it.id }
     }
@@ -149,6 +149,7 @@ fun SocialProfileScreen(
         when (target) {
             is CollaborationTarget.Repository -> repositoriesById[target.repositoryId]
                 ?.let(governanceViewModel::selectRepository)
+
             is CollaborationTarget.Artifact -> {
                 val repository = repositoriesById[target.repositoryId]
                 val artifact = artifactsById[target.artifactId]
@@ -157,42 +158,58 @@ fun SocialProfileScreen(
                     governanceViewModel.selectArtifact(artifact)
                 }
             }
+
             is CollaborationTarget.Issue -> repositoriesById[target.repositoryId]
                 ?.let(governanceViewModel::selectRepository)
+
             is CollaborationTarget.Discussion -> repositoriesById[target.repositoryId]
                 ?.let(governanceViewModel::selectRepository)
+
             is CollaborationTarget.UserProfile -> usersById[target.userId]
                 ?.let(governanceViewModel::selectProfileUser)
+
             is CollaborationTarget.Organization,
-            is CollaborationTarget.Team -> Unit
+            is CollaborationTarget.Team,
+            -> Unit
         }
     }
 
     Column(Modifier.fillMaxSize()) {
         Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
-                .testTag("social_profile_header")
+                .testTag("social_profile_header"),
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(profileUser.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text("@${profileUser.username} · ${profileUser.title}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    profileUser.displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    "@${profileUser.username} · ${profileUser.title}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Text(
                     "Lv.${stats.level} · XP ${stats.xp} · 公開協作 ${stats.publicActions}",
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
-                Text("追隨者 ${followerUsers.size} · 追蹤中 ${followingUsers.size} · 已解鎖 ${achievements.count { it.unlocked }} 個成就")
+                Text(
+                    "追隨者 ${followerUsers.size} · 追蹤中 ${followingUsers.size} · 已解鎖 ${achievements.count {
+                        it.unlocked
+                    }} 個成就",
+                )
                 if (profileUser.id != activeUser.id) {
                     OutlinedButton(
                         onClick = { onToggleFollow(profileUser.id) },
-                        modifier = Modifier.testTag("profile_follow")
+                        modifier = Modifier.testTag("profile_follow"),
                     ) {
                         Text(if (isFollowing) "取消追蹤" else "追蹤")
                     }
                 } else {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Button(onClick = onSyncNow, modifier = Modifier.testTag("profile_sync_now")) {
                             Text("立即同步")
@@ -200,7 +217,7 @@ fun SocialProfileScreen(
                         Text(
                             "待同步 ${syncStatus.pending} · 衝突 ${syncStatus.conflicts} · 失敗 ${syncStatus.failed}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -209,21 +226,21 @@ fun SocialProfileScreen(
 
         LazyRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("social_profile_tabs"),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(SocialProfileTab.entries, key = { it.name }) { tab ->
                 FilterChip(
                     selected = selectedTab == tab,
                     onClick = { tabName = tab.name },
                     label = { Text(tab.label) },
-                    modifier = Modifier.testTag("social_tab_${tab.name.lowercase()}")
+                    modifier = Modifier.testTag("social_tab_${tab.name.lowercase()}"),
                 )
             }
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             when (selectedTab) {
                 SocialProfileTab.OVERVIEW -> {
@@ -234,7 +251,7 @@ fun SocialProfileScreen(
                                 Text(profileUser.bio)
                                 Text(
                                     "${profileUser.location} · ${profileUser.pronouns}",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -282,7 +299,7 @@ fun SocialProfileScreen(
                             Card(
                                 modifier = Modifier.fillMaxWidth().clickable {
                                     usersById[item.actorUserId]?.let(governanceViewModel::selectProfileUser)
-                                }
+                                },
                             ) {
                                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                     Text(item.actorDisplayName, fontWeight = FontWeight.SemiBold)
@@ -290,7 +307,7 @@ fun SocialProfileScreen(
                                     Text(
                                         "${item.repositoryName} · ${formatSocialTime(item.timestamp)}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
@@ -317,23 +334,23 @@ fun SocialProfileScreen(
                                     discussionsById,
                                     organizationsById,
                                     teamsById,
-                                    usersById
+                                    usersById,
                                 )
                                 Card(
                                     modifier = Modifier.fillMaxWidth().clickable { openTarget(target) }
-                                        .testTag("saved_target_${target.toString().hashCode()}")
+                                        .testTag("saved_target_${target.toString().hashCode()}"),
                                 ) {
                                     Column(Modifier.padding(14.dp)) {
                                         Text(
                                             label.first,
                                             fontWeight = FontWeight.SemiBold,
                                             maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
+                                            overflow = TextOverflow.Ellipsis,
                                         )
                                         Text(
                                             label.second,
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
                                 }
@@ -353,7 +370,7 @@ fun SocialProfileScreen(
                                         MaterialTheme.colorScheme.primary
                                     } else {
                                         MaterialTheme.colorScheme.onSurface
-                                    }
+                                    },
                                 )
                                 Text(achievement.badge.description, style = MaterialTheme.typography.bodySmall)
                                 LinearProgressIndicator(
@@ -361,12 +378,12 @@ fun SocialProfileScreen(
                                         (achievement.evidenceCount.toFloat() / achievement.badge.requiredEvidence)
                                             .coerceIn(0f, 1f)
                                     },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
                                 Text(
                                     "${achievement.evidenceCount}/${achievement.badge.requiredEvidence}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -381,14 +398,14 @@ fun SocialProfileScreen(
 private fun SocialPersonCard(user: User, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
-            .testTag("social_user_${user.id}")
+            .testTag("social_user_${user.id}"),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(user.displayName, fontWeight = FontWeight.SemiBold)
             Text(
                 "@${user.username} · ${user.title}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -402,23 +419,29 @@ private fun resolveSavedLabel(
     discussions: Map<String, com.example.data.model.RepoDiscussion>,
     organizations: Map<String, com.example.data.model.Organization>,
     teams: Map<String, com.example.data.model.Team>,
-    users: Map<String, User>
+    users: Map<String, User>,
 ): Pair<String, String> = when (target) {
     is CollaborationTarget.Repository -> repositories[target.repositoryId]
         ?.let { it.displayName to "儲存庫" } ?: "無法開啟" to "儲存庫已不存在或權限已撤銷"
+
     is CollaborationTarget.Artifact -> artifacts[target.artifactId]
         ?.let { it.title to (repositories[target.repositoryId]?.displayName ?: "成果") }
         ?: "無法開啟" to "成果已不存在或權限已撤銷"
+
     is CollaborationTarget.Issue -> issues[target.issueId]
         ?.let { "#${it.issueNumber} ${it.title}" to (repositories[target.repositoryId]?.displayName ?: "工作") }
         ?: "無法開啟" to "工作已不存在或權限已撤銷"
+
     is CollaborationTarget.Discussion -> discussions[target.discussionId]
         ?.let { it.title to (repositories[target.repositoryId]?.displayName ?: "討論") }
         ?: "無法開啟" to "討論已不存在或權限已撤銷"
+
     is CollaborationTarget.Organization -> organizations[target.organizationId]
         ?.let { it.name to "組織" } ?: "無法開啟" to "組織已不存在或不在目前企業"
+
     is CollaborationTarget.Team -> teams[target.teamId]
         ?.let { it.name to "團隊" } ?: "無法開啟" to "團隊已不存在或不在目前企業"
+
     is CollaborationTarget.UserProfile -> users[target.userId]
         ?.let { it.displayName to "@${it.username}" } ?: "無法開啟" to "用戶已不存在或不在目前企業"
 }

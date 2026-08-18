@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 object AppMigrations {
-    const val CURRENT_VERSION = 5
+    const val CURRENT_VERSION = 6
 
     val MIGRATION_4_5_STATEMENTS: List<String> = listOf(
         "ALTER TABLE repo_issues ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0",
@@ -103,8 +103,54 @@ object AppMigrations {
             isApplyingRemote INTEGER NOT NULL
         )
         """.trimIndent(),
-        "INSERT OR IGNORE INTO sync_runtime_state(id, isApplyingRemote) VALUES(1, 0)"
+        "INSERT OR IGNORE INTO sync_runtime_state(id, isApplyingRemote) VALUES(1, 0)",
     )
+
+    val MIGRATION_5_6_STATEMENTS: List<String> = listOf(
+        """
+        CREATE TABLE IF NOT EXISTS work_evidence (
+            id TEXT NOT NULL PRIMARY KEY,
+            issueId TEXT NOT NULL,
+            submitterUserId TEXT NOT NULL,
+            submitterDisplayName TEXT NOT NULL,
+            description TEXT NOT NULL,
+            attachmentsJson TEXT NOT NULL,
+            status TEXT NOT NULL,
+            submittedAt INTEGER NOT NULL
+        )
+        """.trimIndent(),
+        """
+        CREATE TABLE IF NOT EXISTS work_verifications (
+            id TEXT NOT NULL PRIMARY KEY,
+            evidenceId TEXT NOT NULL,
+            issueId TEXT NOT NULL,
+            reviewerUserId TEXT NOT NULL,
+            reviewerDisplayName TEXT NOT NULL,
+            decision TEXT NOT NULL,
+            feedbackNote TEXT NOT NULL,
+            criteriaJson TEXT NOT NULL,
+            verifiedAt INTEGER NOT NULL
+        )
+        """.trimIndent(),
+        """
+        CREATE TABLE IF NOT EXISTS task_checklists (
+            id TEXT NOT NULL PRIMARY KEY,
+            issueId TEXT NOT NULL,
+            title TEXT NOT NULL,
+            isCompleted INTEGER NOT NULL,
+            completedByUserId TEXT,
+            completedByDisplayName TEXT,
+            completedAt INTEGER,
+            createdAt INTEGER NOT NULL
+        )
+        """.trimIndent(),
+    )
+
+    val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            MIGRATION_5_6_STATEMENTS.forEach(database::execSQL)
+        }
+    }
 
     val MIGRATION_4_5: Migration = object : Migration(4, 5) {
         override fun migrate(database: SupportSQLiteDatabase) {

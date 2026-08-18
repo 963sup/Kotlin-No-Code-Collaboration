@@ -12,7 +12,7 @@ class MainNavigationModelTest {
             listOf(
                 MainNavigationTab.HOME,
                 MainNavigationTab.INBOX,
-                MainNavigationTab.KANBAN,
+                MainNavigationTab.WORK,
                 MainNavigationTab.EXPLORE
             ),
             PrimaryBottomNavigationTabs
@@ -21,7 +21,7 @@ class MainNavigationModelTest {
             listOf("首頁", "收件匣", "工作", "探索"),
             PrimaryBottomNavigationTabs.map { it.bottomNavigationLabel() }
         )
-        assertFalse(PrimaryBottomNavigationTabs.contains(MainNavigationTab.ME))
+        assertFalse(PrimaryBottomNavigationTabs.contains(MainNavigationTab.PROFILE))
     }
 
     @Test
@@ -30,7 +30,7 @@ class MainNavigationModelTest {
             listOf(
                 "nav_tab_home",
                 "nav_tab_inbox",
-                "nav_tab_kanban",
+                "nav_tab_work",
                 "nav_tab_explore"
             ),
             PrimaryBottomNavigationTabs.map { it.bottomNavigationTestTag() }

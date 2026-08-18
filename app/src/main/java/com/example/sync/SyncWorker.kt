@@ -12,10 +12,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 
-class CollaborationSyncWorker(
-    appContext: Context,
-    params: WorkerParameters
-) : CoroutineWorker(appContext, params) {
+class CollaborationSyncWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
         val coordinator = SyncRuntime.createCoordinator(applicationContext) ?: return Result.success()
         return when (val result = coordinator.runOnce()) {
@@ -42,7 +39,7 @@ object SyncScheduler {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             PERIODIC_WORK,
             ExistingPeriodicWorkPolicy.KEEP,
-            request
+            request,
         )
     }
 
@@ -53,7 +50,7 @@ object SyncScheduler {
         WorkManager.getInstance(context).enqueueUniqueWork(
             IMMEDIATE_WORK,
             ExistingWorkPolicy.KEEP,
-            request
+            request,
         )
     }
 }
