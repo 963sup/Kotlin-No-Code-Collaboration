@@ -18,13 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Badge
@@ -56,25 +54,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.model.GranteeType
 import com.example.data.model.NoCodeArtifact
+import com.example.data.model.OwnerType
 import com.example.data.model.Repository
 import com.example.data.model.User
 import com.example.ui.components.PersonaSwitcherDialog
 import com.example.ui.components.RepositoryWorkBoardDialog
+import com.example.ui.components.WorkspaceScopeKind
+import com.example.ui.components.WorkspaceScopeSelection
+import com.example.ui.components.WorkspaceScopeSwitcherSheet
 import com.example.ui.screens.ArtifactDetailScreen
-import com.example.ui.screens.AuditLogScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.InboxScreen
 import com.example.ui.screens.KanbanBoardScreen
 import com.example.ui.screens.MeScreen
 import com.example.ui.screens.MeSubTab
-import com.example.ui.screens.OrgTeamScreen
-import com.example.ui.screens.PolicySimulatorScreen
 import com.example.ui.screens.RepoDetailScreen
 import com.example.ui.screens.RepositoriesScreen
-import com.example.ui.screens.UserProfileScreen
 import com.example.ui.theme.LavenderOnPrimary
 import com.example.ui.theme.LavenderPrimary
 import com.example.ui.theme.LavenderSubtle
@@ -157,6 +157,120 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
     var meSubTab by remember { mutableStateOf(MeSubTab.PROFILE) }
     var showPersonaSwitcher by remember { mutableStateOf(false) }
     var showWorkBoard by remember { mutableStateOf(false) }
+    var showWorkspaceScopeSwitcher by remember { mutableStateOf(false) }
+    var selectedWorkspaceScope by remember { mutableStateOf<WorkspaceScopeSelection?>(null) }
+
+    LaunchedEffect(activeUser?.id) {
+        if (selectedWorkspaceScope == null && activeUser != null) {
+            selectedWorkspaceScope = WorkspaceScopeSelection(
+                kind = WorkspaceScopeKind.USER,
+                id = activeUser!!.id,
+                name = activeUser!!.displayName,
+                subtitle = "@${activeUser!!.username} • ${activeUser!!.title}"
+            )
+        }
+    }
+
+    val selectedScopeEnterpriseId = when (selectedWorkspaceScope?.kind) {
+        WorkspaceScopeKind.ENTERPRISE -> selectedWorkspaceScope?.id
+        WorkspaceScopeKind.ORGANIZATION -> organizations.firstOrNull { it.id == selectedWorkspaceScope?.id }?.enterpriseId
+        WorkspaceScopeKind.TEAM -> {
+            val team = teams.firstOrNull { it.id == selectedWorkspaceScope?.id }
+            organizations.firstOrNull { it.id == team?.orgId }?.enterpriseId
+        }
+        WorkspaceScopeKind.USER -> users.firstOrNull { it.id == selectedWorkspaceScope?.id }?.enterpriseId
+        null -> activeUser?.enterpriseId ?: enterprise?.id
+    }
+
+    val scopedEnterprise = enterprises.firstOrNull { it.id == selectedScopeEnterpriseId } ?: enterprise
+
+    val scopedOrganizations = when (selectedWorkspaceScope?.kind) {
+        WorkspaceScopeKind.ENTERPRISE -> organizations.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.ORGANIZATION -> organizations.filter { it.id == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.TEAM -> {
+            val orgId = teams.firstOrNull { it.id == selectedWorkspaceScope?.id }?.orgId
+            organizations.filter { it.id == orgId }
+        }
+        WorkspaceScopeKind.USER -> {
+            val userId = selectedWorkspaceScope?.id
+            val orgIds = allOrgMemberships.filter { it.userId == userId }.map { it.orgId }.toSet()
+            organizations.filter { it.id in orgIds }
+        }
+        null -> organizations
+    }
+
+    val scopedTeams = when (selectedWorkspaceScope?.kind) {
+        WorkspaceScopeKind.ENTERPRISE -> {
+            val orgIds = organizations.filter { it.enterpriseId == selectedWorkspaceScope?.id }.map { it.id }.toSet()
+            teams.filter { it.orgId in orgIds }
+        }
+        WorkspaceScopeKind.ORGANIZATION -> teams.filter { it.orgId == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.TEAM -> teams.filter { it.id == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.USER -> {
+            val userId = selectedWorkspaceScope?.id
+            val teamIds = allTeamMemberships.filter { it.userId == userId }.map { it.teamId }.toSet()
+            teams.filter { it.id in teamIds }
+        }
+        null -> teams
+    }
+
+    val scopedUsers = when (selectedWorkspaceScope?.kind) {
+        WorkspaceScopeKind.ENTERPRISE -> users.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.ORGANIZATION -> {
+            val userIds = allOrgMemberships.filter { it.orgId == selectedWorkspaceScope?.id }.map { it.userId }.toSet()
+            users.filter { it.id in userIds }
+        }
+        WorkspaceScopeKind.TEAM -> {
+            val userIds = allTeamMemberships.filter { it.teamId == selectedWorkspaceScope?.id }.map { it.userId }.toSet()
+            users.filter { it.id in userIds }
+        }
+        WorkspaceScopeKind.USER -> users.filter { it.id == selectedWorkspaceScope?.id }
+        null -> users
+    }
+
+    val scopedRepositories = when (selectedWorkspaceScope?.kind) {
+        WorkspaceScopeKind.ENTERPRISE -> repositories.filter { it.enterpriseId == selectedWorkspaceScope?.id }
+        WorkspaceScopeKind.ORGANIZATION -> repositories.filter {
+            it.ownerType == OwnerType.ORGANIZATION && it.ownerId == selectedWorkspaceScope?.id
+        }
+        WorkspaceScopeKind.TEAM -> {
+            val teamId = selectedWorkspaceScope?.id
+            val repoIds = allAccessRules
+                .filter { it.granteeType == GranteeType.TEAM && it.granteeId == teamId }
+                .map { it.repoId }
+                .toSet()
+            repositories.filter { it.id in repoIds }
+        }
+        WorkspaceScopeKind.USER -> {
+            val userId = selectedWorkspaceScope?.id
+            val orgIds = allOrgMemberships.filter { it.userId == userId }.map { it.orgId }.toSet()
+            val teamIds = allTeamMemberships.filter { it.userId == userId }.map { it.teamId }.toSet()
+            val grantedRepoIds = allAccessRules.filter {
+                (it.granteeType == GranteeType.USER && it.granteeId == userId) ||
+                    (it.granteeType == GranteeType.TEAM && it.granteeId in teamIds)
+            }.map { it.repoId }.toSet()
+
+            repositories.filter {
+                (it.ownerType == OwnerType.USER && it.ownerId == userId) ||
+                    (it.ownerType == OwnerType.ORGANIZATION && it.ownerId in orgIds) ||
+                    it.id in grantedRepoIds
+            }
+        }
+        null -> repositories
+    }
+
+    val scopedRepoIds = scopedRepositories.map { it.id }.toSet()
+    val scopedArtifacts = allArtifacts.filter { it.repoId in scopedRepoIds }
+    val scopedArtifactIds = scopedArtifacts.map { it.id }.toSet()
+    val scopedIssues = allIssues.filter { it.repoId in scopedRepoIds }
+    val scopedDiscussions = allDiscussions.filter { it.repoId in scopedRepoIds }
+    val scopedDependencies = allDependencies.filter { it.repoId in scopedRepoIds }
+    val scopedReviews = allReviews.filter { it.artifactId in scopedArtifactIds }
+    val scopedApprovals = allApprovals.filter { it.artifactId in scopedArtifactIds }
+    val scopedAccessRules = allAccessRules.filter { it.repoId in scopedRepoIds }
+    val scopedAuditLogs = auditLogs.filter {
+        it.repoId == null && it.enterpriseId == scopedEnterprise?.id || it.repoId in scopedRepoIds
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -175,12 +289,12 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .size(30.dp)
+                                .clip(RoundedCornerShape(9.dp))
                                 .background(LavenderPrimary),
                             contentAlignment = Alignment.Center
                         ) {
@@ -188,48 +302,51 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                 imageVector = Icons.Default.Security,
                                 contentDescription = null,
                                 tint = LavenderOnPrimary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
-                        Column {
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
                             Text(
-                                text = "存取治理",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = (-0.3).sp
+                                text = selectedWorkspaceScope?.name ?: scopedEnterprise?.name ?: "存取治理",
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = (-0.2).sp
                                 ),
-                                color = LavenderPrimary
+                                color = TextHighEmphasis,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = (enterprise?.name ?: "企業").uppercase() + " • 無程式碼協作平台",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 9.sp,
-                                    letterSpacing = 1.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = TextMediumEmphasis
+                                text = selectedWorkspaceScope?.kind?.label ?: "企業",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                color = TextMediumEmphasis,
+                                maxLines = 1
                             )
                         }
                     }
                 },
                 actions = {
-                    // Repository-scoped work view: a projection of Issues, not a new Project owner.
-                    if (selectedRepo != null && selectedArtifact == null) {
-                        IconButton(
-                            onClick = { showWorkBoard = true },
-                            modifier = Modifier.testTag("topbar_repo_work_board_btn")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Dashboard,
-                                contentDescription = "儲存庫工作看板與巢狀任務",
-                                tint = LavenderPrimary
-                            )
-                        }
+                    IconButton(
+                        onClick = {
+                            viewModel.selectArtifact(null)
+                            viewModel.selectRepository(null)
+                            currentTab = MainNavigationTab.REPOSITORIES
+                        },
+                        modifier = Modifier.testTag("topbar_search_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "搜尋",
+                            tint = TextHighEmphasis
+                        )
                     }
 
-                    // Inbox Quick Access Button with Badge
                     IconButton(
-                        onClick = { currentTab = MainNavigationTab.INBOX },
+                        onClick = {
+                            viewModel.selectArtifact(null)
+                            viewModel.selectRepository(null)
+                            currentTab = MainNavigationTab.INBOX
+                        },
                         modifier = Modifier.testTag("topbar_inbox_btn")
                     ) {
                         BadgedBox(
@@ -246,17 +363,39 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "統一收件匣",
+                                contentDescription = "通知",
                                 tint = if (currentTab == MainNavigationTab.INBOX) LavenderPrimary else TextHighEmphasis
                             )
                         }
                     }
 
-                    // Persona Switcher Trigger Pill
-                    ActivePersonaPill(
-                        user = activeUser,
-                        onClick = { showPersonaSwitcher = true }
-                    )
+                    IconButton(
+                        onClick = {
+                            if (activeUser != null) viewModel.selectProfileUser(activeUser)
+                            meSubTab = MeSubTab.PROFILE
+                            viewModel.selectArtifact(null)
+                            viewModel.selectRepository(null)
+                            currentTab = MainNavigationTab.ME
+                        },
+                        modifier = Modifier.testTag("topbar_profile_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "我的帳號",
+                            tint = if (currentTab == MainNavigationTab.ME) LavenderPrimary else TextHighEmphasis
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { showWorkspaceScopeSwitcher = true },
+                        modifier = Modifier.testTag("topbar_scope_switcher_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = "切換企業、組織、團隊或用戶範圍",
+                            tint = LavenderPrimary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = SophisticatedSurfaceDark,
@@ -282,20 +421,6 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                             ), modifier = Modifier.testTag("nav_tab_home")
                         )
                         NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.INBOX,
-                            onClick = { currentTab = MainNavigationTab.INBOX },
-                            icon = {
-                                BadgedBox(badge = {
-                                    if (unreadNotificationCount > 0) Badge(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary) { Text("$unreadNotificationCount") }
-                                }) { Icon(Icons.Default.Notifications, contentDescription = "收件匣") }
-                            },
-                            label = { Text("收件匣", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
-                            ), modifier = Modifier.testTag("nav_tab_inbox")
-                        )
-                        NavigationBarItem(
                             selected = currentTab == MainNavigationTab.KANBAN,
                             onClick = { currentTab = MainNavigationTab.KANBAN },
                             icon = { Icon(Icons.Default.Dashboard, contentDescription = "工作看板") },
@@ -314,19 +439,6 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                 selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
                                 unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
                             ), modifier = Modifier.testTag("nav_tab_repos")
-                        )
-                        NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.ME,
-                            onClick = {
-                                if (inspectedProfileUser == null && activeUser != null) viewModel.selectProfileUser(activeUser)
-                                currentTab = MainNavigationTab.ME
-                            },
-                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "我的") },
-                            label = { Text("我的", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
-                            ), modifier = Modifier.testTag("nav_tab_me")
                         )
                     }
                 }
@@ -487,21 +599,21 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         MainNavigationTab.HOME -> {
                             HomeScreen(
                                 activeUser = activeUser,
-                                enterprise = enterprise,
-                                organizations = organizations,
-                                teams = teams,
-                                repositories = repositories,
-                                allArtifacts = allArtifacts,
-                                allIssues = allIssues,
-                                allDiscussions = allDiscussions,
-                                allDependencies = allDependencies,
-                                allReviews = allReviews,
-                                allApprovals = allApprovals,
-                                allAccessRules = allAccessRules,
+                                enterprise = scopedEnterprise,
+                                organizations = scopedOrganizations,
+                                teams = scopedTeams,
+                                repositories = scopedRepositories,
+                                allArtifacts = scopedArtifacts,
+                                allIssues = scopedIssues,
+                                allDiscussions = scopedDiscussions,
+                                allDependencies = scopedDependencies,
+                                allReviews = scopedReviews,
+                                allApprovals = scopedApprovals,
+                                allAccessRules = scopedAccessRules,
                                 allOrgMemberships = allOrgMemberships,
                                 allTeamMemberships = allTeamMemberships,
                                 notifications = userNotifications,
-                                auditLogs = auditLogs,
+                                auditLogs = scopedAuditLogs,
                                 unreadNotificationCount = unreadNotificationCount,
                                 onNavigateToRepository = { repo ->
                                     viewModel.selectRepository(repo)
@@ -527,8 +639,8 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
 
                         MainNavigationTab.KANBAN -> {
                             KanbanBoardScreen(
-                                repositories = repositories,
-                                allIssues = allIssues,
+                                repositories = scopedRepositories,
+                                allIssues = scopedIssues,
                                 onUpdateIssueStatus = { issueId, status -> viewModel.updateIssueStatus(issueId, status) },
                                 onOpenRepository = { repo -> viewModel.selectRepository(repo) }
                             )
@@ -536,14 +648,14 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
 
                         MainNavigationTab.REPOSITORIES -> {
                             RepositoriesScreen(
-                                repositories = repositories,
-                                organizations = organizations,
-                                users = users,
-                                teams = teams,
-                                allAccessRules = allAccessRules,
+                                repositories = scopedRepositories,
+                                organizations = scopedOrganizations,
+                                users = scopedUsers,
+                                teams = scopedTeams,
+                                allAccessRules = scopedAccessRules,
                                 allOrgMemberships = allOrgMemberships,
                                 allTeamMemberships = allTeamMemberships,
-                                allArtifacts = allArtifacts,
+                                allArtifacts = scopedArtifacts,
                                 activeUser = activeUser,
                                 onSelectRepo = { repo -> viewModel.selectRepository(repo) },
                                 onCreateRepo = { name, displayName, ownerType, ownerId, ownerDisplayName, desc, category, callback ->
@@ -707,6 +819,23 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                 viewModel.switchActiveUser(user)
             },
             onDismiss = { showPersonaSwitcher = false }
+        )
+    }
+
+    if (showWorkspaceScopeSwitcher) {
+        WorkspaceScopeSwitcherSheet(
+            enterprises = enterprises,
+            organizations = organizations,
+            teams = teams,
+            users = users,
+            selectedScope = selectedWorkspaceScope,
+            onSelectScope = { scope ->
+                selectedWorkspaceScope = scope
+                viewModel.selectArtifact(null)
+                viewModel.selectRepository(null)
+                currentTab = MainNavigationTab.HOME
+            },
+            onDismiss = { showWorkspaceScopeSwitcher = false }
         )
     }
 }
