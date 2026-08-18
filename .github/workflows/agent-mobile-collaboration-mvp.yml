@@ -39,11 +39,44 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Validate implementation runner
-        run: python3 -m py_compile .github/scripts/agent_mobile_collaboration_mvp.py
+      - name: Validate bounded implementation runners
+        run: |
+          python3 -m py_compile .github/scripts/agent_mobile_wbs_mvp.py
+          python3 -m py_compile .github/scripts/agent_mobile_collaboration_mvp.py
 
-      - name: Apply bounded implementation
+      - name: Materialize previously verified WBS slice and repair baseline syntax
+        run: python3 .github/scripts/agent_mobile_wbs_mvp.py
+
+      - name: Apply bounded mobile collaboration implementation
         run: python3 .github/scripts/agent_mobile_collaboration_mvp.py
+
+      - name: Reject known corrupted Kotlin identifiers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          forbidden = (
+              "associate由",
+              "group由",
+              "sorted由",
+              "distinct由",
+              "then由",
+              "currentBlocked由",
+              "onUpdateIssue狀態",
+              "onUpdate狀態",
+              "new狀態",
+              "notificationFilter狀態",
+              "role範圍",
+          )
+          violations = []
+          for path in Path("app/src").rglob("*.kt"):
+              text = path.read_text(encoding="utf-8")
+              for token in forbidden:
+                  if token in text:
+                      violations.append(f"{path}: {token}")
+          if violations:
+              raise SystemExit("Known identifier corruption remains:\n" + "\n".join(violations))
+          PY
 
       - name: Check patch integrity
         run: git diff --check
@@ -57,6 +90,8 @@ jobs:
       - name: Commit verified implementation
         shell: bash
         run: |
+          rm -f .github/scripts/agent_mobile_wbs_mvp.py
+          rm -f .github/workflows/agent-mobile-wbs-mvp.yml
           rm -f .github/scripts/agent_mobile_collaboration_mvp.py
           rm -f .github/workflows/agent-mobile-collaboration-mvp.yml
           git config user.name "github-actions[bot]"
@@ -66,5 +101,5 @@ jobs:
             echo "No implementation delta was produced."
             exit 1
           fi
-          git commit -m "feat: establish light mobile collaboration shell"
+          git commit -m "feat: deliver verified mobile collaboration MVP"
           git push origin HEAD:agent/mobile-collaboration-mvp
