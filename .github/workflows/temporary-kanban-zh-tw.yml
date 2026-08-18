@@ -1,0 +1,50 @@
+name: Temporary Kanban zh-TW Migration
+
+on:
+  push:
+    branches:
+      - agent/kanban-navigation-zh-tw
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-test-build:
+    if: ${{ !contains(github.event.head_commit.message, '[generated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v7
+        with:
+          ref: agent/kanban-navigation-zh-tw
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Apply bounded transformation
+        run: python .github/scripts/apply_kanban_navigation_zh_tw.py
+
+      - name: Run unit tests
+        run: gradle :app:testDebugUnitTest --continue
+
+      - name: Assemble debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Commit generated product changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app metadata.json
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git commit -m "feat: 完成看板導覽、巢狀任務與繁體中文 UI [generated]"
+          git push origin HEAD:agent/kanban-navigation-zh-tw
