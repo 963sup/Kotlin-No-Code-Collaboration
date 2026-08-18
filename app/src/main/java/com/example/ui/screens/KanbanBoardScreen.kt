@@ -1,5 +1,8 @@
 package com.example.ui.screens
 
+// Temporary compatibility anchor for the one-time bootstrap workflow.
+// private fun androidx.compose.foundation.layout.ColumnScope.EmptyKanban(title: String, message: String) {
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

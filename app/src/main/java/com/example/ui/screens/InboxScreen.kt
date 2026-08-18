@@ -96,10 +96,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AppNotification
+import com.example.data.model.IssueHierarchyRules
+import com.example.data.model.RepoRole
+import com.example.data.model.Repository
 import com.example.data.model.NotificationCategory
 import com.example.data.model.NotificationPriority
 import com.example.data.model.NotificationStatus
 import com.example.data.model.User
+import com.example.engine.HierarchicalPolicyEngine
+import com.example.navigation.CollaborationTarget
+import com.example.navigation.CollaborationTargetAccess
+import com.example.navigation.CollaborationTargetResolver
+import com.example.ui.components.DiscussionDetailDialog
+import com.example.ui.components.IssueDetailDialog
 import com.example.ui.theme.AmberGlow
 import com.example.ui.theme.AmberWarning
 import com.example.ui.theme.EmeraldDark
@@ -145,15 +154,28 @@ fun InboxScreen(
     modifier: Modifier = Modifier
 ) {
     val activeUser by viewModel.activeUser.collectAsState()
+    val allAccessRules by viewModel.allAccessRules.collectAsState()
+    val allArtifacts by viewModel.allArtifacts.collectAsState()
+    val allDependencies by viewModel.allDependencies.collectAsState()
+    val allDiscussions by viewModel.allDiscussions.collectAsState()
+    val allIssues by viewModel.allIssues.collectAsState()
+    val allOrgMemberships by viewModel.allOrgMemberships.collectAsState()
+    val allTeamMemberships by viewModel.allTeamMemberships.collectAsState()
+    val allTeams by viewModel.teams.collectAsState()
     val allUsers by viewModel.users.collectAsState()
     val notifications by viewModel.userNotifications.collectAsState()
-    val unreadCount by viewModel.unreadNotificationCount.collectAsState()
-    val selectedCategoryFilter by viewModel.notificationFilterCategory.collectAsState()
+    val organizations by viewModel.organizations.collectAsState()
     val repositories by viewModel.repositories.collectAsState()
+    val selectedCategoryFilter by viewModel.notificationFilterCategory.collectAsState()
+    val selectedDiscussionComments by viewModel.selectedDiscussionComments.collectAsState()
+    val selectedIssueComments by viewModel.selectedIssueComments.collectAsState()
+    val unreadCount by viewModel.unreadNotificationCount.collectAsState()
 
     var selectedTab by remember { mutableStateOf(InboxFilterTab.ALL) }
     var inspectingNotification by remember { mutableStateOf<AppNotification?>(null) }
     var showArchitectureExplainer by remember { mutableStateOf(false) }
+    var openedTarget by remember { mutableStateOf<CollaborationTarget?>(null) }
+    var targetFailureMessage by remember { mutableStateOf<String?>(null) }
 
     // Filter notifications based on tab and category
     val filteredNotifications = remember(notifications, selectedTab, selectedCategoryFilter) {
@@ -171,6 +193,137 @@ fun InboxScreen(
 
     val actionableCount = remember(notifications) {
         notifications.count { it.isActionable && it.status != NotificationStatus.ARCHIVED }
+    }
+
+
+    fun rejectTarget(message: String): Boolean {
+        openedTarget = null
+        targetFailureMessage = message
+        return false
+    }
+
+    fun canOpenRepository(repo: Repository): Boolean {
+        val actor = activeUser ?: return false
+        return CollaborationTargetAccess.canOpenRepository(
+  user = actor,
+  repository = repo,
+  orgMemberships = allOrgMemberships,
+  teamMemberships = allTeamMemberships,
+  accessRules = allAccessRules
+        )
+    }
+
+    fun openNotificationTarget(notification: AppNotification): Boolean {
+        return when (val target = CollaborationTargetResolver.resolve(notification)) {
+  is CollaborationTarget.Artifact -> {
+      val repo = repositories.firstOrNull { it.id == target.repositoryId }
+          ?: return rejectTarget("通知指向的儲存庫已不存在。")
+      if (!canOpenRepository(repo)) {
+          return rejectTarget("你目前沒有權限開啟這個儲存庫。")
+      }
+      val artifact = allArtifacts.firstOrNull {
+          it.id == target.artifactId && it.repoId == target.repositoryId
+      } ?: return rejectTarget("通知指向的成果已不存在或不屬於該儲存庫。")
+
+      openedTarget = null
+      viewModel.selectRepository(repo)
+      viewModel.selectArtifact(artifact)
+      onNavigateToArtifact(target.repositoryId, target.artifactId)
+      true
+  }
+
+  is CollaborationTarget.Issue -> {
+      val repo = repositories.firstOrNull { it.id == target.repositoryId }
+          ?: return rejectTarget("通知指向的儲存庫已不存在。")
+      if (!canOpenRepository(repo)) {
+          return rejectTarget("你目前沒有權限開啟這個儲存庫任務。")
+      }
+      val issue = allIssues.firstOrNull {
+          it.id == target.issueId && it.repoId == target.repositoryId
+      } ?: return rejectTarget("通知指向的任務已不存在或不屬於該儲存庫。")
+
+      targetFailureMessage = null
+      openedTarget = target
+      viewModel.loadIssueComments(issue.id)
+      true
+  }
+
+  is CollaborationTarget.Discussion -> {
+      val repo = repositories.firstOrNull { it.id == target.repositoryId }
+          ?: return rejectTarget("通知指向的儲存庫已不存在。")
+      if (!canOpenRepository(repo)) {
+          return rejectTarget("你目前沒有權限開啟這個儲存庫討論。")
+      }
+      val discussion = allDiscussions.firstOrNull {
+          it.id == target.discussionId && it.repoId == target.repositoryId
+      } ?: return rejectTarget("通知指向的討論已不存在或不屬於該儲存庫。")
+
+      targetFailureMessage = null
+      openedTarget = target
+      viewModel.loadDiscussionComments(discussion.id)
+      true
+  }
+
+  is CollaborationTarget.Repository -> {
+      val repo = repositories.firstOrNull { it.id == target.repositoryId }
+          ?: return rejectTarget("通知指向的儲存庫已不存在。")
+      if (!canOpenRepository(repo)) {
+          return rejectTarget("你目前沒有權限開啟這個儲存庫。")
+      }
+
+      openedTarget = null
+      viewModel.selectRepository(repo)
+      onNavigateToRepository(target.repositoryId)
+      true
+  }
+
+  is CollaborationTarget.Organization -> {
+      val actor = activeUser ?: return rejectTarget("尚未選擇有效的使用者身分。")
+      val organization = organizations.firstOrNull { it.id == target.organizationId }
+          ?: return rejectTarget("通知指向的組織已不存在。")
+      val canOpen = organization.enterpriseId == actor.enterpriseId &&
+          (actor.isEnterpriseAdmin || allOrgMemberships.any {
+              it.orgId == organization.id && it.userId == actor.id
+          })
+      if (!canOpen) return rejectTarget("你目前沒有權限開啟這個組織。")
+
+      openedTarget = null
+      onNavigateToOrg(organization.id)
+      true
+  }
+
+  is CollaborationTarget.Team -> {
+      val actor = activeUser ?: return rejectTarget("尚未選擇有效的使用者身分。")
+      val team = allTeams.firstOrNull { it.id == target.teamId }
+          ?: return rejectTarget("通知指向的團隊已不存在。")
+      val organization = organizations.firstOrNull { it.id == team.orgId }
+          ?: return rejectTarget("通知指向的團隊沒有有效的所屬組織。")
+      val canOpen = organization.enterpriseId == actor.enterpriseId &&
+          (actor.isEnterpriseAdmin || allTeamMemberships.any {
+              it.teamId == team.id && it.userId == actor.id
+          })
+      if (!canOpen) return rejectTarget("你目前沒有權限開啟這個團隊。")
+
+      openedTarget = null
+      onNavigateToOrg(team.orgId)
+      true
+  }
+
+  is CollaborationTarget.UserProfile -> {
+      val actor = activeUser ?: return rejectTarget("尚未選擇有效的使用者身分。")
+      val profileUser = allUsers.firstOrNull { it.id == target.userId }
+          ?: return rejectTarget("通知指向的使用者已不存在。")
+      if (profileUser.enterpriseId != actor.enterpriseId) {
+          return rejectTarget("不能開啟其他企業範圍的使用者資料。")
+      }
+
+      openedTarget = null
+      onNavigateToUserProfile(profileUser)
+      true
+  }
+
+  null -> rejectTarget("這則通知沒有可開啟的有效協作目標。")
+        }
     }
 
     LazyColumn(
@@ -385,33 +538,11 @@ fun InboxScreen(
                     onDelete = { viewModel.deleteNotification(notif.id) },
                     onInspectContext = { inspectingNotification = notif },
                     onPerformAction = {
-                        // Mark action as completed if actionable
-                        if (notif.isActionable) {
-                            viewModel.markNotificationActionCompleted(notif.id)
-                        }
-                        // Deep navigation based on target entity
-                        if (notif.repoId != null && notif.artifactId != null) {
-                            val repo = repositories.firstOrNull { it.id == notif.repoId }
-                            if (repo != null) {
-                                viewModel.selectRepository(repo)
-                                val artifact = viewModel.allArtifacts.value.firstOrNull { it.id == notif.artifactId }
-                                if (artifact != null) {
-                                    viewModel.selectArtifact(artifact)
-                                    onNavigateToArtifact(notif.repoId, notif.artifactId)
-                                } else {
-                                    onNavigateToRepository(notif.repoId)
-                                }
-                            }
-                        } else if (notif.repoId != null) {
-                            val repo = repositories.firstOrNull { it.id == notif.repoId }
-                            if (repo != null) {
-                                viewModel.selectRepository(repo)
-                                onNavigateToRepository(notif.repoId)
-                            }
-                        } else if (notif.orgId != null) {
-                            onNavigateToOrg(notif.orgId)
-                        }
-                    }
+              val opened = openNotificationTarget(notif)
+              if (opened && notif.isActionable) {
+                  viewModel.markNotificationActionCompleted(notif.id)
+              }
+          }
                 )
             }
         }
@@ -423,30 +554,142 @@ fun InboxScreen(
             notification = inspectingNotification!!,
             onDismiss = { inspectingNotification = null },
             onNavigateToEntity = {
-                val notif = inspectingNotification!!
-                inspectingNotification = null
-                if (notif.repoId != null && notif.artifactId != null) {
-                    val repo = repositories.firstOrNull { it.id == notif.repoId }
-                    if (repo != null) {
-                        viewModel.selectRepository(repo)
-                        val artifact = viewModel.allArtifacts.value.firstOrNull { it.id == notif.artifactId }
-                        if (artifact != null) {
-                            viewModel.selectArtifact(artifact)
-                            onNavigateToArtifact(notif.repoId, notif.artifactId)
-                        } else {
-                            onNavigateToRepository(notif.repoId)
-                        }
-                    }
-                } else if (notif.repoId != null) {
-                    val repo = repositories.firstOrNull { it.id == notif.repoId }
-                    if (repo != null) {
-                        viewModel.selectRepository(repo)
-                        onNavigateToRepository(notif.repoId)
-                    }
-                } else if (notif.orgId != null) {
-                    onNavigateToOrg(notif.orgId)
-                }
-            }
+      val notif = inspectingNotification!!
+      if (openNotificationTarget(notif)) {
+          inspectingNotification = null
+      }
+  }
+        )
+    }
+
+
+    val issueTarget = openedTarget as? CollaborationTarget.Issue
+    if (issueTarget != null) {
+        val repo = repositories.firstOrNull { it.id == issueTarget.repositoryId }
+        val repoIssues = allIssues.filter { it.repoId == issueTarget.repositoryId }
+        val issue = repoIssues.firstOrNull { it.id == issueTarget.issueId }
+        if (repo != null && issue != null) {
+  val descendantIds = IssueHierarchyRules.descendantIds(issue.id, repoIssues)
+  val subIssues = IssueHierarchyRules.orderedForDisplay(repoIssues)
+      .map { it.first }
+      .filter { it.id in descendantIds }
+  val repoDependencies = allDependencies.filter { it.repoId == repo.id }
+  val blockedBy = repoDependencies
+      .filter { it.blockedIssueId == issue.id }
+      .mapNotNull { dependency ->
+          repoIssues.firstOrNull { it.id == dependency.blockingIssueId }
+              ?.let { dependency to it }
+      }
+  val blocking = repoDependencies
+      .filter { it.blockingIssueId == issue.id }
+      .mapNotNull { dependency ->
+          repoIssues.firstOrNull { it.id == dependency.blockedIssueId }
+              ?.let { dependency to it }
+      }
+  val repoArtifacts = allArtifacts.filter { it.repoId == repo.id }
+
+  IssueDetailDialog(
+      repo = repo,
+      issue = issue,
+      subIssues = subIssues,
+      blockedByDependencies = blockedBy,
+      blockingDependencies = blocking,
+      allRepoIssues = repoIssues,
+      comments = selectedIssueComments,
+      allUsers = allUsers,
+      allTeams = allTeams,
+      repoArtifacts = repoArtifacts,
+      activeUser = activeUser,
+      onDismiss = { openedTarget = null },
+      onAddComment = { content ->
+          viewModel.addIssueComment(issue.id, content) {
+              viewModel.loadIssueComments(issue.id)
+          }
+      },
+      onUpdateStatus = { status -> viewModel.updateIssueStatus(issue.id, status) },
+      onAssignIssue = { type, id, name ->
+          viewModel.assignIssue(issue.id, type, id, name)
+      },
+      onLinkParent = { parentId ->
+          viewModel.linkParentIssue(issue.id, parentId) {}
+      },
+      onAddDependency = { blockingIssueId ->
+          viewModel.addIssueDependency(repo.id, issue.id, blockingIssueId) {}
+      },
+      onRemoveDependency = { dependencyId ->
+          viewModel.removeIssueDependency(dependencyId) {}
+      },
+      onAddSubIssue = {
+          openedTarget = null
+          viewModel.selectRepository(repo)
+          onNavigateToRepository(repo.id)
+      },
+      onSelectArtifact = { artifactId ->
+          val artifact = repoArtifacts.firstOrNull { it.id == artifactId }
+          if (artifact == null) {
+              rejectTarget("任務連結的成果已不存在。")
+          } else {
+              openedTarget = null
+              viewModel.selectRepository(repo)
+              viewModel.selectArtifact(artifact)
+              onNavigateToArtifact(repo.id, artifact.id)
+          }
+      }
+  )
+        }
+    }
+
+    val discussionTarget = openedTarget as? CollaborationTarget.Discussion
+    if (discussionTarget != null) {
+        val repo = repositories.firstOrNull { it.id == discussionTarget.repositoryId }
+        val discussion = allDiscussions.firstOrNull {
+  it.id == discussionTarget.discussionId && it.repoId == discussionTarget.repositoryId
+        }
+        if (repo != null && discussion != null) {
+  val effectiveRole = activeUser?.let { actor ->
+      HierarchicalPolicyEngine.resolveEffectiveRole(
+          actor = actor,
+          repo = repo,
+          orgMemberships = allOrgMemberships,
+          teamMemberships = allTeamMemberships,
+          teams = allTeams,
+          accessRules = allAccessRules
+      ).first
+  } ?: RepoRole.VIEWER
+
+  DiscussionDetailDialog(
+      discussion = discussion,
+      comments = selectedDiscussionComments,
+      activeUser = activeUser,
+      effectiveRole = effectiveRole,
+      onDismiss = { openedTarget = null },
+      onAddComment = { content ->
+          viewModel.addDiscussionComment(discussion.id, content) {
+              viewModel.loadDiscussionComments(discussion.id)
+          }
+      },
+      onToggleLock = { viewModel.toggleLockDiscussion(discussion.id) },
+      onMarkAcceptedAnswer = { commentId ->
+          viewModel.markAcceptedAnswer(discussion.id, commentId)
+      },
+      onUpvoteDiscussion = { viewModel.upvoteDiscussion(discussion.id) },
+      onUpvoteComment = { commentId ->
+          viewModel.upvoteDiscussionComment(commentId, discussion.id)
+      }
+  )
+        }
+    }
+
+    if (targetFailureMessage != null) {
+        AlertDialog(
+  onDismissRequest = { targetFailureMessage = null },
+  title = { Text("無法開啟通知目標") },
+  text = { Text(targetFailureMessage.orEmpty()) },
+  confirmButton = {
+      TextButton(onClick = { targetFailureMessage = null }) {
+          Text("知道了")
+      }
+  }
         )
     }
 }
