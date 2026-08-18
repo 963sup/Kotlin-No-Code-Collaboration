@@ -1,0 +1,135 @@
+name: Security Verify Mobile Collaboration v2
+
+on:
+  push:
+    branches:
+      - feature/mobile-collaboration-v2
+    paths:
+      - .github/workflows/agent-mobile-collaboration-v2-security.yml
+      - .github/scripts/harden_mobile_collaboration_v2.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: mobile-collaboration-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  harden-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/mobile-collaboration-v2
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Materialize and harden implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f app/src/main/java/com/example/data/local/AppMigrations.kt ]]; then
+            python3 .github/scripts/implement_mobile_collaboration_v2_data.py
+            python3 .github/scripts/implement_mobile_collaboration_v2_ui_models.py
+            python3 .github/scripts/implement_mobile_collaboration_v2_integration.py
+            python3 .github/scripts/implement_mobile_collaboration_v2_validation.py
+          fi
+          if [[ -f .github/scripts/repair_mobile_collaboration_v2.py ]]; then
+            python3 .github/scripts/repair_mobile_collaboration_v2.py
+          fi
+          python3 .github/scripts/harden_mobile_collaboration_v2.py
+          git diff --check
+
+      - name: Security invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R "fallbackToDestructiveMigration" -n app/src 2>/dev/null
+          ! grep -R "data class WbsTask\|class WbsTask" -n app/src 2>/dev/null
+          ! grep -R "ExistingWorkPolicy.REPLACE" -n app/src/main/java/com/example/sync 2>/dev/null
+          ! grep -R "http://" -n app/src/main/java/com/example/sync 2>/dev/null
+          grep -R "database.withTransaction" -n app/src/main/java/com/example/sync/RemoteSync.kt
+          grep -R "UPDATE sync_runtime_state SET isApplyingRemote = 0" -n app/src/main/java/com/example/data/local/DatabaseSyncTriggers.kt
+          grep -R "MAX_SYNC_PAYLOAD_CHARS" -n app/src/main/java/com/example/sync/RemoteSync.kt
+          grep -R "log.repoId in visibleRepositoryIds" -n app/src/main/java/com/example/ui/model/ExperienceProjections.kt
+          grep -R "addMigrations(AppMigrations.MIGRATION_4_5)" -n app/src/main/java
+          git diff --check
+
+      - name: Run JVM tests and assemble Debug APK
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon testDebugUnitTest assembleDebug --stacktrace 2>&1 | tee /tmp/mobile-v2-security-build.log
+          status=${PIPESTATUS[0]}
+          if [[ $status -ne 0 ]]; then
+            tail -n 280 /tmp/mobile-v2-security-build.log > /tmp/mobile-v2-security-tail.log
+            {
+              echo '### Mobile Collaboration v2 security verification build failed'
+              echo
+              echo '```text'
+              cat /tmp/mobile-v2-security-tail.log
+              echo '```'
+            } > /tmp/mobile-v2-security-comment.md
+            gh pr comment 21 --repo 963sup/Kotlin-No-Code-Collaboration --body-file /tmp/mobile-v2-security-comment.md || true
+            exit $status
+          fi
+
+      - name: Remove all temporary automation
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/scripts/implement_mobile_collaboration_v2_data.py
+          rm -f .github/scripts/implement_mobile_collaboration_v2_ui_models.py
+          rm -f .github/scripts/implement_mobile_collaboration_v2_integration.py
+          rm -f .github/scripts/implement_mobile_collaboration_v2_validation.py
+          rm -f .github/scripts/repair_mobile_collaboration_v2.py
+          rm -f .github/scripts/harden_mobile_collaboration_v2.py
+          rm -f .github/workflows/agent-mobile-collaboration-v2.yml
+          rm -f .github/workflows/agent-mobile-collaboration-v2-repair.yml
+          rm -f .github/workflows/agent-mobile-collaboration-v2-security.yml
+          rm -f .github/workflows/agent-collaboration-target-workloop.yml
+          git diff --check
+
+      - name: Commit security-verified implementation
+        shell: bash
+        env:
+          BRANCH_NAME: feature/mobile-collaboration-v2
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No hardening changes to commit"
+            exit 0
+          fi
+          git commit -m "security: harden mobile collaboration sync boundaries"
+          git push origin "HEAD:${BRANCH_NAME}"
+
+      - name: Upload security verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-collaboration-v2-security-verification
+          if-no-files-found: ignore
+          path: |
+            /tmp/mobile-v2-security-build.log
+            app/build/reports/tests/
+            app/build/outputs/apk/debug/*.apk
