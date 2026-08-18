@@ -152,7 +152,7 @@ fun RepoIssuesSection(
     onAddDependency: (repoId: String, blockedIssueId: String, blockingIssueId: String, onSuccess: () -> Unit) -> Unit = { _, _, _, _ -> },
     onRemoveDependency: (dependencyId: String, onSuccess: () -> Unit) -> Unit = { _, _ -> },
     onAddComment: (issueId: String, content: String, onSuccess: () -> Unit) -> Unit,
-    onUpdate狀態：(issueId: String, new狀態：IssueStatus) -> Unit,
+    onUpdateStatus:(issueId: String, newStatus:IssueStatus) -> Unit,
     onAssignIssue: (issueId: String, assigneeType: GranteeType?, assigneeId: String?, assigneeName: String?) -> Unit,
     onLoadComments: (issueId: String) -> Unit,
     onSelectArtifact: ((NoCodeArtifact) -> Unit)? = null
@@ -550,7 +550,7 @@ fun RepoIssuesSection(
     if (currentViewingIssue != null) {
         val currentIssueNestedIds = IssueHierarchyRules.descendantIds(currentViewingIssue.id, issues)
         val currentIssueSubIssues = IssueHierarchyRules.orderedForDisplay(issues).map { it.first }.filter { it.id in currentIssueNestedIds }
-        val currentBlocked由 = dependencies.filter { it.blockedIssueId == currentViewingIssue.id }
+        val currentBlockedBy = dependencies.filter { it.blockedIssueId == currentViewingIssue.id }
             .mapNotNull { dep ->
                 val blocking = issues.firstOrNull { it.id == dep.blockingIssueId }
                 if (blocking != null) Pair(dep, blocking) else null
@@ -1074,7 +1074,7 @@ fun IssueDetailDialog(
     activeUser: User?,
     onDismiss: () -> Unit,
     onAddComment: (String) -> Unit,
-    onUpdate狀態：(IssueStatus) -> Unit,
+    onUpdateStatus:(IssueStatus) -> Unit,
     onAssignIssue: (GranteeType?, String?, String?) -> Unit,
     onLinkParent: (String?) -> Unit,
     onAddDependency: (blockingIssueId: String) -> Unit,

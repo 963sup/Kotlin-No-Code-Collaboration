@@ -151,7 +151,7 @@ fun RepositoriesScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("搜尋儲存庫、擁有者或藍圖…", color = TextLowEmphasis, fontSize = 13.sp) },
+                    placeholder = { Text("搜尋專案、儲存庫、擁有者或類別…", color = TextLowEmphasis, fontSize = 13.sp) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = LavenderPrimary) },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
@@ -177,7 +177,7 @@ fun RepositoriesScreen(
                 ) {
                     item {
                         FilterChip(
-                            label = "All Workspaces (${repositories.size})",
+                            label = "全部 (${repositories.size})",
                             isSelected = selectedFilter == RepoFilter.ALL,
                             onClick = { selectedFilter = RepoFilter.ALL },
                             testTag = "filter_all_repos"
@@ -185,7 +185,7 @@ fun RepositoriesScreen(
                     }
                     item {
                         FilterChip(
-                            label = "Org-Owned (${repositories.count { it.ownerType == OwnerType.ORGANIZATION }})",
+                            label = "組織擁有 (${repositories.count { it.ownerType == OwnerType.ORGANIZATION }})",
                             isSelected = selectedFilter == RepoFilter.ORG_OWNED,
                             onClick = { selectedFilter = RepoFilter.ORG_OWNED },
                             testTag = "filter_org_repos"
@@ -193,7 +193,7 @@ fun RepositoriesScreen(
                     }
                     item {
                         FilterChip(
-                            label = "User-Owned (${repositories.count { it.ownerType == OwnerType.USER }})",
+                            label = "個人擁有 (${repositories.count { it.ownerType == OwnerType.USER }})",
                             isSelected = selectedFilter == RepoFilter.USER_OWNED,
                             onClick = { selectedFilter = RepoFilter.USER_OWNED },
                             testTag = "filter_user_repos"
@@ -312,7 +312,7 @@ fun EnterpriseGovernanceHeroBanner(
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "企業階層治理",
+                        text = "探索可存取的專案與成果",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             letterSpacing = 0.8.sp,

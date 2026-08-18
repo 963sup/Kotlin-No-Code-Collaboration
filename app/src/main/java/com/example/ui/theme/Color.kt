@@ -2,42 +2,43 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Sophisticated Dark Theme Base Surfaces (from Design Specification)
-val SophisticatedBg = Color(0xFF1C1B1F)           // #1C1B1F Dark Base Canvas
-val SophisticatedSurface = Color(0xFF25232A)      // #25232A Main Card / Container Surface
-val SophisticatedSurfaceDark = Color(0xFF1D1B20)  // #1D1B20 Sub-container / Deep Inset Surface
-val SophisticatedContainer = Color(0xFF332D41)    // #332D41 Elevated / Active Pill / Header container
-val SophisticatedBorder = Color(0xFF49454F)       // #49454F Structural Outline / Divider
-val SophisticatedBorderSubtle = Color(0x4DD0BCFF) // Subtle Lavender border (30% alpha)
+// Light-first enterprise collaboration palette. Legacy token names are retained to
+// keep the current component surface stable while the design system moves to M3 roles.
+val SophisticatedBg = Color(0xFFF6F8FC)
+val SophisticatedSurface = Color(0xFFFFFFFF)
+val SophisticatedSurfaceDark = Color(0xFFF9FBFF)
+val SophisticatedContainer = Color(0xFFEAF1FF)
+val SophisticatedBorder = Color(0xFFD8E0EC)
+val SophisticatedBorderSubtle = Color(0x4D0B63F6)
 
-// Sophisticated Accents & M3 Tonal Palette
-val LavenderPrimary = Color(0xFFD0BCFF)           // #D0BCFF Primary Soft Lavender Highlight
-val LavenderOnPrimary = Color(0xFF381E72)         // #381E72 Contrast text/icon on primary
-val LavenderContainer = Color(0xFF4F378B)         // #4F378B M3 Lavender container
-val LavenderGlow = Color(0xFFE8DEF8)              // #E8DEF8 Bright lavender tint
-val LavenderSubtle = Color(0xFFCCC2DC)            // #CCC2DC Secondary soft lilac gray
-val PinkAccent = Color(0xFFEFB8C8)                // #EFB8C8 Tertiary soft rose/pink accent
+// Primary product identity: high-contrast blue on a white operational canvas.
+val LavenderPrimary = Color(0xFF0B63F6)
+val LavenderOnPrimary = Color(0xFFFFFFFF)
+val LavenderContainer = Color(0xFFDDE9FF)
+val LavenderGlow = Color(0xFF2459A9)
+val LavenderSubtle = Color(0xFF35598A)
+val PinkAccent = Color(0xFF9C2F6D)
 val WhiteM3 = Color(0xFFFFFFFF)
 
-// Typography & Hierarchy
-val TextHighEmphasis = Color(0xFFE6E1E5)          // #E6E1E5 Primary readable text
-val TextMediumEmphasis = Color(0xFF938F99)        // #938F99 Secondary muted label
-val TextLowEmphasis = Color(0xFF79747E)           // #79747E Tertiary subtle outline/text
+// Typography hierarchy for field readability.
+val TextHighEmphasis = Color(0xFF14213D)
+val TextMediumEmphasis = Color(0xFF5C667A)
+val TextLowEmphasis = Color(0xFF8992A6)
 val PureWhite = Color(0xFFFFFFFF)
 
-// Governance & Status Indicators (Calibrated to Sophisticated Dark Palette)
-val EmeraldSuccess = Color(0xFF81C784)            // Soft emerald success
-val EmeraldDark = Color(0xFF1B4D3E)               // Dark emerald container
-val AmberWarning = Color(0xFFFFD54F)              // Soft amber warning
-val AmberGlow = Color(0xFFFFE082)
-val RoseError = Color(0xFFF2B8B5)                 // Soft rose error
-val RoseDark = Color(0xFF601410)                  // Dark rose container
-val CyanAccent = Color(0xFFD0BCFF)                // Lavender accent for high-tech tags
-val CyanGlow = Color(0xFFE8DEF8)
-val PurpleTech = Color(0xFFD0BCFF)
-val PurpleGlow = Color(0xFFE8DEF8)
+// Operational states calibrated for a light background.
+val EmeraldSuccess = Color(0xFF137A43)
+val EmeraldDark = Color(0xFFE4F6EC)
+val AmberWarning = Color(0xFF8A4E00)
+val AmberGlow = Color(0xFFFFE0A3)
+val RoseError = Color(0xFFB3261E)
+val RoseDark = Color(0xFFFCE8E6)
+val CyanAccent = Color(0xFF005B8F)
+val CyanGlow = Color(0xFFDDF2FF)
+val PurpleTech = Color(0xFF5B42B2)
+val PurpleGlow = Color(0xFFECE7FF)
 
-// Component & Dark Mode Compatibility Aliases
+// Compatibility aliases used by existing components.
 val SlateDark950 = SophisticatedBg
 val SlateDark900 = SophisticatedSurfaceDark
 val SlateDark800 = SophisticatedSurface
@@ -45,8 +46,7 @@ val SlateDark700 = SophisticatedContainer
 val SlateDark600 = SophisticatedBorder
 val IndigoPrimary = LavenderPrimary
 val IndigoLight = LavenderPrimary
-val IndigoDark = LavenderOnPrimary
+val IndigoDark = Color(0xFF002F66)
 val CardSurfaceDark = SophisticatedSurface
 val CardBorderDark = SophisticatedBorder
 val TopBarSurfaceDark = SophisticatedSurfaceDark
-

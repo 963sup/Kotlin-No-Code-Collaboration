@@ -212,7 +212,7 @@ fun RepoDetailScreen(
     onAddDependency: (repoId: String, blockedIssueId: String, blockingIssueId: String, () -> Unit) -> Unit = { _, _, _, _ -> },
     onRemoveDependency: (dependencyId: String, () -> Unit) -> Unit = { _, _ -> },
     onAddIssueComment: (issueId: String, content: String, () -> Unit) -> Unit = { _, _, _ -> },
-    onUpdateIssue狀態：(issueId: String, new狀態：IssueStatus) -> Unit = { _, _ -> },
+    onUpdateIssueStatus:(issueId: String, newStatus:IssueStatus) -> Unit = { _, _ -> },
     onAssignIssue: (issueId: String, assigneeType: GranteeType?, assigneeId: String?, assigneeName: String?) -> Unit = { _, _, _, _ -> },
     onLoadIssueComments: (issueId: String) -> Unit = {},
     onCreateDiscussion: (title: String, category: DiscussionCategory, body: String, () -> Unit) -> Unit = { _, _, _, _ -> },

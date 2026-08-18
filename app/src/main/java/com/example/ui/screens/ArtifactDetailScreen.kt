@@ -105,7 +105,7 @@ fun ArtifactDetailScreen(
 ) {
     var showReviewDialog by remember { mutableStateOf(false) }
 
-    val distinctApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinct由 { it.approverUserId }.size
+    val distinctApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
     val requiredApprovers = repo.requiredApproverCount
     val isAlreadySignedByActiveUser = activeUser != null && approvals.any { it.approverUserId == activeUser.id && it.status == ApprovalStatus.APPROVED }
 
@@ -549,7 +549,7 @@ fun SignaturesAndReviewsSection(
     reviews: List<ArtifactReview>,
     requiredApprovers: Int
 ) {
-    val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinct由 { it.approverUserId }.size
+    val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "核准與簽章（$validApprovalsCount / $requiredApprovers）",
