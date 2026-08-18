@@ -70,7 +70,7 @@ interface CollaborationExperienceDao {
     @Query(
         "SELECT COUNT(*) FROM sync_outbox " +
             "WHERE entityType = :entityType AND entityId = :entityId " +
-            "AND state IN ('PENDING', 'FAILED', 'IN_FLIGHT')"
+            "AND state != 'SYNCED'"
     )
     suspend fun countUnsynced(entityType: String, entityId: String): Int
 

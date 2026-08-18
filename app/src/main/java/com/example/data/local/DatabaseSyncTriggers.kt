@@ -29,6 +29,7 @@ object DatabaseSyncTriggers {
     fun install(db: SupportSQLiteDatabase) {
         db.execSQL("INSERT OR IGNORE INTO sync_runtime_state(id, isApplyingRemote) VALUES(1, 0)")
         db.execSQL("UPDATE sync_runtime_state SET isApplyingRemote = 0 WHERE id = 1")
+        db.execSQL("UPDATE sync_outbox SET state = 'PENDING', lastError = 'Recovered interrupted sync' WHERE state = 'IN_FLIGHT'")
         trackedTables.forEach { (table, entityType) ->
             db.execSQL(upsertTrigger(table, entityType, "INSERT"))
             db.execSQL(upsertTrigger(table, entityType, "UPDATE"))
@@ -45,7 +46,7 @@ object DatabaseSyncTriggers {
             BEGIN
                 DELETE FROM sync_outbox
                 WHERE entityType = '$entityType' AND entityId = NEW.id
-                  AND state IN ('PENDING', 'FAILED');
+                  AND state IN ('PENDING', 'FAILED', 'AUTH_REQUIRED');
                 INSERT INTO sync_outbox(
                     id, entityType, entityId, operation, localVersion,
                     state, attemptCount, queuedAt, updatedAt, lastError
@@ -74,7 +75,7 @@ object DatabaseSyncTriggers {
         BEGIN
             DELETE FROM sync_outbox
             WHERE entityType = '$entityType' AND entityId = OLD.id
-              AND state IN ('PENDING', 'FAILED');
+              AND state IN ('PENDING', 'FAILED', 'AUTH_REQUIRED');
             INSERT INTO sync_outbox(
                 id, entityType, entityId, operation, localVersion,
                 state, attemptCount, queuedAt, updatedAt, lastError

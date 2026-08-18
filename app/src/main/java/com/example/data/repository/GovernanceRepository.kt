@@ -897,7 +897,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
         val evaluation = evaluateAction(actor, repo, null, GovernanceAction.ASSIGN_ISSUE)
-        if (evaluation.verdict != PolicyVerdict.ALLOWED && issue.authorUserId != actor.id) {
+        if (evaluation.verdict != PolicyVerdict.ALLOWED) {
             return Pair(false, evaluation.finalExplanation)
         }
         val validationError = IssueHierarchyRules.validatePlan(

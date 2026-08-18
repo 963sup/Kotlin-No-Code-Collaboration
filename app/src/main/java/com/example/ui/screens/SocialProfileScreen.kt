@@ -46,7 +46,9 @@ fun SocialProfileScreen(
             Column(Modifier.padding(16.dp)) {
                 Text("Lv.${stats.level} · XP ${stats.xp}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 Text("公開協作成果 ${stats.publicActions} · 追隨者 $followers · 追蹤中 $following")
-                Text("收藏 ${savedTargets.count { it.userId == profileUser.id }}")
+                if (profileUser.id == activeUser.id) {
+                    Text("收藏 ${savedTargets.count { it.userId == activeUser.id }}")
+                }
             }
         }
         if (profileUser.id != activeUser.id) {
