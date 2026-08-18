@@ -11,6 +11,14 @@ def patch(rel: str, old: str, new: str) -> None:
         path.write_text(text, encoding="utf-8")
 
 
+# WBS plan changes alter scheduling/weight/progress and must always traverse the
+# existing assignment-policy path; being the original author is not an override.
+patch(
+    "app/src/main/java/com/example/data/repository/GovernanceRepository.kt",
+    "if (evaluation.verdict != PolicyVerdict.ALLOWED && issue.authorUserId != actor.id)",
+    "if (evaluation.verdict != PolicyVerdict.ALLOWED)"
+)
+
 patch(
     "app/src/main/java/com/example/ui/model/ExperienceProjections.kt",
     '''    fun stats(user: User, auditLogs: List<AuditLog>): SocialStats {\n        val public = auditLogs.filter { it.actorUserId == user.id && PublicActivityPolicy.isPublic(it) }''',
