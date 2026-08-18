@@ -8,6 +8,8 @@ plugins {
   alias(libs.plugins.detekt)
 }
 
+val mockkAgent: Configuration by configurations.creating
+
 android {
   val syncBaseUrl =
       providers.gradleProperty("SYNC_BASE_URL")
@@ -58,7 +60,29 @@ android {
     buildConfig = true
   }
 
-  testOptions { unitTests { isIncludeAndroidResources = true } }
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+      all { testTask ->
+        testTask.jvmArgumentProviders.add(
+          CommandLineArgumentProvider {
+            val agentJar = mockkAgent.files.find { it.name.startsWith("byte-buddy-agent") }
+            if (agentJar != null) {
+              listOf("-javaagent:${agentJar.absolutePath}")
+            } else {
+              emptyList()
+            }
+          },
+        )
+        testTask.jvmArgs(
+          "-XX:+EnableDynamicAgentLoading",
+          "-Djdk.attach.allowAttachSelf=true",
+          "--add-opens=java.base/java.lang=ALL-UNNAMED",
+          "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+        )
+      }
+    }
+  }
 
   dependenciesInfo {
     includeInApk = false
@@ -115,6 +139,8 @@ dependencies {
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)
   testImplementation(libs.konsist)
+  testImplementation(libs.mockk)
+  mockkAgent(libs.mockk.agent)
 
   debugImplementation(libs.androidx.compose.ui.tooling)
 

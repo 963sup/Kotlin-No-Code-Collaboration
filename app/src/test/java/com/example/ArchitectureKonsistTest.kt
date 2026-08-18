@@ -152,5 +152,17 @@ class ArchitectureKonsistTest {
                 ui.dependsOnNothing()
             }
     }
+
+    // 13. 禁止使用 Mockito 或 Mockito-Kotlin (測試替身統一使用 MockK)
+    @Test
+    fun `no mockito imports exist in project`() {
+        Konsist.scopeFromProject()
+            .imports
+            .assertFalse {
+                it.name.startsWith("org.mockito") ||
+                    it.name.startsWith("com.nhaarman.mockitokotlin2") ||
+                    it.name.startsWith("org.mockito.kotlin")
+            }
+    }
 }
 

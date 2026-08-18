@@ -20,3 +20,12 @@
 - **Unidirectional Dependencies**: Enforce strictly unidirectional dependencies. Forbid circular references, reverse dependencies, and core domain logic depending on upper-level implementations.
 - **Reversible Design**: Prioritize designs that are easy to alter, replace, or roll back. Avoid premature, hard-to-reverse architectural commitments.
 - **YAGNI (You Aren't Gonna Need It)**: Never introduce abstractions, extension points, dependencies, or architectural complexity for unvalidated or future requirements.
+
+# Testing & Mocking Standards
+
+- **測試替身統一使用 MockK**。
+- **不要新增 Mockito、Mockito-Kotlin 或其他平行 mocking framework**。
+- **Coroutine / suspend function 使用 coEvery、coVerify**。
+- **能使用 fake 或真實 domain object 驗證時，不要為了方便過度 mock**。
+- **只 mock 外部邊界與不可控依賴，不 mock 純 domain logic**。
+
