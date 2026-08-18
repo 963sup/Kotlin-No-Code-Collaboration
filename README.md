@@ -38,6 +38,8 @@ Repository 只由 Organization 或 User 擁有；Team 透過 Access Rule 取得�
 
 本專案主要在 **GitHub** 與 **Google AI Studio** 開發。Repository 只保留正式產品程式碼、必要測試、架構決策與按需 Android Verification；一次性生成腳本、自修改 workflow、臨時觸發檔與重複代理規則不應留在主幹。
 
+AI / agent 修改先讀 `AGENTS.md`；GitHub Copilot 另有 `.github/copilot-instructions.md` 作為最小入口。兩者都要求沿用既有 canonical model、限制變更範圍，避免為了工具本身產生平行模型或大規模重構。
+
 Google AI Studio 相關專案 metadata 保留於 `metadata.json`，`MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API` 不移除。
 
 ## 技術棧
@@ -52,7 +54,8 @@ Google AI Studio 相關專案 metadata 保留於 `metadata.json`，`MAJOR_CAPABI
 | Network | Retrofit + OkHttp + Moshi |
 | Identity / Push | Firebase Auth + Firebase Cloud Messaging |
 | AI Integration | Google AI Studio project capability / server-side Gemini boundary |
-| Tests | JVM / Robolectric / Roborazzi |
+| Tests | JVM / Robolectric / Roborazzi / Konsist |
+| Static Analysis | Detekt |
 | Build | Gradle Kotlin DSL + Version Catalog |
 
 Android 設定：`minSdk 24`、`targetSdk 36`、`compileSdk 36.1`。
@@ -60,10 +63,12 @@ Android 設定：`minSdk 24`、`targetSdk 36`、`compileSdk 36.1`。
 ## 驗證
 
 ```bash
-gradle :app:testDebugUnitTest :app:assembleDebug
+gradle :app:detekt :app:testDebugUnitTest :app:assembleDebug
 ```
 
-`.github/workflows/android.yml` 只在 Pull Request 的 Android/Gradle 變更或手動觸發時執行，不阻塞直接推送 `main` 的 Web/AI Studio 快速路徑。Room schema 變更不得使用 destructive migration；同步端點必須為 HTTPS，伺服器端必須驗證 Firebase ID token 與實際授權。
+Konsist 是架構硬性測試；Detekt 初期採 advisory/report-only，避免既有技術債阻塞日常交付。`.github/workflows/android.yml` 會在相關 Pull Request、直接推送 `main` 或手動觸發時執行；同一分支的新執行會取消舊執行，因此 GitHub / AI Studio 快速路徑不需要等待 CI 才能繼續工作。
+
+Room schema 變更不得使用 destructive migration；同步端點必須為 HTTPS，伺服器端必須驗證 Firebase ID token 與實際授權。
 
 ## Release boundary
 
