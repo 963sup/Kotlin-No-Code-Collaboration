@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  finalize:
+  final-ui-literals:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout feature branch
@@ -17,52 +17,31 @@ jobs:
           ref: agent/kanban-navigation-zh-tw
           fetch-depth: 0
 
-      - name: Check finalization marker
+      - name: Check patch marker
         id: marker
         shell: bash
         run: |
-          if [ -f .github/finalization-audit.txt ]; then
+          if [ -f .github/final-ui-patch-done.txt ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Finalization already exists; no-op."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Apply finalization
+      - name: Patch final fixed UI literals
         if: ${{ steps.marker.outputs.skip == 'false' }}
-        id: finalize
-        shell: bash
         run: |
-          set +e
-          python .github/scripts/finalize_kanban_zh_tw.py > /tmp/finalize-output.txt 2>&1
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            python .github/scripts/patch_final_ui_literals.py >> /tmp/finalize-output.txt 2>&1
-            status=$?
-          fi
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          cat /tmp/finalize-output.txt
-          exit 0
+          python .github/scripts/patch_final_ui_literals.py
+          echo "fixed-English UI literal check passed" > .github/final-ui-patch-done.txt
 
-      - name: Commit final product and compatibility changes
-        if: ${{ steps.marker.outputs.skip == 'false' && steps.finalize.outputs.status == '0' }}
+      - name: Commit final UI patch
+        if: ${{ steps.marker.outputs.skip == 'false' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app metadata.json gradle/libs.versions.toml build.gradle.kts .github/finalization-audit.txt
+          git add app .github/final-ui-patch-done.txt
           if git diff --cached --quiet; then
-            echo "No finalization changes"
+            echo "No final UI changes"
             exit 0
           fi
-          git commit -m "fix: 對齊 Android 建置並完成繁體中文 UI [generated-final]"
-          git push origin HEAD:agent/kanban-navigation-zh-tw
-
-      - name: Commit finalization error evidence
-        if: ${{ steps.marker.outputs.skip == 'false' && steps.finalize.outputs.status != '0' }}
-        run: |
-          cp /tmp/finalize-output.txt .github/finalization-error.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/finalization-error.txt
-          git commit -m "chore: record finalization error [final-error]"
+          git commit -m "fix: 清除最後固定英文 UI 字串 [generated-ui]"
           git push origin HEAD:agent/kanban-navigation-zh-tw
