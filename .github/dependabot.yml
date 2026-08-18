@@ -1,27 +1,15 @@
 version: 2
 updates:
+  # Keep dependency security coverage without creating routine version-update PR noise.
+  # Dependabot security updates use a separate PR mechanism and are not disabled by this limit.
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 3
-    groups:
-      safe-gradle-updates:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 2
-    groups:
-      safe-action-updates:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+    open-pull-requests-limit: 0
