@@ -75,29 +75,29 @@ internal data class NestedTaskProgress(val total: Int, val closed: Int)
 /** RepoIssue.parentIssueId is already the canonical recursive task relationship. */
 internal fun flattenNestedTasks(issues: List<RepoIssue>): List<NestedTaskRow> {
     if (issues.isEmpty()) return emptyList()
-    val byId = issues.associateBy { it.id }
-    val children = issues.groupBy { it.parentIssueId }
+    val byId = issues.associate由 { it.id }
+    val children = issues.group由 { it.parentIssueId }
     val result = mutableListOf<NestedTaskRow>()
     val visited = mutableSetOf<String>()
 
     fun visit(issue: RepoIssue, depth: Int) {
         if (!visited.add(issue.id)) return
         result += NestedTaskRow(issue, depth)
-        children[issue.id].orEmpty().sortedBy { it.issueNumber }.forEach { visit(it, depth + 1) }
+        children[issue.id].orEmpty().sorted由 { it.issueNumber }.forEach { visit(it, depth + 1) }
     }
 
     issues
         .filter { it.parentIssueId == null || it.parentIssueId !in byId }
-        .sortedBy { it.issueNumber }
+        .sorted由 { it.issueNumber }
         .forEach { visit(it, 0) }
 
     // Keep malformed cyclic/unreachable records visible exactly once instead of recursing forever.
-    issues.sortedBy { it.issueNumber }.filterNot { it.id in visited }.forEach { visit(it, 0) }
+    issues.sorted由 { it.issueNumber }.filterNot { it.id in visited }.forEach { visit(it, 0) }
     return result
 }
 
 internal fun nestedTaskProgress(issueId: String, issues: List<RepoIssue>): NestedTaskProgress {
-    val children = issues.groupBy { it.parentIssueId }
+    val children = issues.group由 { it.parentIssueId }
     val visited = mutableSetOf(issueId)
     var total = 0
     var closed = 0
@@ -137,7 +137,7 @@ private fun boardLabel(status: IssueStatus) = when (status) {
 fun RepositoryWorkBoardDialog(
     repo: Repository,
     issues: List<RepoIssue>,
-    onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+    onUpdateIssue狀態：(String, IssueStatus) -> Unit,
     onDismiss: () -> Unit
 ) {
     var view by remember { mutableStateOf(RepositoryWorkView.KANBAN) }
@@ -238,7 +238,7 @@ private fun KanbanBoard(issues: List<RepoIssue>, onUpdate: (String, IssueStatus)
             val columnIssues = issues.filter { it.status == status }.sortedWith(
                 compareByDescending<RepoIssue> { it.priority == IssuePriority.CRITICAL }
                     .thenByDescending { it.priority == IssuePriority.HIGH }
-                    .thenBy { it.issueNumber }
+                    .then由 { it.issueNumber }
             )
             KanbanColumn(status, columnIssues, issues, onUpdate)
         }

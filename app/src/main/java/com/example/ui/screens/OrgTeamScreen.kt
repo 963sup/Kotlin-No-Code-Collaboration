@@ -200,7 +200,7 @@ fun OrgTeamScreen(
                                         color = TextHighEmphasis
                                     )
                                     Text(
-                                        text = "ROOT GOVERNANCE ENTITY • @${activeEnterprise?.slug ?: "root"}",
+                                        text = "根治理實體 • @${activeEnterprise?.slug ?: "root"}",
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             fontSize = 9.sp,
                                             letterSpacing = 0.8.sp,
@@ -226,7 +226,7 @@ fun OrgTeamScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Text("+ Enterprise", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                                    Text("+ 企業", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                                 }
                             }
                         }
@@ -290,7 +290,7 @@ fun OrgTeamScreen(
                                     color = TextHighEmphasis
                                 )
                                 Text(
-                                    text = "Operating entities containing teams, members, and workspaces",
+                                    text = "包含團隊、成員與工作區的營運實體",
                                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                                     color = TextMediumEmphasis
                                 )
@@ -311,7 +311,7 @@ fun OrgTeamScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Text("New Org", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                                    Text("新增組織", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                                 }
                             }
                         }
@@ -331,15 +331,15 @@ fun OrgTeamScreen(
                                     verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     Icon(Icons.Default.Apartment, contentDescription = null, tint = TextMediumEmphasis, modifier = Modifier.size(40.dp))
-                                    Text("No organizations established yet", style = MaterialTheme.typography.titleMedium, color = TextHighEmphasis)
-                                    Text("Create your first Organization to group teams and own collaboration containers.", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                                    Text("尚未建立組織", style = MaterialTheme.typography.titleMedium, color = TextHighEmphasis)
+                                    Text("建立第一個組織，用來管理團隊並擁有協作容器。", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Button(
                                         onClick = { showCreateOrgDialog = true },
                                         colors = ButtonDefaults.buttonColors(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text("Create Organization")
+                                        Text("建立組織")
                                     }
                                 }
                             }
@@ -423,12 +423,12 @@ fun OrgTeamScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Action")
+                Icon(Icons.Default.Add, contentDescription = "新增操作")
                 Text(
                     text = when (viewMode) {
-                        OrgHubViewMode.ORGANIZATIONS -> "New Org"
+                        OrgHubViewMode.ORGANIZATIONS -> "新增組織"
                         OrgHubViewMode.ENTERPRISE_GOVERNANCE -> "Add User"
-                        OrgHubViewMode.HIERARCHY_MATRIX -> "New Org"
+                        OrgHubViewMode.HIERARCHY_MATRIX -> "新增組織"
                     },
                     fontWeight = FontWeight.Bold
                 )
@@ -642,7 +642,7 @@ fun OrganizationCard(
                             )
                             Text("•", color = TextLowEmphasis, fontSize = 10.sp)
                             Text(
-                                text = "Default: ${org.defaultMemberRole.name}",
+                                text = "預設：${org.defaultMemberRole.name}",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = TextMediumEmphasis
                             )
@@ -659,7 +659,7 @@ fun OrganizationCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "${members.size} Members • ${teams.size} Teams",
+                        text = "${members.size} 個成員 • ${teams.size} 個團隊",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                         color = LavenderPrimary
                     )
@@ -710,7 +710,7 @@ fun OrganizationCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "TEAMS ROSTER",
+                                text = "團隊名冊",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
                                 color = TextMediumEmphasis
                             )
@@ -726,7 +726,7 @@ fun OrganizationCard(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(12.dp))
-                                    Text("+ Team", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                                    Text("+ 團隊", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                                 }
                             }
                         }
@@ -741,7 +741,7 @@ fun OrganizationCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No teams established under this organization.",
+                                    text = "此組織下尚未建立團隊。",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextLowEmphasis
                                 )
@@ -769,7 +769,7 @@ fun OrganizationCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "ORGANIZATION MEMBERS & GOVERNANCE ROLES",
+                                text = "組織成員與治理角色",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
                                 color = TextMediumEmphasis
                             )
@@ -785,13 +785,13 @@ fun OrganizationCard(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(12.dp))
-                                    Text("+ Member", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                                    Text("+ 成員", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                                 }
                             }
                         }
 
                         if (members.isEmpty()) {
-                            Text("No members registered.", color = TextLowEmphasis, style = MaterialTheme.typography.bodySmall)
+                            Text("尚無成員。", color = TextLowEmphasis, style = MaterialTheme.typography.bodySmall)
                         } else {
                             members.forEach { mem ->
                                 val user = allUsers.firstOrNull { it.id == mem.userId }
@@ -810,13 +810,13 @@ fun OrganizationCard(
                 "REPOS" -> {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = "OWNED NO-CODE REPOSITORIES",
+                            text = "擁有的無程式碼儲存庫",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
                             color = TextMediumEmphasis
                         )
 
                         if (repositories.isEmpty()) {
-                            Text("No repositories owned by this organization.", color = TextLowEmphasis, style = MaterialTheme.typography.bodySmall)
+                            Text("此組織尚未擁有任何儲存庫。", color = TextLowEmphasis, style = MaterialTheme.typography.bodySmall)
                         } else {
                             repositories.forEach { repo ->
                                 Row(
@@ -847,7 +847,7 @@ fun OrganizationCard(
                                             .background(SophisticatedContainer)
                                             .padding(horizontal = 8.dp, vertical = 3.dp)
                                     ) {
-                                        Text("${repo.requiredApproverCount} Sign-Offs Required", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = LavenderPrimary)
+                                        Text("${repo.requiredApproverCount} 個簽核為必要", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = LavenderPrimary)
                                     }
                                 }
                             }
@@ -938,7 +938,7 @@ fun TeamItemCard(
                     onClick = onAddMember,
                     modifier = Modifier.size(28.dp).testTag("add_user_to_team_${team.slug}")
                 ) {
-                    Icon(Icons.Default.GroupAdd, contentDescription = "Add Member", tint = LavenderPrimary, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.GroupAdd, contentDescription = "新增成員", tint = LavenderPrimary, modifier = Modifier.size(18.dp))
                 }
             }
 
@@ -948,7 +948,7 @@ fun TeamItemCard(
                 color = TextMediumEmphasis
             )
 
-            // Team Members roster pills
+            // Team 個成員 roster pills
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -986,7 +986,7 @@ fun TeamItemCard(
                 }
                 if (memberships.isEmpty()) {
                     Text(
-                        text = "No team members assigned yet",
+                        text = "尚未指派團隊成員",
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = TextLowEmphasis
                     )
@@ -1133,8 +1133,8 @@ fun EnterpriseGovernanceSection(
                             Icon(Icons.Default.Shield, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(20.dp))
                         }
                         Column {
-                            Text("Enterprise Governance Policies", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                            Text("ROOT COMPLIANCE GATES & ACCESS CONTROL INHERITANCE", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp), color = TextMediumEmphasis)
+                            Text("企業治理政策", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                            Text("根層守規關卡與存取控制繼承", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp), color = TextMediumEmphasis)
                         }
                     }
 
@@ -1150,7 +1150,7 @@ fun EnterpriseGovernanceSection(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Text("Configure", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                            Text("設定", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                         }
                     }
                 }
@@ -1158,7 +1158,7 @@ fun EnterpriseGovernanceSection(
                 // Security Policy Gates Summary
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     PolicyGateRow(
-                        title = "Segregation of Duties (SoD)",
+                        title = "職責分離（SoD）",
                         description = "Strictly prohibits artifact authors from reviewing or granting final release approvals to their own work.",
                         isEnabled = enterprise?.enforceSegregationOfDuties ?: true
                     )
@@ -1209,8 +1209,8 @@ fun EnterpriseGovernanceSection(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Enterprise Identity Roster (${users.size})", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("All provisioned accounts within ${enterprise?.name ?: "企業"}", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                        Text("企業身分名冊（${users.size}）", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("已建立的所有帳號皆位於 ${enterprise?.name ?: "企業"}", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
                     }
 
                     Button(
@@ -1225,7 +1225,7 @@ fun EnterpriseGovernanceSection(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Text("+ Add User", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                            Text("+ 新增使用者", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                         }
                     }
                 }
@@ -1278,7 +1278,7 @@ fun EnterpriseGovernanceSection(
                                     .border(1.dp, LavenderPrimary.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
-                                Text("ENTERPRISE ADMIN", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                                Text("企業管理員", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold), color = LavenderPrimary)
                             }
                         }
                     }
@@ -1388,8 +1388,8 @@ fun HierarchyVisualizerSection(
                     Icon(Icons.Default.AccountTree, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(20.dp))
                 }
                 Column {
-                    Text("Hierarchical Model & Permission Matrix", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                    Text("CLOSED-LOOP MULTI-LAYER ACCESS CONTROL DELEGATION", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp), color = TextMediumEmphasis)
+                    Text("階層模型與權限矩陣", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("閉環多層級存取控制授權", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp), color = TextMediumEmphasis)
                 }
             }
 
@@ -1411,7 +1411,7 @@ fun HierarchyVisualizerSection(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "LEVEL 2: ORGANIZATIONS (${organizations.size})",
+                    text = "第 2 層：組織（${organizations.size}）",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
                     color = LavenderPrimary
                 )
@@ -1443,16 +1443,16 @@ fun HierarchyVisualizerSection(
                                     Icon(Icons.Default.Apartment, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(18.dp))
                                     Text(org.name, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                                 }
-                                Text("Default: ${org.defaultMemberRole.name}", style = MaterialTheme.typography.labelSmall, color = LavenderSubtle)
+                                Text("預設：${org.defaultMemberRole.name}", style = MaterialTheme.typography.labelSmall, color = LavenderSubtle)
                             }
 
-                            // Level 3: Nested Teams inside Org
+                            // Level 3: Nested 個團隊 inside Org
                             if (orgTeams.isNotEmpty()) {
                                 Column(
                                     modifier = Modifier.padding(start = 12.dp),
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Text("LEVEL 3: TEAMS (Child of Org)", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold), color = TextMediumEmphasis)
+                                    Text("第 3 層：團隊（隸屬組織）", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold), color = TextMediumEmphasis)
                                     orgTeams.forEach { team ->
                                         val teamMems = teamMemberships.filter { it.teamId == team.id }
                                         Row(
@@ -1471,7 +1471,7 @@ fun HierarchyVisualizerSection(
                                                 Icon(Icons.Default.Groups, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(14.dp))
                                                 Text(team.name, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                                             }
-                                            Text("${teamMems.size} Members", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = TextMediumEmphasis)
+                                            Text("${teamMems.size} 個成員", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = TextMediumEmphasis)
                                         }
                                     }
                                 }
@@ -1483,7 +1483,7 @@ fun HierarchyVisualizerSection(
                                     modifier = Modifier.padding(start = 12.dp),
                                     verticalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Text("LEVEL 4: WORKSPACES (Owned by Org)", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold), color = TextMediumEmphasis)
+                                    Text("第 4 層：工作區（由組織擁有）", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold), color = TextMediumEmphasis)
                                     orgRepos.forEach { repo ->
                                         Row(
                                             modifier = Modifier
@@ -1584,8 +1584,8 @@ fun CreateEnterpriseDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text("Create New Enterprise", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
-                Text("Establish a root organizational boundary with customized governance baseline.", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                Text("建立新企業", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("建立具自訂治理基準的根組織邊界。", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
 
                 OutlinedTextField(
                     value = name,
@@ -1595,7 +1595,7 @@ fun CreateEnterpriseDialog(
                             slug = it.lowercase().replace(" ", "-")
                         }
                     },
-                    label = { Text("Enterprise Name") },
+                    label = { Text("企業名稱") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1611,7 +1611,7 @@ fun CreateEnterpriseDialog(
                 OutlinedTextField(
                     value = slug,
                     onValueChange = { slug = it.lowercase().replace(" ", "-") },
-                    label = { Text("Slug Identifier") },
+                    label = { Text("Slug 識別碼") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1627,7 +1627,7 @@ fun CreateEnterpriseDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Governance Purpose") },
+                    label = { Text("治理目的") },
                     maxLines = 2,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1640,14 +1640,14 @@ fun CreateEnterpriseDialog(
                     modifier = Modifier.fillMaxWidth().testTag("ent_desc_input")
                 )
 
-                Text("Security Governance Policies", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                Text("安全治理政策", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Segregation of Duties (SoD)", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
+                    Text("職責分離（SoD）", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
                     Switch(checked = segDuties, onCheckedChange = { segDuties = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
 
@@ -1656,7 +1656,7 @@ fun CreateEnterpriseDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Dual Approver Gate", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
+                    Text("雙核准人關卡", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
                     Switch(checked = dualApproval, onCheckedChange = { dualApproval = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
 
@@ -1665,7 +1665,7 @@ fun CreateEnterpriseDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Reviewer Gate Before Sign-Off", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
+                    Text("簽核前審查者關卡", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
                     Switch(checked = revGate, onCheckedChange = { revGate = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
 
@@ -1674,7 +1674,7 @@ fun CreateEnterpriseDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Allow User-Owned Repositories", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
+                    Text("允許使用者擁有儲存庫", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
                     Switch(checked = allowUserRepos, onCheckedChange = { allowUserRepos = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
 
@@ -1694,7 +1694,7 @@ fun CreateEnterpriseDialog(
                         enabled = name.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_enterprise_button")
                     ) {
-                        Text("Establish Enterprise")
+                        Text("建立企業")
                     }
                 }
             }
@@ -1726,8 +1726,8 @@ fun EditEnterprisePoliciesDialog(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text("Configure Governance Policies", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
-                Text("Changes apply immediately across all organizations and repositories under ${enterprise.name}.", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                Text("設定治理政策", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("變更會立即套用至 ${enterprise.name} 下所有組織與儲存庫。", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1735,8 +1735,8 @@ fun EditEnterprisePoliciesDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Segregation of Duties (SoD)", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("Prohibit authors from reviewing or approving own work", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                        Text("職責分離（SoD）", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("禁止作者審查或核准自己的成果", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                     }
                     Switch(checked = segDuties, onCheckedChange = { segDuties = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
@@ -1747,8 +1747,8 @@ fun EditEnterprisePoliciesDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Dual Approval Gate", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("Require 2 sign-offs for release promotions", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                        Text("雙重核准關卡", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("發布提升需取得 2 個簽核", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                     }
                     Switch(checked = dualApp, onCheckedChange = { dualApp = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
@@ -1759,8 +1759,8 @@ fun EditEnterprisePoliciesDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Peer Review Gate", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("Require review before approver sign-off", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                        Text("同儕審查關卡", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("核准人簽核前必須先通過審查", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                     }
                     Switch(checked = revGate, onCheckedChange = { revGate = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
@@ -1771,8 +1771,8 @@ fun EditEnterprisePoliciesDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("User-Owned Workspaces", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("Allow non-organization workspaces", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                        Text("使用者擁有的工作區", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("允許非組織工作區", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                     }
                     Switch(checked = allowUserRepos, onCheckedChange = { allowUserRepos = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
@@ -1797,7 +1797,7 @@ fun EditEnterprisePoliciesDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary),
                         modifier = Modifier.testTag("save_enterprise_policies_button")
                     ) {
-                        Text("Save Policies")
+                        Text("儲存政策")
                     }
                 }
             }
@@ -1835,8 +1835,8 @@ fun CreateOrganizationDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Create Organization", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
-                Text("Establish a dedicated operating entity capable of grouping teams and owning workspaces.", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                Text("建立組織", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("建立可管理團隊並擁有工作區的專屬營運實體。", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
 
                 OutlinedTextField(
                     value = name,
@@ -1846,7 +1846,7 @@ fun CreateOrganizationDialog(
                             slug = it.lowercase().replace(" ", "-")
                         }
                     },
-                    label = { Text("Organization Name (e.g. Fintech & Payments)") },
+                    label = { Text("組織名稱（例如：Fintech & Payments）") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1862,7 +1862,7 @@ fun CreateOrganizationDialog(
                 OutlinedTextField(
                     value = slug,
                     onValueChange = { slug = it.lowercase().replace(" ", "-") },
-                    label = { Text("Slug Identifier (@fintech-payments)") },
+                    label = { Text("Slug 識別碼（@fintech-payments）") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1878,7 +1878,7 @@ fun CreateOrganizationDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Organization Mission & Scope") },
+                    label = { Text("組織使命與範圍") },
                     maxLines = 2,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -1891,7 +1891,7 @@ fun CreateOrganizationDialog(
                     modifier = Modifier.fillMaxWidth().testTag("org_desc_input")
                 )
 
-                Text("Default Member Repository Role", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                Text("成員預設儲存庫角色", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -1916,7 +1916,7 @@ fun CreateOrganizationDialog(
                     }
                 }
 
-                Text("Initial Organization Owner", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                Text("初始組織擁有者", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     allUsers.forEach { user ->
                         val isSelected = user.id == selectedOwnerId
@@ -1954,7 +1954,7 @@ fun CreateOrganizationDialog(
                         enabled = name.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_org_button")
                     ) {
-                        Text("Create Organization")
+                        Text("建立組織")
                     }
                 }
             }
@@ -1988,7 +1988,7 @@ fun CreateUserDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Provision Enterprise User", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("建立企業使用者", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
 
                 OutlinedTextField(
                     value = displayName,
@@ -2001,7 +2001,7 @@ fun CreateUserDialog(
                             email = "${username}@acme.io"
                         }
                     },
-                    label = { Text("Display Name (e.g. Maya Lin)") },
+                    label = { Text("顯示名稱（例如：Maya Lin）") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2017,7 +2017,7 @@ fun CreateUserDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it.lowercase().replace(" ", "_") },
-                    label = { Text("Username handle") },
+                    label = { Text("使用者帳號") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2033,7 +2033,7 @@ fun CreateUserDialog(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Enterprise Email") },
+                    label = { Text("企業電子郵件") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2049,7 +2049,7 @@ fun CreateUserDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title / Professional Role") },
+                    label = { Text("職稱／專業角色") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2068,8 +2068,8 @@ fun CreateUserDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Enterprise Admin Privilege", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("Grant top-level administrative authority", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                        Text("企業管理員權限", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                        Text("授予最高層管理權限", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                     }
                     Switch(checked = isAdmin, onCheckedChange = { isAdmin = it }, colors = SwitchDefaults.colors(checkedThumbColor = LavenderPrimary))
                 }
@@ -2090,7 +2090,7 @@ fun CreateUserDialog(
                         enabled = displayName.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_user_button")
                     ) {
-                        Text("Provision Identity")
+                        Text("建立身分")
                     }
                 }
             }
@@ -2125,13 +2125,13 @@ fun AddOrgMemberDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Add Member to '${organization.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("新增成員至『${organization.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
 
                 if (availableUsers.isEmpty()) {
-                    Text("All enterprise users are already members of this organization.", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
+                    Text("所有企業使用者都已是此組織成員。", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
                     TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("關閉", color = LavenderPrimary) }
                 } else {
-                    Text("Select User", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("選擇使用者", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         availableUsers.forEach { user ->
                             val isSelected = user.id == selectedUserId
@@ -2153,7 +2153,7 @@ fun AddOrgMemberDialog(
                         }
                     }
 
-                    Text("Assign Organization Role", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("指派組織角色", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -2194,7 +2194,7 @@ fun AddOrgMemberDialog(
                             colors = ButtonDefaults.buttonColors(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary),
                             modifier = Modifier.testTag("confirm_add_org_member")
                         ) {
-                            Text("Add Member")
+                            Text("新增成員")
                         }
                     }
                 }
@@ -2230,8 +2230,8 @@ fun CreateTeamDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Create Team under '${organization.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
-                Text("Teams are organization-scoped groups that receive repository permissions.", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                Text("在『${organization.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("團隊是組織範圍內的群組，可取得儲存庫權限。", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
 
                 OutlinedTextField(
                     value = name,
@@ -2241,7 +2241,7 @@ fun CreateTeamDialog(
                             slug = it.lowercase().replace(" ", "-")
                         }
                     },
-                    label = { Text("Team Name (e.g. Core Infrastructure)") },
+                    label = { Text("團隊名稱（例如：Core Infrastructure）") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2257,7 +2257,7 @@ fun CreateTeamDialog(
                 OutlinedTextField(
                     value = slug,
                     onValueChange = { slug = it.lowercase().replace(" ", "-") },
-                    label = { Text("Slug Identifier (@core-infra)") },
+                    label = { Text("Slug 識別碼（@core-infra）") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2273,7 +2273,7 @@ fun CreateTeamDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Team Purpose & Mission") },
+                    label = { Text("團隊目的與使命") },
                     maxLines = 2,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = SophisticatedSurfaceDark,
@@ -2287,7 +2287,7 @@ fun CreateTeamDialog(
                 )
 
                 if (allTeams.isNotEmpty()) {
-                    Text("Nested Under Parent Team (Optional)", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("隸屬上層團隊（選填）", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(
                             modifier = Modifier
@@ -2299,7 +2299,7 @@ fun CreateTeamDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(selected = parentTeamId == null, onClick = { parentTeamId = null }, colors = RadioButtonDefaults.colors(selectedColor = LavenderPrimary))
-                            Text("Top-level team (No parent)", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
+                            Text("最上層團隊（無上層）", style = MaterialTheme.typography.bodySmall, color = TextHighEmphasis)
                         }
 
                         allTeams.forEach { parent ->
@@ -2336,7 +2336,7 @@ fun CreateTeamDialog(
                         enabled = name.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_team_button")
                     ) {
-                        Text("Create Team")
+                        Text("建立團隊")
                     }
                 }
             }
@@ -2371,13 +2371,13 @@ fun AddTeamMemberDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Add Member to '${team.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
+                Text("新增成員至『${team.name}'", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LavenderPrimary)
 
                 if (availableUsers.isEmpty()) {
-                    Text("All users are already assigned to this team.", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
+                    Text("所有使用者都已加入此團隊。", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
                     TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("關閉", color = LavenderPrimary) }
                 } else {
-                    Text("Select User", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("選擇使用者", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         availableUsers.forEach { user ->
                             val isSelected = user.id == selectedUserId
@@ -2399,7 +2399,7 @@ fun AddTeamMemberDialog(
                         }
                     }
 
-                    Text("Team Role", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
+                    Text("團隊角色", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -2439,7 +2439,7 @@ fun AddTeamMemberDialog(
                             colors = ButtonDefaults.buttonColors(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary),
                             modifier = Modifier.testTag("confirm_add_team_member")
                         ) {
-                            Text("Add Member")
+                            Text("新增成員")
                         }
                     }
                 }

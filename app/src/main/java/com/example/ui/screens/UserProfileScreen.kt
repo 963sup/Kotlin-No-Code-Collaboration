@@ -336,7 +336,7 @@ fun UserProfileScreen(
                     EnterpriseAuthorityCard(user = user, enterprise = enterprise)
                 }
 
-                // Organization Memberships & Roles
+                // Organization 個成員hips & Roles
                 item {
                     OrganizationMembershipsSection(
                         memberships = userOrgMemberships,
@@ -344,7 +344,7 @@ fun UserProfileScreen(
                     )
                 }
 
-                // Team Memberships & Collaborative Context
+                // Team 個成員hips & Collaborative Context
                 item {
                     TeamMembershipsSection(
                         teamMemberships = userTeamMemberships,
@@ -369,7 +369,7 @@ fun UserProfileScreen(
             }
 
             ProfileSubTab.CONTRIBUTIONS -> {
-                // Authored Artifacts Section
+                // Authored 個成果 Section
                 item {
                     ProfileAuthoredArtifactsSection(
                         artifacts = userArtifacts,
@@ -387,7 +387,7 @@ fun UserProfileScreen(
                     )
                 }
 
-                // Formal Approver Sign-offs Section
+                // Formal Approver 個簽核s Section
                 item {
                     ProfileApprovalsSection(
                         approvals = userApprovals,
@@ -541,7 +541,7 @@ private fun UserProfileHeroCard(
                             tint = LavenderPrimary
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Inspect User", style = MaterialTheme.typography.labelSmall)
+                        Text("檢視使用者", style = MaterialTheme.typography.labelSmall)
                     }
 
                     DropdownMenu(
@@ -649,7 +649,7 @@ private fun UserProfileHeroCard(
                                 color = LavenderContainer
                             ) {
                                 Text(
-                                    text = "YOU",
+                                    text = "你",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold
@@ -772,7 +772,7 @@ private fun UserProfileHeroCard(
                         tint = LavenderPrimary
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Edit Profile", style = MaterialTheme.typography.labelMedium)
+                    Text("編輯個人檔案", style = MaterialTheme.typography.labelMedium)
                 }
 
                 if (!isSelf) {
@@ -793,7 +793,7 @@ private fun UserProfileHeroCard(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Act as Persona", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        Text("切換為此身分", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                     }
                 }
             }
@@ -858,7 +858,7 @@ private fun ProfileMetricsGrid(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "ENTERPRISE FOOTPRINT & RESPONSIBILITIES",
+                text = "企業範圍與責任",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.8.sp
@@ -991,7 +991,7 @@ private fun ProfileIdentitySummaryCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Identity & Role Profile",
+                    text = "身分與角色檔案",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -1080,14 +1080,14 @@ private fun GovernanceHierarchyRelationalCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Hierarchy & Relationship Architecture",
+                    text = "階層與關係架構",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
             }
 
             Text(
-                text = "Illustrating the direct relational mapping from User Profile down through Enterprise, Organizations, Teams, and Repositories:",
+                text = "顯示使用者檔案向下連結企業、組織、團隊與儲存庫的關係：",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis
             )
@@ -1120,10 +1120,10 @@ private fun GovernanceHierarchyRelationalCard(
                         tint = EmeraldSuccess
                     )
 
-                    // Level 3: Teams
+                    // Level 3: 個團隊
                     HierarchyLevelRow(
                         level = "團隊",
-                        title = "${teamMemberships.size} Team Membership(s)",
+                        title = "${teamMemberships.size} Team 個成員hip(s)",
                         subtitle = teamMemberships.joinToString(", ") { "${it.second.name} (${it.first.role.name})" }.ifEmpty { "No team assignments" },
                         icon = Icons.Default.Groups,
                         tint = PinkAccent
@@ -1235,7 +1235,7 @@ private fun RecentProfileActivityCard(
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "Recent Attributed Activity",
+                        text = "近期歸屬活動",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
@@ -1246,7 +1246,7 @@ private fun RecentProfileActivityCard(
                     color = SophisticatedSurfaceDark
                 ) {
                     Text(
-                        text = "${auditLogs.size} Events",
+                        text = "${auditLogs.size} 個事件",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -1256,7 +1256,7 @@ private fun RecentProfileActivityCard(
 
             if (auditLogs.isEmpty()) {
                 Text(
-                    text = "No recent audit events attributed to ${user.displayName}.",
+                    text = "尚無歸屬於此使用者的近期稽核事件：${user.displayName}.",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -1346,14 +1346,14 @@ private fun EnterpriseAuthorityCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Enterprise Policy & Authority Scope",
+                    text = "企業政策與權限範圍",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
             }
 
             Text(
-                text = "The User Profile is rooted within Enterprise '${enterprise?.name ?: "Nexus Enterprise"}'. Security policies active at this root level govern this identity across all Organizations and Repositories:",
+                text = "使用者檔案隸屬企業 '${enterprise?.name ?: "Nexus Enterprise"}'. Security policies active at this root level govern this identity across all Organizations and Repositories:",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis
             )
@@ -1449,7 +1449,7 @@ private fun OrganizationMembershipsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Organization Memberships (${memberships.size})",
+                    text = "組織成員關係（${memberships.size}）",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -1457,7 +1457,7 @@ private fun OrganizationMembershipsSection(
 
             if (memberships.isEmpty()) {
                 Text(
-                    text = "This user does not currently hold membership in any Organization.",
+                    text = "此使用者目前不屬於任何組織。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -1499,7 +1499,7 @@ private fun OrganizationMembershipsSection(
                                     color = TextHighEmphasis
                                 )
                                 Text(
-                                    text = "org/${org.slug} • Default Repo Role: ${org.defaultMemberRole.name}",
+                                    text = "org/${org.slug} • 預設儲存庫角色：${org.defaultMemberRole.name}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = TextMediumEmphasis
                                 )
@@ -1550,7 +1550,7 @@ private fun TeamMembershipsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Team Memberships & Maintainer Roles (${teamMemberships.size})",
+                    text = "團隊成員與維護者角色（${teamMemberships.size}）",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -1558,7 +1558,7 @@ private fun TeamMembershipsSection(
 
             if (teamMemberships.isEmpty()) {
                 Text(
-                    text = "This user is not assigned to any collaborative Teams.",
+                    text = "此使用者目前未加入任何協作團隊。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -1650,7 +1650,7 @@ private fun RepositoryGrantsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Repositories & Workspaces",
+                    text = "儲存庫與工作區",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -1680,7 +1680,7 @@ private fun RepositoryGrantsSection(
             // Collaborator Grants
             if (collaboratorRepos.isNotEmpty()) {
                 Text(
-                    text = "COLLABORATOR & ORGANIZATIONAL REPOSITORIES",
+                    text = "協作者與組織儲存庫",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp
@@ -1700,7 +1700,7 @@ private fun RepositoryGrantsSection(
 
             if (ownedRepos.isEmpty() && collaboratorRepos.isEmpty()) {
                 Text(
-                    text = "No accessible repositories assigned to this user.",
+                    text = "此使用者目前沒有可存取的儲存庫。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -1790,14 +1790,14 @@ private fun EffectivePermissionsMatrixCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Effective Permissions Matrix",
+                    text = "有效權限矩陣",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
             }
 
             Text(
-                text = "Evaluated capabilities determined by Enterprise, Organization, Team memberships, and Repo Access Rules:",
+                text = "實際能力由企業、組織、團隊成員關係與儲存庫存取規則共同決定：",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis
             )
@@ -1811,7 +1811,7 @@ private fun EffectivePermissionsMatrixCard(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    PermissionMatrixRow("Create No-Code Artifacts", "Allowed in Collaborator/Maintainer/Owner workspaces", true)
+                    PermissionMatrixRow("Create No-Code 個成果", "Allowed in Collaborator/Maintainer/Owner workspaces", true)
                     PermissionMatrixRow("Submit Formal Artifact Reviews", "Allowed in assigned Reviewer/Collaborator scopes (Subject to Segregation of Duties)", true)
                     PermissionMatrixRow("Grant Cryptographic Approvals", "Allowed for Approver/Maintainer/Owner roles (Requires independent reviewer gate)", true)
                     PermissionMatrixRow("Publish & Lock Production Releases", "Requires dual approvals and approver sign-offs", true)
@@ -1884,7 +1884,7 @@ private fun ProfileAuthoredArtifactsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Authored No-Code Artifacts (${artifacts.size})",
+                    text = "建立的無程式碼成果（${artifacts.size}）",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -1892,7 +1892,7 @@ private fun ProfileAuthoredArtifactsSection(
 
             if (artifacts.isEmpty()) {
                 Text(
-                    text = "No artifacts authored yet by ${user.displayName}.",
+                    text = "尚未由此使用者建立成果：${user.displayName}.",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -2005,7 +2005,7 @@ private fun ProfileReviewsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Formal Reviews Submitted (${reviews.size})",
+                    text = "已提交正式審查（${reviews.size}）",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2013,7 +2013,7 @@ private fun ProfileReviewsSection(
 
             if (reviews.isEmpty()) {
                 Text(
-                    text = "No formal artifact reviews recorded for this user.",
+                    text = "此使用者尚無正式成果審查紀錄。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -2069,7 +2069,7 @@ private fun ProfileReviewsSection(
                             }
 
                             Text(
-                                text = "Reviewed on ${dateFormat.format(Date(review.reviewedAt))}",
+                                text = "審查於 ${dateFormat.format(Date(review.reviewedAt))}",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = TextLowEmphasis
                             )
@@ -2110,7 +2110,7 @@ private fun ProfileApprovalsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Formal Approver Sign-offs (${approvals.size})",
+                    text = "正式核准簽核（${approvals.size}）",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2118,7 +2118,7 @@ private fun ProfileApprovalsSection(
 
             if (approvals.isEmpty()) {
                 Text(
-                    text = "No formal sign-offs executed by this user.",
+                    text = "此使用者尚無正式簽核紀錄。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -2163,7 +2163,7 @@ private fun ProfileApprovalsSection(
                                             modifier = Modifier.size(12.dp)
                                         )
                                         Text(
-                                            text = "SIGNED OFF",
+                                            text = "已簽核",
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Bold
@@ -2175,7 +2175,7 @@ private fun ProfileApprovalsSection(
                             }
 
                             Text(
-                                text = "Signature Proof: ${approval.signatureProof}",
+                                text = "簽章證明：${approval.signatureProof}",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontFamily = FontFamily.Monospace,
                                     fontSize = 10.sp
@@ -2184,7 +2184,7 @@ private fun ProfileApprovalsSection(
                             )
 
                             Text(
-                                text = "Signed on ${dateFormat.format(Date(approval.signedAt))}",
+                                text = "簽核於 ${dateFormat.format(Date(approval.signedAt))}",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = TextLowEmphasis
                             )
@@ -2223,7 +2223,7 @@ private fun ProfileIssuesAndDiscussionsSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Issues & RFC Discussions",
+                    text = "任務與 RFC 討論",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2231,7 +2231,7 @@ private fun ProfileIssuesAndDiscussionsSection(
 
             if (issues.isNotEmpty()) {
                 Text(
-                    text = "ISSUES AUTHORED / ASSIGNED (${issues.size})",
+                    text = "建立／被指派的任務（${issues.size}）",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp
@@ -2316,7 +2316,7 @@ private fun ProfileIssuesAndDiscussionsSection(
                                 modifier = Modifier.weight(1f)
                             )
                             Text(
-                                text = "${disc.upvoteCount} Upvotes",
+                                text = "${disc.upvoteCount} 票贊成",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = TextMediumEmphasis
                             )
@@ -2327,7 +2327,7 @@ private fun ProfileIssuesAndDiscussionsSection(
 
             if (issues.isEmpty() && discussions.isEmpty()) {
                 Text(
-                    text = "No issues or RFC discussions recorded for this user.",
+                    text = "此使用者尚無任務或 RFC 討論紀錄。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -2361,12 +2361,12 @@ private fun SecurityArchitectureCalloutCard() {
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Architectural Separation of Concerns",
+                    text = "架構責任分離",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = LavenderPrimary
                 )
                 Text(
-                    text = "User Profile serves as the centralized identity representation across the Enterprise while strictly decoupling Authentication (SAML/OIDC SSO, FIDO2 tokens), Authorization (Role & Permission Hierarchy), and Account Settings.",
+                    text = "使用者檔案是企業中的集中身分表示，同時嚴格分離驗證（SAML／OIDC SSO、FIDO2 權杖）、授權（角色與權限階層）以及帳號設定。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextHighEmphasis
                 )
@@ -2398,7 +2398,7 @@ private fun AuthenticationIdentityCard(user: User) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Federated Authentication & Single Sign-On",
+                    text = "聯邦驗證與單一登入",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2437,7 +2437,7 @@ private fun SessionSecurityCard(user: User) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Multi-Factor & Cryptographic Tokens",
+                    text = "多因素驗證與安全權杖",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2484,7 +2484,7 @@ private fun AccountSettingsCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Account Display & Identity Customization",
+                    text = "帳號顯示與身分自訂",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2493,7 +2493,7 @@ private fun AccountSettingsCard(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 ProfileFieldRow(label = "顯示名稱", value = user.displayName)
                 ProfileFieldRow(label = "Job Title / Role", value = user.title)
-                ProfileFieldRow(label = "Location", value = user.location.ifEmpty { "Not specified" })
+                ProfileFieldRow(label = "位置", value = user.location.ifEmpty { "Not specified" })
                 ProfileFieldRow(label = "Pronouns", value = user.pronouns.ifEmpty { "Not specified" })
                 ProfileFieldRow(label = "Avatar Color Hex", value = user.avatarColorHex)
             }
@@ -2515,7 +2515,7 @@ private fun AccountSettingsCard(
                     tint = LavenderPrimary
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Modify Profile Information", style = MaterialTheme.typography.labelMedium)
+                Text("修改個人檔案資訊", style = MaterialTheme.typography.labelMedium)
             }
         }
     }
@@ -2544,7 +2544,7 @@ private fun NotificationPreferencesCard(user: User) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Notification Routing & Policy Subscriptions",
+                    text = "通知路由與政策訂閱",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2599,7 +2599,7 @@ private fun EditProfileModal(
                     tint = LavenderPrimary
                 )
                 Text(
-                    text = "Edit User Profile",
+                    text = "編輯使用者檔案",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2629,7 +2629,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = title,
                         onValueChange = { title = it },
-                        label = { Text("Title / Professional Role") },
+                        label = { Text("職稱／專業角色") },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LavenderPrimary,
@@ -2644,7 +2644,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = bio,
                         onValueChange = { bio = it },
-                        label = { Text("Bio / Focus Area") },
+                        label = { Text("簡介／專注領域") },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -2660,7 +2660,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = location,
                         onValueChange = { location = it },
-                        label = { Text("Location") },
+                        label = { Text("位置") },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LavenderPrimary,
@@ -2675,7 +2675,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = pronouns,
                         onValueChange = { pronouns = it },
-                        label = { Text("Pronouns (e.g. they/them)") },
+                        label = { Text("代名詞（例如：they/them）") },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LavenderPrimary,
@@ -2688,7 +2688,7 @@ private fun EditProfileModal(
 
                 item {
                     Text(
-                        text = "Avatar Badge Color",
+                        text = "頭像識別色",
                         style = MaterialTheme.typography.labelMedium,
                         color = TextMediumEmphasis
                     )
@@ -2718,7 +2718,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = notifPrefs,
                         onValueChange = { notifPrefs = it },
-                        label = { Text("Notification Subscriptions") },
+                        label = { Text("通知訂閱") },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LavenderPrimary,
@@ -2741,7 +2741,7 @@ private fun EditProfileModal(
                 ),
                 modifier = Modifier.testTag("btn_save_profile")
             ) {
-                Text("Save Profile", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                Text("儲存個人檔案", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
             }
         },
         dismissButton = {

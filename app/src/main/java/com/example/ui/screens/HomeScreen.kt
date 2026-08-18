@@ -194,7 +194,7 @@ fun HomeScreen(
         )
     }
 
-    // Artifacts waiting for review in user's accessible scope
+    // 個成果 waiting for review in user's accessible scope
     val pendingReviewArtifacts = remember(activeUser, allArtifacts, allReviews, repositories) {
         if (activeUser == null) emptyList()
         else {
@@ -204,7 +204,7 @@ fun HomeScreen(
         }
     }
 
-    // Artifacts waiting for multi-signatory approval
+    // 個成果 waiting for multi-signatory approval
     val pendingApprovalArtifacts = remember(activeUser, allArtifacts, allApprovals, repositories) {
         if (activeUser == null) emptyList()
         else {
@@ -612,7 +612,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Recently Accessed Repositories",
+                        text = "最近存取的儲存庫",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
@@ -621,7 +621,7 @@ fun HomeScreen(
                         modifier = Modifier.testTag("home_view_all_repos_btn")
                     ) {
                         Text(
-                            text = "View All (${repositories.size})",
+                            text = "查看全部（${repositories.size}）",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = LavenderPrimary
                         )
@@ -686,7 +686,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Quick Navigation",
+                        text = "快速導覽",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.5.sp
@@ -713,7 +713,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Containers", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("協作容器", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
 
                         OutlinedButton(
@@ -870,7 +870,7 @@ fun HomeIssueCard(
                             color = LavenderContainer
                         ) {
                             Text(
-                                text = "You",
+                                text = "你",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.SemiBold
@@ -968,7 +968,7 @@ fun HomeIssueCard(
                             modifier = Modifier.size(10.dp)
                         )
                         Text(
-                            text = "Linked: ${issue.linkedArtifactTitle}",
+                            text = "連結：${issue.linkedArtifactTitle}",
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                             color = TextMediumEmphasis,
                             maxLines = 1,
@@ -984,7 +984,7 @@ fun HomeIssueCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Status: ${issue.status.name.replace("_", " ")}",
+                    text = "狀態：${issue.status.name.replace("_", " ")}",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = when (issue.status) {
                         IssueStatus.OPEN -> LavenderPrimary
@@ -1040,7 +1040,7 @@ fun HomeArtifactReviewCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = if (isApproval) "Approval Sign-off" else "Peer Review Request",
+                        text = if (isApproval) "Approval 個簽核" else "Peer Review Request",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = if (isApproval) EmeraldSuccess else AmberWarning
@@ -1086,7 +1086,7 @@ fun HomeArtifactReviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Container: ${repo?.displayName ?: "Repository"}",
+                    text = "容器：${repo?.displayName ?: "Repository"}",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis
                 )
@@ -1362,7 +1362,7 @@ fun HomeRepositoryRowCard(
                     }
                 }
                 Text(
-                    text = "${repo.ownerDisplayName} • $artifactCount Blueprints • $openIssueCount Issues • $discussionCount Discussions",
+                    text = "${repo.ownerDisplayName} • $artifactCount 個藍圖 • $openIssueCount 個任務 • $discussionCount 個討論",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis
                 )
@@ -1370,7 +1370,7 @@ fun HomeRepositoryRowCard(
 
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Open Repository",
+                contentDescription = "開啟儲存庫",
                 tint = TextMediumEmphasis,
                 modifier = Modifier.size(16.dp)
             )

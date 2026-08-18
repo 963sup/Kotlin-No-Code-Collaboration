@@ -152,7 +152,7 @@ fun RepoIssuesSection(
     onAddDependency: (repoId: String, blockedIssueId: String, blockingIssueId: String, onSuccess: () -> Unit) -> Unit = { _, _, _, _ -> },
     onRemoveDependency: (dependencyId: String, onSuccess: () -> Unit) -> Unit = { _, _ -> },
     onAddComment: (issueId: String, content: String, onSuccess: () -> Unit) -> Unit,
-    onUpdateStatus: (issueId: String, newStatus: IssueStatus) -> Unit,
+    onUpdate狀態：(issueId: String, new狀態：IssueStatus) -> Unit,
     onAssignIssue: (issueId: String, assigneeType: GranteeType?, assigneeId: String?, assigneeName: String?) -> Unit,
     onLoadComments: (issueId: String) -> Unit,
     onSelectArtifact: ((NoCodeArtifact) -> Unit)? = null
@@ -315,7 +315,7 @@ fun RepoIssuesSection(
                     selectedPriorityFilter = null
                     hierarchyFilter = "ALL"
                 },
-                label = { Text("All (${issues.size})", fontSize = 12.sp) },
+                label = { Text("全部（${issues.size}）", fontSize = 12.sp) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = LavenderContainer,
                     selectedLabelColor = LavenderGlow,
@@ -550,7 +550,7 @@ fun RepoIssuesSection(
     if (currentViewingIssue != null) {
         val currentIssueNestedIds = IssueHierarchyRules.descendantIds(currentViewingIssue.id, issues)
         val currentIssueSubIssues = IssueHierarchyRules.orderedForDisplay(issues).map { it.first }.filter { it.id in currentIssueNestedIds }
-        val currentBlockedBy = dependencies.filter { it.blockedIssueId == currentViewingIssue.id }
+        val currentBlocked由 = dependencies.filter { it.blockedIssueId == currentViewingIssue.id }
             .mapNotNull { dep ->
                 val blocking = issues.firstOrNull { it.id == dep.blockingIssueId }
                 if (blocking != null) Pair(dep, blocking) else null
@@ -1055,7 +1055,7 @@ fun IssuePriorityBadge(priority: IssuePriority) {
 
 /**
  * Full Comprehensive Dialog to View & Manage Issue Details:
- * Includes Parent Issue link/unlink, Sub-issues list + quick add, Dependencies manager (Blocked By & Blocking),
+ * Includes Parent Issue link/unlink, Sub-issues list + quick add, Dependencies manager (Blocked 由 & Blocking),
  * Assignee, Status actions, and threaded comments.
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -1074,7 +1074,7 @@ fun IssueDetailDialog(
     activeUser: User?,
     onDismiss: () -> Unit,
     onAddComment: (String) -> Unit,
-    onUpdateStatus: (IssueStatus) -> Unit,
+    onUpdate狀態：(IssueStatus) -> Unit,
     onAssignIssue: (GranteeType?, String?, String?) -> Unit,
     onLinkParent: (String?) -> Unit,
     onAddDependency: (blockingIssueId: String) -> Unit,
@@ -1203,12 +1203,12 @@ fun IssueDetailDialog(
                                 Icon(Icons.Default.Block, contentDescription = null, tint = RoseError, modifier = Modifier.size(20.dp))
                                 Column {
                                     Text(
-                                        text = "Work Blocked by $openBlockersCount Prerequisite Issue(s)",
+                                        text = "工作受到 $openBlockersCount 個前置任務阻擋",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = RoseError
                                     )
                                     Text(
-                                        text = "Resolve prerequisite blocking tasks before executing or closing this issue.",
+                                        text = "請先完成前置阻擋任務，再執行或關閉此任務。",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TextMediumEmphasis,
                                         fontSize = 11.sp
@@ -1261,7 +1261,7 @@ fun IssueDetailDialog(
                                             RoleBadge(roleName = issue.authorRole)
                                         }
                                         Text(
-                                            text = "Created on ${SimpleDateFormat("MMM d, yyyy 'at' HH:mm", Locale.getDefault()).format(Date(issue.createdAt))}",
+                                            text = "建立於 ${SimpleDateFormat("MMM d, yyyy 'at' HH:mm", Locale.getDefault()).format(Date(issue.createdAt))}",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = TextMediumEmphasis,
                                             fontSize = 11.sp
@@ -1490,7 +1490,7 @@ fun IssueDetailDialog(
                             } else {
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "No sub-issues linked yet. Break this task down into tracked sub-components.",
+                                    text = "尚未連結子任務；可將此工作拆解成可追蹤的子項目。",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextMediumEmphasis,
                                     fontSize = 11.sp
@@ -1585,7 +1585,7 @@ fun IssueDetailDialog(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Blocked By list
+                            // Blocked 由 list
                             if (blockedByDependencies.isNotEmpty()) {
                                 Text(
                                     text = "受以下前置任務阻擋：",
@@ -1650,7 +1650,7 @@ fun IssueDetailDialog(
                             // Blocking others list
                             if (blockingDependencies.isNotEmpty()) {
                                 Text(
-                                    text = "BLOCKING (Blocks Downstream):",
+                                    text = "阻擋下游任務：",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = AmberGlow,
                                     fontSize = 10.sp
@@ -1693,7 +1693,7 @@ fun IssueDetailDialog(
 
                             if (blockedByDependencies.isEmpty() && blockingDependencies.isEmpty()) {
                                 Text(
-                                    text = "No blocking dependencies attached to this issue.",
+                                    text = "此任務尚無阻擋相依。",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextMediumEmphasis,
                                     fontSize = 11.sp
@@ -1796,7 +1796,7 @@ fun IssueDetailDialog(
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.testTag("start_issue_button")
                                 ) {
-                                    Text("Start Work", fontSize = 12.sp)
+                                    Text("開始處理", fontSize = 12.sp)
                                 }
                             }
 
@@ -1810,7 +1810,7 @@ fun IssueDetailDialog(
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.testTag("close_issue_button")
                                 ) {
-                                    Text("Close Issue", fontSize = 12.sp)
+                                    Text("關閉任務", fontSize = 12.sp)
                                 }
                             } else {
                                 Button(
@@ -1822,7 +1822,7 @@ fun IssueDetailDialog(
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.testTag("reopen_issue_button")
                                 ) {
-                                    Text("Reopen Issue", fontSize = 12.sp)
+                                    Text("重新開啟任務", fontSize = 12.sp)
                                 }
                             }
                         }
@@ -1832,7 +1832,7 @@ fun IssueDetailDialog(
 
                     // Discussion / Comments Thread
                     Text(
-                        text = "Activity & Comments (${comments.size})",
+                        text = "活動與留言（${comments.size}）",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
@@ -2103,7 +2103,7 @@ fun CreateIssueDialog(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("任務標題 *") },
-                    placeholder = { Text("e.g., Update KYC schema for Tier-3 approvals") },
+                    placeholder = { Text("例如：更新第 3 級核准的 KYC 結構") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("new_issue_title_input"),
@@ -2336,8 +2336,8 @@ fun CreateIssueDialog(
                 OutlinedTextField(
                     value = labels,
                     onValueChange = { labels = it },
-                    label = { Text("Labels (comma-separated)") },
-                    placeholder = { Text("e.g. compliance, security, bug, sla") },
+                    label = { Text("標籤（以逗號分隔）") },
+                    placeholder = { Text("例如：守規、安全、問題、SLA") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("new_issue_labels_input"),
@@ -2392,7 +2392,7 @@ fun CreateIssueDialog(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.testTag("confirm_create_issue_button")
                     ) {
-                        Text("Submit Issue")
+                        Text("送出任務")
                     }
                 }
             }

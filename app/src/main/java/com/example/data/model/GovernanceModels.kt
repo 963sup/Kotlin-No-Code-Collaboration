@@ -104,10 +104,10 @@ enum class IssuePriority(val label: String) {
 
 enum class DiscussionCategory(val label: String, val iconName: String, val description: String) {
     GENERAL("一般", "Forum", "一般社群與儲存庫討論"),
-    RFC_PROPOSALS("RFC Proposals", "Gavel", "正式藍圖、架構與結構提案"),
-    ANNOUNCEMENTS("Announcements", "Campaign", "由儲存庫維護者與擁有者發布的正式更新"),
-    IDEAS_AND_BRAINSTORM("Ideas & Brainstorm", "Lightbulb", "無程式碼工作流程的協作腦力激盪"),
-    Q_AND_A("Q & A", "Help", "提問並取得已驗證的回答"),
+    RFC_PROPOSALS("RFC 提案", "Gavel", "正式藍圖、架構與結構提案"),
+    ANNOUNCEMENTS("公告", "Campaign", "由儲存庫維護者與擁有者發布的正式更新"),
+    IDEAS_AND_BRAINSTORM("想法與腦力激盪", "Lightbulb", "無程式碼工作流程的協作腦力激盪"),
+    Q_AND_A("問答", "Help", "提問並取得已驗證的回答"),
     GOVERNANCE_DEBATE("治理與政策", "Policy", "討論守規關卡、存取角色與稽核規則")
 }
 

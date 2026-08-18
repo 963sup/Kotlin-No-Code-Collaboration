@@ -79,7 +79,7 @@ import com.example.ui.theme.TextMediumEmphasis
 fun KanbanBoardScreen(
     repositories: List<Repository>,
     allIssues: List<RepoIssue>,
-    onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+    onUpdateIssue狀態：(String, IssueStatus) -> Unit,
     onOpenRepository: (Repository) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -188,7 +188,7 @@ private fun KanbanColumn(
     status: IssueStatus,
     tasks: List<Pair<RepoIssue, Int>>,
     allIssues: List<RepoIssue>,
-    onUpdateIssueStatus: (String, IssueStatus) -> Unit
+    onUpdateIssue狀態：(String, IssueStatus) -> Unit
 ) {
     val title = when (status) {
         IssueStatus.OPEN -> "待處理"

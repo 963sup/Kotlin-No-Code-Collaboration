@@ -203,7 +203,7 @@ fun InboxScreen(
             }
         }
 
-        // 3. INBOX STATUS TABS (ALL / UNREAD / ACTION REQUIRED / ARCHIVED)
+        // 3. INBOX STATUS TABS (ALL / UNREAD / 需處理 / ARCHIVED)
         item {
             Surface(
                 color = SophisticatedSurface,
@@ -284,7 +284,7 @@ fun InboxScreen(
                     FilterChip(
                         selected = selectedCategoryFilter == null,
                         onClick = { viewModel.setNotificationFilterCategory(null) },
-                        label = { Text("All Categories (${notifications.count { if (selectedTab == InboxFilterTab.ARCHIVED) it.status == NotificationStatus.ARCHIVED else it.status != NotificationStatus.ARCHIVED }})") },
+                        label = { Text("所有分類（${notifications.count { if (selectedTab == InboxFilterTab.ARCHIVED) it.status == NotificationStatus.ARCHIVED else it.status != NotificationStatus.ARCHIVED }}）") },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = LavenderPrimary,
                             selectedLabelColor = LavenderOnPrimary,
@@ -543,7 +543,7 @@ private fun InboxHeaderCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "Architecture Info",
+                            contentDescription = "架構說明",
                             tint = LavenderPrimary
                         )
                     }
@@ -596,7 +596,7 @@ private fun InboxHeaderCard(
                     }
                     Column {
                         Text(
-                            text = "Inbox Scoped To: ${activeUser?.displayName ?: "No User"}",
+                            text = "收件匣範圍：${activeUser?.displayName ?: "No User"}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = TextHighEmphasis
@@ -862,7 +862,7 @@ private fun NotificationItemCard(
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "From ${notification.actorDisplayName}",
+                        text = "來自 ${notification.actorDisplayName}",
                         fontSize = 11.sp,
                         color = TextMediumEmphasis
                     )
@@ -899,7 +899,7 @@ private fun NotificationItemCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Governance Links",
+                        text = "治理關聯",
                         fontSize = 12.sp,
                         color = LavenderSubtle
                     )
@@ -917,7 +917,7 @@ private fun NotificationItemCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Mark as Read",
+                                contentDescription = "標為已讀",
                                 tint = TextMediumEmphasis,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -1005,7 +1005,7 @@ private fun InboxGovernanceArchitectureCard(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Unified Inbox vs. Audit Log Architecture",
+                        text = "統一收件匣與稽核紀錄架構",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextHighEmphasis
@@ -1021,7 +1021,7 @@ private fun InboxGovernanceArchitectureCard(
             }
 
             Text(
-                text = "The Unified Inbox establishes a user-centric collaboration layer across the entire enterprise governance hierarchy. It is architecturally separate from the immutable compliance Audit Log:",
+                text = "統一收件匣在企業治理階層上建立以使用者為中心的協作層，並在架構上與不可任意竄改的守規稽核紀錄分離：",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextMediumEmphasis
             )
@@ -1045,10 +1045,10 @@ private fun InboxGovernanceArchitectureCard(
                             Icon(Icons.Default.Notifications, null, tint = LavenderPrimary, modifier = Modifier.size(16.dp))
                             Text("統一收件匣", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = LavenderGlow)
                         }
-                        Text("• Private to active User identity", fontSize = 11.sp, color = TextHighEmphasis)
-                        Text("• Interactive states: Unread / Read / Archived", fontSize = 11.sp, color = TextMediumEmphasis)
-                        Text("• Actionable: Direct 1-click approvals & reviews", fontSize = 11.sp, color = TextMediumEmphasis)
-                        Text("• Scoped to user's assigned responsibilities", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 僅屬目前使用者身分", fontSize = 11.sp, color = TextHighEmphasis)
+                        Text("• 互動狀態：未讀／已讀／已封存", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 可執行：直接處理核准與審查", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 依使用者被指派的責任範圍顯示", fontSize = 11.sp, color = TextMediumEmphasis)
                     }
                 }
 
@@ -1067,10 +1067,10 @@ private fun InboxGovernanceArchitectureCard(
                             Icon(Icons.Default.Security, null, tint = EmeraldSuccess, modifier = Modifier.size(16.dp))
                             Text("稽核紀錄", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = EmeraldSuccess)
                         }
-                        Text("• Enterprise-wide immutable ledger", fontSize = 11.sp, color = TextHighEmphasis)
-                        Text("• Records all policy engine verdicts", fontSize = 11.sp, color = TextMediumEmphasis)
-                        Text("• Forensic compliance & security stream", fontSize = 11.sp, color = TextMediumEmphasis)
-                        Text("• Append-only, non-actionable history", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 全企業不可任意竄改的紀錄帳", fontSize = 11.sp, color = TextHighEmphasis)
+                        Text("• 記錄所有政策引擎判定", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 守規與安全追溯事件流", fontSize = 11.sp, color = TextMediumEmphasis)
+                        Text("• 僅追加、不可直接操作的歷史", fontSize = 11.sp, color = TextMediumEmphasis)
                     }
                 }
             }
@@ -1089,7 +1089,7 @@ private fun InboxGovernanceArchitectureCard(
                 ) {
                     Icon(Icons.Default.Lock, null, tint = AmberWarning, modifier = Modifier.size(16.dp))
                     Text(
-                        text = "Governance Preserved: Triggering an action from any notification runs the exact same Hierarchical Policy Engine validation as manual execution.",
+                        text = "治理規則不變：從通知執行動作時，仍會經過與手動操作完全相同的階層政策引擎驗證。",
                         fontSize = 11.sp,
                         color = AmberGlow
                     )
@@ -1131,13 +1131,13 @@ private fun NotificationRelationalDetailDialog(
                 }
                 Column {
                     Text(
-                        text = "Notification Relational Context",
+                        text = "通知關聯脈絡",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "ID: ${notification.id}",
+                        text = "通知 ID：${notification.id}",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = TextMediumEmphasis
@@ -1254,13 +1254,13 @@ private fun NotificationRelationalDetailDialog(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "Distinct from System Audit Log",
+                                text = "與系統稽核紀錄分離",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp,
                                 color = LavenderGlow
                             )
                             Text(
-                                text = "While this notification routes an interactive prompt to ${notification.recipientUserId}, the corresponding action record in the Audit Log remains an immutable forensic entry accessible to enterprise compliance officers.",
+                                text = "此通知將互動工作導向 ${notification.recipientUserId}，而相對應的動作仍會在稽核紀錄中保留不可任意竄改的追溯證據，供企業守規人員查核。",
                                 fontSize = 11.sp,
                                 color = TextMediumEmphasis,
                                 lineHeight = 16.sp
@@ -1287,7 +1287,7 @@ private fun NotificationRelationalDetailDialog(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Open Target Entity")
+                    Text("開啟目標物件")
                 }
             }
         },

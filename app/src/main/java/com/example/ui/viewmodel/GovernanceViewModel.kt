@@ -89,7 +89,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
     val notificationFilterCategory: StateFlow<NotificationCategory?> = _notificationFilterCategory.asStateFlow()
 
     private val _notificationFilterStatus = MutableStateFlow<NotificationStatus?>(null)
-    val notificationFilterStatus: StateFlow<NotificationStatus?> = _notificationFilterStatus.asStateFlow()
+    val notificationFilter狀態：StateFlow<NotificationStatus?> = _notificationFilterStatus.asStateFlow()
 
     private val _inspectedProfileUser = MutableStateFlow<User?>(null)
     val inspectedProfileUser: StateFlow<User?> = _inspectedProfileUser.asStateFlow()
@@ -559,7 +559,7 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun updateIssueStatus(issueId: String, newStatus: IssueStatus) {
+    fun updateIssueStatus(issueId: String, new狀態：IssueStatus) {
         val user = _activeUser.value ?: return
         viewModelScope.launch {
             val (success, msg) = repository.updateIssueStatus(issueId, newStatus, user)

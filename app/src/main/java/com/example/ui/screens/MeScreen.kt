@@ -55,7 +55,7 @@ import com.example.ui.theme.TextMediumEmphasis
 
 enum class MeSubTab(val label: String, val icon: ImageVector, val tag: String) {
     PROFILE("Profile & Identity", Icons.Default.Person, "me_tab_profile"),
-    ORGS_AND_TEAMS("Orgs & Teams", Icons.Default.CorporateFare, "me_tab_orgs"),
+    ORGS_AND_TEAMS("Orgs & 個團隊", Icons.Default.CorporateFare, "me_tab_orgs"),
     POLICIES("Policies & Security", Icons.Default.Policy, "me_tab_policies"),
     AUDIT("Audit Trail", Icons.Default.History, "me_tab_audit")
 }

@@ -474,7 +474,7 @@ fun RepoCardItem(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "$artifactCount Artifacts",
+                        text = "$artifactCount 個成果",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                         color = LavenderSubtle
                     )
@@ -483,7 +483,7 @@ fun RepoCardItem(
                         color = SophisticatedBorder
                     )
                     Text(
-                        text = "${repo.requiredApproverCount} Approvers Gate",
+                        text = "${repo.requiredApproverCount} 個核准人關卡",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis
                     )
@@ -491,7 +491,7 @@ fun RepoCardItem(
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Open Repo",
+                    contentDescription = "開啟儲存庫",
                     tint = TextMediumEmphasis,
                     modifier = Modifier.size(16.dp)
                 )
@@ -539,7 +539,7 @@ fun CreateRepositoryDialog(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    text = "New No-Code Repository Container",
+                    text = "新增無程式碼儲存庫容器",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                     color = LavenderPrimary
                 )
@@ -559,7 +559,7 @@ fun CreateRepositoryDialog(
                     ) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(18.dp))
                         Text(
-                            text = "Only an Organization or User can Owner a Repository. Teams cannot own repositories; they inherit collaboration roles.",
+                            text = "只有組織或使用者可以擁有儲存庫；團隊不能擁有儲存庫，只能繼承協作角色。",
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 16.sp),
                             color = LavenderSubtle
                         )
@@ -568,7 +568,7 @@ fun CreateRepositoryDialog(
 
                 // Owner Type Selection
                 Text(
-                    text = "Repository Owner Entity",
+                    text = "儲存庫擁有者實體",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -674,7 +674,7 @@ fun CreateRepositoryDialog(
                             name = it.lowercase().replace(" ", "-")
                         }
                     },
-                    label = { Text("Display Name (e.g. Core API Blueprints)") },
+                    label = { Text("顯示名稱（例如：Core API 藍圖）") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -691,7 +691,7 @@ fun CreateRepositoryDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.lowercase().replace(" ", "-") },
-                    label = { Text("Repository Slug Identifier") },
+                    label = { Text("儲存庫 Slug 識別碼") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -708,7 +708,7 @@ fun CreateRepositoryDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Purpose & Governance Scope") },
+                    label = { Text("目的與治理範圍") },
                     maxLines = 3,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -725,7 +725,7 @@ fun CreateRepositoryDialog(
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },
-                    label = { Text("Category (e.g. Process Automation, RFCs)") },
+                    label = { Text("分類（例如：流程自動化、RFC）") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -764,7 +764,7 @@ fun CreateRepositoryDialog(
                         enabled = name.isNotBlank() && displayName.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_repo_button")
                     ) {
-                        Text("Create Workspace", fontWeight = FontWeight.Bold)
+                        Text("建立工作區", fontWeight = FontWeight.Bold)
                     }
                 }
             }

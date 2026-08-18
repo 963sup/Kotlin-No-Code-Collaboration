@@ -425,13 +425,13 @@ fun DiscussionCard(
                                 horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldSuccess, modifier = Modifier.size(12.dp))
-                                Text("Answered", color = EmeraldSuccess, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text("已回答", color = EmeraldSuccess, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
 
                     if (discussion.isLocked) {
-                        Icon(Icons.Default.Lock, contentDescription = "Locked", tint = RoseError, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.Lock, contentDescription = "已鎖定", tint = RoseError, modifier = Modifier.size(14.dp))
                     }
                 }
 
@@ -472,7 +472,7 @@ fun DiscussionCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(Icons.Default.ThumbUp, contentDescription = "Upvote", tint = LavenderPrimary, modifier = Modifier.size(13.dp))
+                        Icon(Icons.Default.ThumbUp, contentDescription = "贊成", tint = LavenderPrimary, modifier = Modifier.size(13.dp))
                         Text(
                             text = "${discussion.upvoteCount}",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -628,7 +628,7 @@ fun DiscussionDetailDialog(
                                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                                     ) {
                                         Icon(Icons.Default.Lock, contentDescription = null, tint = RoseError, modifier = Modifier.size(12.dp))
-                                        Text("Locked", color = RoseError, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                        Text("已鎖定", color = RoseError, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -700,7 +700,7 @@ fun DiscussionDetailDialog(
                                             RoleBadge(roleName = discussion.authorRole)
                                         }
                                         Text(
-                                            text = "Posted on ${SimpleDateFormat("MMM d, yyyy 'at' HH:mm", Locale.getDefault()).format(Date(discussion.createdAt))}",
+                                            text = "發布於 ${SimpleDateFormat("MMM d, yyyy 'at' HH:mm", Locale.getDefault()).format(Date(discussion.createdAt))}",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = TextMediumEmphasis,
                                             fontSize = 11.sp
@@ -718,7 +718,7 @@ fun DiscussionDetailDialog(
                                     border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder),
                                     modifier = Modifier.testTag("upvote_discussion_button")
                                 ) {
-                                    Icon(Icons.Default.ThumbUp, contentDescription = "Upvote", modifier = Modifier.size(14.dp))
+                                    Icon(Icons.Default.ThumbUp, contentDescription = "贊成", modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("${discussion.upvoteCount}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 }
@@ -765,7 +765,7 @@ fun DiscussionDetailDialog(
 
                     // Replies List
                     Text(
-                        text = "Replies & Answers (${comments.size})",
+                        text = "回覆與回答（${comments.size}）",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
@@ -780,7 +780,7 @@ fun DiscussionDetailDialog(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "No replies yet. Contribute to this RFC or answer the question below.",
+                                text = "尚無回覆；請針對此 RFC 提供意見或回答下方問題。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextMediumEmphasis,
                                 modifier = Modifier.padding(12.dp)
@@ -865,7 +865,7 @@ fun DiscussionDetailDialog(
                                                     .clickable { onUpvoteComment(comment.id) }
                                                     .padding(4.dp)
                                             ) {
-                                                Icon(Icons.Default.ThumbUp, contentDescription = "Upvote", tint = LavenderPrimary, modifier = Modifier.size(12.dp))
+                                                Icon(Icons.Default.ThumbUp, contentDescription = "贊成", tint = LavenderPrimary, modifier = Modifier.size(12.dp))
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text("${comment.upvotes}", fontSize = 11.sp, color = LavenderGlow)
                                             }
@@ -916,7 +916,7 @@ fun DiscussionDetailDialog(
                         ) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = RoseError, modifier = Modifier.size(18.dp))
                             Text(
-                                text = "This conversation has been locked by repository maintainers. Replies are disabled.",
+                                text = "此討論已被儲存庫維護者鎖定，無法再回覆。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextMediumEmphasis
                             )
@@ -934,7 +934,7 @@ fun DiscussionDetailDialog(
                             modifier = Modifier
                                 .weight(1f)
                                 .testTag("discussion_reply_input"),
-                            placeholder = { Text("Write a reply or RFC feedback...", color = TextLowEmphasis, fontSize = 12.sp) },
+                            placeholder = { Text("撰寫回覆或 RFC 意見…", color = TextLowEmphasis, fontSize = 12.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = SophisticatedSurfaceDark,
                                 unfocusedContainerColor = SophisticatedSurfaceDark,
@@ -1006,7 +1006,7 @@ fun CreateDiscussionDialog(
                 ) {
                     Column {
                         Text(
-                            text = "Start a Discussion",
+                            text = "開始討論",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
@@ -1028,8 +1028,8 @@ fun CreateDiscussionDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Discussion Title *") },
-                    placeholder = { Text("e.g. RFC: Unified Declarative State Machine Model") },
+                    label = { Text("討論標題 *") },
+                    placeholder = { Text("例如：RFC－統一宣告式狀態機模型") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("new_discussion_title_input"),
@@ -1096,8 +1096,8 @@ fun CreateDiscussionDialog(
                 OutlinedTextField(
                     value = body,
                     onValueChange = { body = it },
-                    label = { Text("Discussion Content & Specification *") },
-                    placeholder = { Text("Outline the proposal, questions, tradeoffs, or governance rules...") },
+                    label = { Text("討論內容與規格 *") },
+                    placeholder = { Text("說明提案、問題、權衡或治理規則…") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
@@ -1141,7 +1141,7 @@ fun CreateDiscussionDialog(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.testTag("confirm_create_discussion_button")
                     ) {
-                        Text("Publish Discussion")
+                        Text("發布討論")
                     }
                 }
             }

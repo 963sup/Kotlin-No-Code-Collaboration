@@ -101,7 +101,7 @@ fun PersonaSwitcherDialog(
                             )
                         }
                         Text(
-                            text = "Switch Active Persona",
+                            text = "切換目前身分",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                             color = LavenderPrimary
                         )
@@ -109,7 +109,7 @@ fun PersonaSwitcherDialog(
                 }
 
                 Text(
-                    text = "Simulate how different roles and hierarchical access control policies behave across enterprise no-code repositories.",
+                    text = "模擬不同角色與階層存取控制政策在企業無程式碼儲存庫中的行為。",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis,
                     modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
@@ -184,7 +184,7 @@ fun PersonaSwitcherDialog(
                                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                                             ) {
                                                 Text(
-                                                    text = "ENT ADMIN",
+                                                    text = "企業管理員",
                                                     fontSize = 9.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = LavenderOnPrimary
@@ -209,7 +209,7 @@ fun PersonaSwitcherDialog(
                                 if (isSelected) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
-                                        contentDescription = "Selected",
+                                        contentDescription = "已選取",
                                         tint = LavenderPrimary,
                                         modifier = Modifier.size(20.dp)
                                     )
