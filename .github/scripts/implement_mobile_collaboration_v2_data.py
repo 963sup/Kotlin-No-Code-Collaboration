@@ -1567,8 +1567,9 @@ if "SYNC_BASE_URL=" not in env_text:
 manifest_path = ROOT / "app/src/main/AndroidManifest.xml"
 manifest_text = manifest_path.read_text(encoding="utf-8")
 if "android.permission.INTERNET" not in manifest_text:
-    opening_end = manifest_text.find(">")
-    if opening_end < 0:
+    manifest_start = manifest_text.find("<manifest")
+    opening_end = manifest_text.find(">", manifest_start)
+    if manifest_start < 0 or opening_end < 0:
         raise RuntimeError("AndroidManifest.xml opening tag missing")
     manifest_text = (
         manifest_text[:opening_end + 1]
