@@ -201,7 +201,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                 color = LavenderPrimary
                             )
                             Text(
-                                text = (enterprise?.name ?: "NEXUS ENTERPRISE").uppercase() + " • NO-CODE PLATFORM",
+                                text = (enterprise?.name ?: "企業").uppercase() + " • 無程式碼協作平台",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     letterSpacing = 1.sp,

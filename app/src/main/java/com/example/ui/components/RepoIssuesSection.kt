@@ -1563,7 +1563,7 @@ fun IssueDetailDialog(
                                             )
                                         } else {
                                             Text(
-                                                text = "  SELECT BLOCKING PREREQUISITE",
+                                                text = "  選擇前置阻擋任務",
                                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = RoseError,
                                                 modifier = Modifier.padding(vertical = 4.dp)
@@ -1749,7 +1749,7 @@ fun IssueDetailDialog(
                                 )
 
                                 Text(
-                                    text = "  TEAMS",
+                                    text = "  團隊",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = LavenderPrimary,
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -1766,7 +1766,7 @@ fun IssueDetailDialog(
                                 }
 
                                 Text(
-                                    text = "  USERS",
+                                    text = "  使用者",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = LavenderPrimary,
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -2233,7 +2233,7 @@ fun CreateIssueDialog(
                         )
 
                         Text(
-                            text = "  TEAMS",
+                            text = "  團隊",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = LavenderPrimary,
                             modifier = Modifier.padding(vertical = 4.dp)
@@ -2252,7 +2252,7 @@ fun CreateIssueDialog(
                         }
 
                         Text(
-                            text = "  USERS",
+                            text = "  使用者",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = LavenderPrimary,
                             modifier = Modifier.padding(vertical = 4.dp)

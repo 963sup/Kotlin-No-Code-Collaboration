@@ -281,7 +281,7 @@ fun OrgTeamScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "ORGANIZATIONS (${organizations.size})",
+                                    text = "組織（${organizations.size})",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp,

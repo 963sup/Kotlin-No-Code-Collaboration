@@ -26,12 +26,12 @@ enum class OwnerType {
 }
 
 enum class RepoRole(val rank: Int, val description: String) {
-    VIEWER(1, "Read-only access to published artifacts and documents"),
-    COLLABORATOR(2, "Can create drafts, build no-code workflows, and submit proposals for review"),
-    REVIEWER(3, "Authorized to review proposals, submit change requests, and validate quality"),
-    APPROVER(4, "Sign-off authority for releases, workflow promotions, and artifact approvals"),
-    MAINTAINER(5, "Full access to repository settings, access mappings, and policy enforcement"),
-    OWNER(6, "Ultimate authority over repository lifecycle, policy overrides, and ownership transfer");
+    VIEWER(1, "僅能檢視已發布的成果與文件"),
+    COLLABORATOR(2, "可建立草稿、無程式碼工作流程並送出審查"),
+    REVIEWER(3, "可審查提案、要求修改並驗證品質"),
+    APPROVER(4, "可對發布、工作流程提升與成果進行正式簽核"),
+    MAINTAINER(5, "可管理儲存庫設定、存取映射與政策執行"),
+    OWNER(6, "對儲存庫生命週期、政策例外與所有權移轉負最終權責");
 
     fun canPerform(requiredRole: RepoRole): Boolean = this.rank >= requiredRole.rank
 }
@@ -61,7 +61,7 @@ enum class GranteeType {
 }
 
 enum class ArtifactType(val label: String, val iconName: String) {
-    SPECIFICATION_DOC("Product Specification", "說明"),
+    SPECIFICATION_DOC("產品規格", "說明"),
     PROCESS_WORKFLOW("無程式碼工作流程", "AccountTree"),
     DECISION_RECORD("決策紀錄（RFC）", "Gavel"),
     FORM_SCHEMA("表單與資料結構", "DynamicForm"),
@@ -127,9 +127,9 @@ enum class GovernanceAction(val label: String, val minimumRole: RepoRole) {
     EDIT_DRAFT("編輯無程式碼草稿", RepoRole.COLLABORATOR),
     SUBMIT_FOR_REVIEW("送出同儕審查", RepoRole.COLLABORATOR),
     SUBMIT_REVIEW("提交正式審查", RepoRole.REVIEWER),
-    REQUEST_CHANGES("Request Artifact Changes", RepoRole.REVIEWER),
+    REQUEST_CHANGES("要求修改成果", RepoRole.REVIEWER),
     SUBMIT_FINAL_APPROVAL("核准人簽核", RepoRole.APPROVER),
-    PUBLISH_AND_LOCK("Publish & Lock Artifact", RepoRole.APPROVER),
+    PUBLISH_AND_LOCK("發布並鎖定成果", RepoRole.APPROVER),
     MANAGE_ACCESS_RULES("管理協作者與角色", RepoRole.MAINTAINER),
     UPDATE_REPO_POLICY("更新儲存庫政策", RepoRole.MAINTAINER),
     TRANSFER_OWNERSHIP("移轉儲存庫所有權", RepoRole.OWNER),
@@ -151,14 +151,14 @@ enum class GovernanceAction(val label: String, val minimumRole: RepoRole) {
 // -------------------------------------------------------------
 
 enum class NotificationCategory(val label: String, val description: String) {
-    REVIEW_REQUEST("審查請求", "Peers requesting your formal review on artifacts or RFCs"),
-    APPROVAL_GATE("核准與簽核", "Governance gates awaiting your cryptographic sign-off"),
-    ISSUE_ASSIGNMENT("任務指派", "Repository issues assigned directly or to your team"),
-    MENTION_AND_REPLY("提及與回覆", "Direct @mentions and replies to your threads"),
-    ACCESS_CHANGE("存取與權限", "Direct repository collaborator grants and role updates"),
-    MEMBERSHIP_CHANGE("組織與團隊成員關係", "Organization invitations and team assignment changes"),
-    PUBLICATION("發布與公告", "Artifact milestones published and locked"),
-    GOVERNANCE_EVENT("治理與政策警示", "Enterprise policy checks, dual-approval alerts, and compliance gates")
+    REVIEW_REQUEST("審查請求", "同儕要求你正式審查成果或 RFC"),
+    APPROVAL_GATE("核准與簽核", "等待你完成正式簽核的治理關卡"),
+    ISSUE_ASSIGNMENT("任務指派", "直接指派給你或你的團隊的儲存庫任務"),
+    MENTION_AND_REPLY("提及與回覆", "直接提及你或回覆你參與的討論串"),
+    ACCESS_CHANGE("存取與權限", "儲存庫協作者授權與角色更新"),
+    MEMBERSHIP_CHANGE("組織與團隊成員關係", "組織邀請與團隊指派異動"),
+    PUBLICATION("發布與公告", "成果里程碑已發布並鎖定"),
+    GOVERNANCE_EVENT("治理與政策警示", "企業政策檢查、雙重核准警示與守規關卡")
 }
 
 enum class NotificationStatus {
