@@ -1,6 +1,8 @@
 name: Diagnose Repository Workboard Baseline
 
 on:
+  pull_request:
+    branches: [ "main" ]
   push:
     branches: [ "agent/finalize-workboard-zh-tw" ]
     paths:
