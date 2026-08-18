@@ -38,5 +38,5 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
-      - name: Test and assemble
-        run: gradle :app:testDebugUnitTest :app:assembleDebug
+      - name: Static analysis, tests, and assemble
+        run: gradle :app:detekt :app:testDebugUnitTest :app:assembleDebug
