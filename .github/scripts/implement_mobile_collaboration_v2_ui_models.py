@@ -564,7 +564,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -598,7 +597,7 @@ fun PersonalCenterSwitchScreen(
             FilterChip(selected = social, onClick = { social = true }, label = { Text("成就與動態") })
             FilterChip(selected = !social, onClick = { social = false }, label = { Text("身份與治理") }, modifier = Modifier.padding(start = 8.dp))
         }
-        Column(Modifier.fillMaxWidth().weight(1f)) {
+        Column(Modifier.fillMaxWidth()) {
             if (social) {
                 SocialProfileScreen(profileUser, activeUser, auditLogs, follows, savedTargets, syncStatus, onToggleFollow, onSyncNow)
             } else governanceContent()
