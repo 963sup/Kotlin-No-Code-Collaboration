@@ -43,6 +43,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.model.IssueHierarchyRules
 import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
@@ -76,6 +78,7 @@ import com.example.ui.theme.SophisticatedSurfaceDark
 import com.example.ui.theme.TextHighEmphasis
 import com.example.ui.theme.TextLowEmphasis
 import com.example.ui.theme.TextMediumEmphasis
+import com.example.ui.viewmodel.GovernanceViewModel
 
 private enum class WorkProjectionMode(val label: String) {
     KANBAN("看板"),
@@ -94,20 +97,42 @@ fun KanbanBoardScreen(
     onOpenRepository: (Repository) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val governanceViewModel: GovernanceViewModel = viewModel()
+    val activeUser by governanceViewModel.activeUser.collectAsState()
+    val teamMemberships by governanceViewModel.allTeamMemberships.collectAsState()
+
     var selectedRepoId by remember { mutableStateOf<String?>(null) }
+    var assignmentScope by remember { mutableStateOf(WorkAssignmentScope.MINE) }
     var projectionMode by remember { mutableStateOf(WorkProjectionMode.KANBAN) }
 
-    LaunchedEffect(repositories, allIssues) {
-        if (selectedRepoId == null || repositories.none { it.id == selectedRepoId }) {
-            selectedRepoId = allIssues.firstOrNull()?.repoId ?: repositories.firstOrNull()?.id
+    LaunchedEffect(repositories) {
+        if (selectedRepoId != null && repositories.none { it.id == selectedRepoId }) {
+            selectedRepoId = null
+            projectionMode = WorkProjectionMode.KANBAN
         }
     }
 
     val selectedRepo = repositories.firstOrNull { it.id == selectedRepoId }
-    val issues = allIssues.filter { it.repoId == selectedRepoId }
+    val assignmentScopedIssues = remember(allIssues, activeUser?.id, teamMemberships, assignmentScope) {
+        projectWorkIssues(
+            allIssues = allIssues,
+            activeUserId = activeUser?.id,
+            teamMemberships = teamMemberships,
+            assignmentScope = assignmentScope,
+            repositoryId = null
+        )
+    }
+    val issues = remember(assignmentScopedIssues, selectedRepoId) {
+        if (selectedRepoId == null) assignmentScopedIssues
+        else assignmentScopedIssues.filter { it.repoId == selectedRepoId }
+    }
     val ordered = remember(issues) { IssueHierarchyRules.orderedForDisplay(issues) }
-    val wbsRows = remember(issues) { IssueHierarchyRules.wbsProjection(issues) }
+    val wbsRows = remember(issues, selectedRepoId) {
+        if (selectedRepoId == null) emptyList() else IssueHierarchyRules.wbsProjection(issues)
+    }
     val overallProgress = remember(issues) { IssueHierarchyRules.overallProgress(issues) }
+    val repositoryById = remember(repositories) { repositories.associateBy { it.id } }
+    val visibleRepositoryCount = remember(issues) { issues.map { it.repoId }.toSet().size }
 
     Column(
         modifier = modifier
@@ -120,8 +145,10 @@ fun KanbanBoardScreen(
         Spacer(Modifier.height(2.dp))
         WorkHeader(
             projectionMode = projectionMode,
+            assignmentScope = assignmentScope,
             selectedRepo = selectedRepo,
             issues = issues,
+            visibleRepositoryCount = visibleRepositoryCount,
             overallProgress = overallProgress,
             onOpenRepository = onOpenRepository
         )
@@ -131,35 +158,69 @@ fun KanbanBoardScreen(
             return@Column
         }
 
+        AssignmentScopeSelector(
+            selectedScope = assignmentScope,
+            onSelectScope = { assignmentScope = it }
+        )
+
         RepositorySelector(
             repositories = repositories,
-            allIssues = allIssues,
+            issues = assignmentScopedIssues,
             selectedRepoId = selectedRepoId,
+            onSelectAll = {
+                selectedRepoId = null
+                projectionMode = WorkProjectionMode.KANBAN
+            },
             onSelectRepository = { selectedRepoId = it.id }
         )
 
         ProjectionModeSelector(
             selectedMode = projectionMode,
+            wbsEnabled = selectedRepo != null,
             onSelectMode = { projectionMode = it }
         )
 
-        if (selectedRepo == null || issues.isEmpty()) {
-            EmptyWorkState("此儲存庫尚無任務", "新增任務後會自動出現在看板與 WBS。")
-        } else {
-            when (projectionMode) {
-                WorkProjectionMode.KANBAN -> KanbanProjection(
+        when {
+            assignmentScope == WorkAssignmentScope.MINE && activeUser == null -> {
+                EmptyWorkState("尚未選擇使用者", "切換至有效使用者，或改看目前範圍內的全部工作。")
+            }
+
+            issues.isEmpty() -> {
+                val title = when {
+                    assignmentScope == WorkAssignmentScope.MINE && selectedRepo == null -> "目前沒有指派工作"
+                    selectedRepo == null -> "目前沒有可顯示的工作"
+                    else -> "此儲存庫目前沒有符合條件的任務"
+                }
+                val message = when {
+                    assignmentScope == WorkAssignmentScope.MINE -> "直接指派與團隊指派的任務會集中顯示在這裡。"
+                    selectedRepo == null -> "目前範圍內尚無 Repository Issue。"
+                    else -> "調整工作範圍，或在儲存庫內新增任務。"
+                }
+                EmptyWorkState(title, message)
+            }
+
+            projectionMode == WorkProjectionMode.KANBAN -> {
+                KanbanProjection(
                     ordered = ordered,
                     issues = issues,
+                    repositoryById = repositoryById,
+                    showRepository = selectedRepo == null,
                     onUpdateIssueStatus = onUpdateIssueStatus,
                     modifier = Modifier.fillMaxWidth().weight(1f)
                 )
+            }
 
-                WorkProjectionMode.WBS -> WbsProjection(
+            selectedRepo != null -> {
+                WbsProjection(
                     rows = wbsRows,
                     overallProgress = overallProgress,
                     onUpdateIssueStatus = onUpdateIssueStatus,
                     modifier = Modifier.fillMaxWidth().weight(1f)
                 )
+            }
+
+            else -> {
+                EmptyWorkState("請先選擇儲存庫", "WBS 是單一 Repository Issue 樹的投影。")
             }
         }
     }
@@ -168,11 +229,31 @@ fun KanbanBoardScreen(
 @Composable
 private fun WorkHeader(
     projectionMode: WorkProjectionMode,
+    assignmentScope: WorkAssignmentScope,
     selectedRepo: Repository?,
     issues: List<RepoIssue>,
+    visibleRepositoryCount: Int,
     overallProgress: Float,
     onOpenRepository: (Repository) -> Unit
 ) {
+    val percentage = (overallProgress * 100).toInt()
+    val repositoryCount = if (selectedRepo != null) 1 else visibleRepositoryCount
+    val scopeLabel = selectedRepo?.displayName ?: "全部可存取儲存庫"
+    val description = when {
+        projectionMode == WorkProjectionMode.WBS -> {
+            "WBS 顯示單一儲存庫的上下層分解與完成率；資料仍是 Repository Issue。"
+        }
+        selectedRepo == null && assignmentScope == WorkAssignmentScope.MINE -> {
+            "聚合直接指派與團隊指派；資料仍是 Repository Issue。"
+        }
+        selectedRepo == null -> {
+            "顯示目前範圍內所有可存取任務；資料仍是 Repository Issue。"
+        }
+        else -> {
+            "看板依狀態投影已篩選任務；資料仍是 Repository Issue。"
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
@@ -192,13 +273,14 @@ private fun WorkHeader(
                     )
                 }
                 Column(Modifier.weight(1f)) {
-                    Text("工作", color = TextHighEmphasis, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        if (projectionMode == WorkProjectionMode.WBS) {
-                            "WBS 顯示上下層分解與完成率；資料仍是 Repository Issue。"
-                        } else {
-                            "看板依狀態投影任務；資料仍是 Repository Issue。"
-                        },
+                        assignmentScope.label,
+                        color = TextHighEmphasis,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        description,
                         color = TextMediumEmphasis,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -214,13 +296,56 @@ private fun WorkHeader(
                     }
                 }
             }
-            if (selectedRepo != null) {
-                val percentage = (overallProgress * 100).toInt()
-                Text(
-                    "${selectedRepo.displayName} · ${issues.size} 個任務 · ${issues.count { it.parentIssueId != null }} 個巢狀任務 · $percentage%",
-                    color = LavenderGlow,
-                    style = MaterialTheme.typography.labelMedium
-                )
+            Text(
+                "$scopeLabel · ${issues.size} 個任務 · $repositoryCount 個儲存庫 · $percentage%",
+                color = LavenderGlow,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun AssignmentScopeSelector(
+    selectedScope: WorkAssignmentScope,
+    onSelectScope: (WorkAssignmentScope) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(SophisticatedSurfaceDark, RoundedCornerShape(14.dp))
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        WorkAssignmentScope.entries.forEach { scope ->
+            val selected = scope == selectedScope
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp)
+                    .clickable { onSelectScope(scope) }
+                    .testTag("work_scope_${scope.name.lowercase()}"),
+                shape = RoundedCornerShape(10.dp),
+                color = if (selected) LavenderPrimary else SophisticatedSurfaceDark
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = if (scope == WorkAssignmentScope.MINE) Icons.Default.Person else Icons.Default.Dashboard,
+                        contentDescription = null,
+                        tint = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        scope.label,
+                        color = if (selected) LavenderOnPrimary else TextHighEmphasis,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -229,11 +354,39 @@ private fun WorkHeader(
 @Composable
 private fun RepositorySelector(
     repositories: List<Repository>,
-    allIssues: List<RepoIssue>,
+    issues: List<RepoIssue>,
     selectedRepoId: String?,
+    onSelectAll: () -> Unit,
     onSelectRepository: (Repository) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+        item(key = "all_repositories") {
+            val selected = selectedRepoId == null
+            Surface(
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .clickable(onClick = onSelectAll)
+                    .testTag("kanban_repo_all"),
+                shape = RoundedCornerShape(12.dp),
+                color = if (selected) LavenderPrimary else SophisticatedSurface,
+                border = BorderStroke(1.dp, if (selected) LavenderPrimary else SophisticatedBorder)
+            ) {
+                Column(Modifier.padding(horizontal = 13.dp, vertical = 8.dp)) {
+                    Text(
+                        "全部儲存庫",
+                        color = if (selected) LavenderOnPrimary else TextHighEmphasis,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
+                    Text(
+                        "${issues.size} 個任務",
+                        color = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+        }
+
         items(repositories, key = { it.id }) { repo ->
             val selected = repo.id == selectedRepoId
             Surface(
@@ -253,7 +406,7 @@ private fun RepositorySelector(
                         maxLines = 1
                     )
                     Text(
-                        "${allIssues.count { it.repoId == repo.id }} 個任務",
+                        "${issues.count { it.repoId == repo.id }} 個任務",
                         color = if (selected) LavenderOnPrimary else TextMediumEmphasis,
                         fontSize = 10.sp
                     )
@@ -266,6 +419,7 @@ private fun RepositorySelector(
 @Composable
 private fun ProjectionModeSelector(
     selectedMode: WorkProjectionMode,
+    wbsEnabled: Boolean,
     onSelectMode: (WorkProjectionMode) -> Unit
 ) {
     Row(
@@ -277,11 +431,12 @@ private fun ProjectionModeSelector(
     ) {
         WorkProjectionMode.entries.forEach { mode ->
             val selected = mode == selectedMode
+            val enabled = mode != WorkProjectionMode.WBS || wbsEnabled
             Surface(
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 48.dp)
-                    .clickable { onSelectMode(mode) }
+                    .clickable(enabled = enabled) { onSelectMode(mode) }
                     .testTag("work_projection_${mode.name.lowercase()}"),
                 shape = RoundedCornerShape(10.dp),
                 color = if (selected) LavenderPrimary else SophisticatedSurfaceDark
@@ -294,14 +449,23 @@ private fun ProjectionModeSelector(
                     Icon(
                         imageVector = if (mode == WorkProjectionMode.WBS) Icons.Default.AccountTree else Icons.Default.Dashboard,
                         contentDescription = null,
-                        tint = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                        tint = when {
+                            selected -> LavenderOnPrimary
+                            enabled -> TextMediumEmphasis
+                            else -> TextLowEmphasis
+                        },
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        mode.label,
-                        color = if (selected) LavenderOnPrimary else TextHighEmphasis,
-                        fontWeight = FontWeight.Bold
+                        if (mode == WorkProjectionMode.WBS && !enabled) "WBS（先選儲存庫）" else mode.label,
+                        color = when {
+                            selected -> LavenderOnPrimary
+                            enabled -> TextHighEmphasis
+                            else -> TextLowEmphasis
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
                     )
                 }
             }
@@ -313,6 +477,8 @@ private fun ProjectionModeSelector(
 private fun KanbanProjection(
     ordered: List<Pair<RepoIssue, Int>>,
     issues: List<RepoIssue>,
+    repositoryById: Map<String, Repository>,
+    showRepository: Boolean,
     onUpdateIssueStatus: (String, IssueStatus) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -326,6 +492,8 @@ private fun KanbanProjection(
                 status = status,
                 tasks = ordered.filter { (issue, _) -> issue.status == status },
                 allIssues = issues,
+                repositoryById = repositoryById,
+                showRepository = showRepository,
                 onUpdateIssueStatus = onUpdateIssueStatus
             )
         }
@@ -475,6 +643,8 @@ private fun KanbanColumn(
     status: IssueStatus,
     tasks: List<Pair<RepoIssue, Int>>,
     allIssues: List<RepoIssue>,
+    repositoryById: Map<String, Repository>,
+    showRepository: Boolean,
     onUpdateIssueStatus: (String, IssueStatus) -> Unit
 ) {
     val title = status.label
@@ -494,7 +664,13 @@ private fun KanbanColumn(
             Spacer(Modifier.height(10.dp))
             LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 items(tasks, key = { it.first.id }) { (issue, depth) ->
-                    KanbanTaskCard(issue, depth, allIssues, onUpdateIssueStatus)
+                    KanbanTaskCard(
+                        issue = issue,
+                        depth = depth,
+                        allIssues = allIssues,
+                        repositoryName = if (showRepository) repositoryById[issue.repoId]?.displayName else null,
+                        onUpdate = onUpdateIssueStatus
+                    )
                 }
             }
         }
@@ -506,6 +682,7 @@ private fun KanbanTaskCard(
     issue: RepoIssue,
     depth: Int,
     allIssues: List<RepoIssue>,
+    repositoryName: String?,
     onUpdate: (String, IssueStatus) -> Unit
 ) {
     val descendants = remember(issue.id, allIssues) { IssueHierarchyRules.descendantIds(issue.id, allIssues) }
@@ -524,6 +701,12 @@ private fun KanbanTaskCard(
                 Spacer(Modifier.width(8.dp))
                 Surface(shape = RoundedCornerShape(8.dp), color = accent.copy(alpha = 0.12f)) {
                     Text(issue.priority.label, Modifier.padding(horizontal = 7.dp, vertical = 3.dp), color = accent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            repositoryName?.let { name ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Icon(Icons.Default.FolderOpen, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(14.dp))
+                    Text(name, color = LavenderGlow, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             if (depth > 0) {
