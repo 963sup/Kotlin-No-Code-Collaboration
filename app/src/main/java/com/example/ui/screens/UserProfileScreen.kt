@@ -1659,7 +1659,7 @@ private fun RepositoryGrantsSection(
             // User-Owned Personal Repos
             if (ownedRepos.isNotEmpty()) {
                 Text(
-                    text = "PERSONAL WORKSPACES (OWNED BY ${user.username.uppercase()})",
+                    text = "個人工作區（由 ${user.username.uppercase()} 擁有）",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp
@@ -2283,7 +2283,7 @@ private fun ProfileIssuesAndDiscussionsSection(
 
             if (discussions.isNotEmpty()) {
                 Text(
-                    text = "RFC DISCUSSIONS INITIATED (${discussions.size})",
+                    text = "已發起的 RFC 討論（${discussions.size}）",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.6.sp

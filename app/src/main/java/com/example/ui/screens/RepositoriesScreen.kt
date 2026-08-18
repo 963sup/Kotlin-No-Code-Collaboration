@@ -605,7 +605,7 @@ fun CreateRepositoryDialog(
 
                 // Owner Entity Dropdown / Selector List
                 Text(
-                    text = "Select Specific ${selectedOwnerType.displayName()}",
+                    text = "選擇指定的 ${selectedOwnerType.displayName()}",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextMediumEmphasis
                 )

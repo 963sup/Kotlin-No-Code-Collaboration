@@ -229,7 +229,7 @@ fun RepoDiscussionsSection(
             FilterChip(
                 selected = selectedCategoryFilter == null,
                 onClick = { selectedCategoryFilter = null },
-                label = { Text("All Categories (${discussions.size})", fontSize = 12.sp) },
+                label = { Text("所有分類（${discussions.size}）", fontSize = 12.sp) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = LavenderContainer,
                     selectedLabelColor = LavenderGlow,
