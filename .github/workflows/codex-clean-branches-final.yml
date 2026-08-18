@@ -1,0 +1,53 @@
+name: Codex Final Branch Cleanup
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: codex-final-branch-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.issue.number == 21 &&
+      github.event.comment.user.login == '963sup' &&
+      github.event.comment.body == '/codex-clean-branches-final'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Delete every remote branch except main and self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          mapfile -t branches < <(
+            git ls-remote --heads origin |
+              awk '{print $2}' |
+              sed 's#refs/heads/##' |
+              grep -v '^main$' || true
+          )
+
+          for branch in "${branches[@]}"; do
+            echo "Deleting branch: $branch"
+            git push origin --delete "$branch"
+          done
+
+          remaining=$(git ls-remote --heads origin | awk '{print $2}' | sed 's#refs/heads/##')
+          test "$remaining" = "main"
+
+          git rm .github/workflows/codex-clean-branches-final.yml
+          git commit -m "chore: remove one-time branch cleanup"
+          git push origin HEAD:main
