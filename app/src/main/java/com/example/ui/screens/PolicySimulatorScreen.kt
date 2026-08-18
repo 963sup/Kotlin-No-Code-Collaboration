@@ -446,7 +446,7 @@ fun SchemaHierarchyVisualizer() {
 fun SchemaNodeItem(
     level: Int,
     entity: String,
-    role範圍：String,
+    roleScope:String,
     detail: String,
     color: Color
 ) {

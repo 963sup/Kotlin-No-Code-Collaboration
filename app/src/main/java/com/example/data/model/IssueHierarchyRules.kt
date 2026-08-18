@@ -2,8 +2,17 @@ package com.example.data.model
 
 /**
  * Pure recursive hierarchy rules for RepoIssue.
- * Nested tasks are relationships between Issues, never a second Task entity.
+ * Nested tasks and WBS rows are projections of Issues, never a second Task entity.
  */
+data class WbsProjectionRow(
+    val issue: RepoIssue,
+    val depth: Int,
+    val code: String,
+    val completedCount: Int,
+    val totalCount: Int,
+    val progress: Float
+)
+
 object IssueHierarchyRules {
     fun descendantIds(rootIssueId: String, issues: List<RepoIssue>): Set<String> {
         val childrenByParent = issues.groupBy { it.parentIssueId }
@@ -13,7 +22,9 @@ object IssueHierarchyRules {
         while (queue.isNotEmpty()) {
             val currentId = queue.removeFirst()
             childrenByParent[currentId].orEmpty().forEach { child ->
-                if (descendants.add(child.id)) queue.addLast(child.id)
+                if (child.id != rootIssueId && descendants.add(child.id)) {
+                    queue.addLast(child.id)
+                }
             }
         }
         return descendants
@@ -65,5 +76,59 @@ object IssueHierarchyRules {
             if (issue.id !in visited) visit(issue, depthOf(issue.id, issues))
         }
         return result
+    }
+
+    /**
+     * Creates a deterministic WBS view from the existing Issue tree.
+     * Codes are sibling ordinals (1, 1.1, 1.2...) and are never persisted.
+     */
+    fun wbsProjection(issues: List<RepoIssue>): List<WbsProjectionRow> {
+        if (issues.isEmpty()) return emptyList()
+        val byId = issues.associateBy { it.id }
+        val childrenByParent = issues.groupBy { it.parentIssueId }
+            .mapValues { (_, children) -> children.sortedBy { it.issueNumber } }
+        val rows = mutableListOf<WbsProjectionRow>()
+        val visited = mutableSetOf<String>()
+
+        fun visit(issue: RepoIssue, depth: Int, code: String) {
+            if (!visited.add(issue.id)) return
+            val subtreeIds = descendantIds(issue.id, issues) + issue.id
+            val subtree = issues.filter { it.id in subtreeIds }
+            val completedCount = subtree.count { it.status == IssueStatus.CLOSED }
+            val totalCount = subtree.size.coerceAtLeast(1)
+            rows += WbsProjectionRow(
+                issue = issue,
+                depth = depth,
+                code = code,
+                completedCount = completedCount,
+                totalCount = totalCount,
+                progress = completedCount.toFloat() / totalCount.toFloat()
+            )
+            childrenByParent[issue.id].orEmpty().forEachIndexed { index, child ->
+                visit(child, depth + 1, "$code.${index + 1}")
+            }
+        }
+
+        var rootOrdinal = 1
+        issues.filter { it.parentIssueId == null || it.parentIssueId !in byId }
+            .sortedBy { it.issueNumber }
+            .forEach { root ->
+                visit(root, 0, rootOrdinal.toString())
+                rootOrdinal += 1
+            }
+
+        // Cyclic records have no valid root. Promote each unseen component to a safe root.
+        issues.sortedBy { it.issueNumber }.forEach { issue ->
+            if (issue.id !in visited) {
+                visit(issue, 0, rootOrdinal.toString())
+                rootOrdinal += 1
+            }
+        }
+        return rows
+    }
+
+    fun overallProgress(issues: List<RepoIssue>): Float {
+        if (issues.isEmpty()) return 0f
+        return issues.count { it.status == IssueStatus.CLOSED }.toFloat() / issues.size.toFloat()
     }
 }

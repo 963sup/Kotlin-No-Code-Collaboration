@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -91,8 +90,31 @@ enum class MainNavigationTab {
     HOME,
     INBOX,
     KANBAN,
-    REPOSITORIES,
+    EXPLORE,
     ME
+}
+
+internal val PrimaryBottomNavigationTabs = listOf(
+    MainNavigationTab.HOME,
+    MainNavigationTab.INBOX,
+    MainNavigationTab.KANBAN,
+    MainNavigationTab.EXPLORE
+)
+
+internal fun MainNavigationTab.bottomNavigationLabel(): String = when (this) {
+    MainNavigationTab.HOME -> "首頁"
+    MainNavigationTab.INBOX -> "收件匣"
+    MainNavigationTab.KANBAN -> "工作"
+    MainNavigationTab.EXPLORE -> "探索"
+    MainNavigationTab.ME -> "個人"
+}
+
+internal fun MainNavigationTab.bottomNavigationTestTag(): String = when (this) {
+    MainNavigationTab.HOME -> "nav_tab_home"
+    MainNavigationTab.INBOX -> "nav_tab_inbox"
+    MainNavigationTab.KANBAN -> "nav_tab_kanban"
+    MainNavigationTab.EXPLORE -> "nav_tab_explore"
+    MainNavigationTab.ME -> "nav_tab_me"
 }
 
 class MainActivity : ComponentActivity() {
@@ -330,7 +352,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         onClick = {
                             viewModel.selectArtifact(null)
                             viewModel.selectRepository(null)
-                            currentTab = MainNavigationTab.REPOSITORIES
+                            currentTab = MainNavigationTab.EXPLORE
                         },
                         modifier = Modifier.testTag("topbar_search_btn")
                     ) {
@@ -339,34 +361,6 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                             contentDescription = "搜尋",
                             tint = TextHighEmphasis
                         )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            viewModel.selectArtifact(null)
-                            viewModel.selectRepository(null)
-                            currentTab = MainNavigationTab.INBOX
-                        },
-                        modifier = Modifier.testTag("topbar_inbox_btn")
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                if (unreadNotificationCount > 0) {
-                                    Badge(
-                                        containerColor = LavenderPrimary,
-                                        contentColor = LavenderOnPrimary
-                                    ) {
-                                        Text("$unreadNotificationCount")
-                                    }
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "通知",
-                                tint = if (currentTab == MainNavigationTab.INBOX) LavenderPrimary else TextHighEmphasis
-                            )
-                        }
                     }
 
                     IconButton(
@@ -409,38 +403,66 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                     color = SophisticatedSurfaceDark,
                     border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder)
                 ) {
-                    NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) {
-                        NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.HOME,
-                            onClick = { currentTab = MainNavigationTab.HOME },
-                            icon = { Icon(Icons.Default.Home, contentDescription = "首頁") },
-                            label = { Text("首頁", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
-                            ), modifier = Modifier.testTag("nav_tab_home")
-                        )
-                        NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.KANBAN,
-                            onClick = { currentTab = MainNavigationTab.KANBAN },
-                            icon = { Icon(Icons.Default.Dashboard, contentDescription = "工作看板") },
-                            label = { Text("看板", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
-                            ), modifier = Modifier.testTag("nav_tab_kanban")
-                        )
-                        NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.REPOSITORIES,
-                            onClick = { currentTab = MainNavigationTab.REPOSITORIES },
-                            icon = { Icon(Icons.Default.Folder, contentDescription = "儲存庫") },
-                            label = { Text("儲存庫", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
-                            ), modifier = Modifier.testTag("nav_tab_repos")
+
+NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) {
+    PrimaryBottomNavigationTabs.forEach { tab ->
+        NavigationBarItem(
+            selected = currentTab == tab,
+            onClick = {
+                viewModel.selectArtifact(null)
+                viewModel.selectRepository(null)
+                currentTab = tab
+            },
+            icon = {
+                val icon = when (tab) {
+                    MainNavigationTab.HOME -> Icons.Default.Home
+                    MainNavigationTab.INBOX -> Icons.Default.Notifications
+                    MainNavigationTab.KANBAN -> Icons.Default.Dashboard
+                    MainNavigationTab.EXPLORE -> Icons.Default.Search
+                    MainNavigationTab.ME -> Icons.Default.AccountCircle
+                }
+                if (tab == MainNavigationTab.INBOX) {
+                    BadgedBox(
+                        badge = {
+                            if (unreadNotificationCount > 0) {
+                                Badge(
+                                    containerColor = LavenderPrimary,
+                                    contentColor = LavenderOnPrimary
+                                ) {
+                                    Text("$unreadNotificationCount")
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = tab.bottomNavigationLabel()
                         )
                     }
+                } else {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = tab.bottomNavigationLabel()
+                    )
+                }
+            },
+            label = {
+                Text(
+                    text = tab.bottomNavigationLabel(),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = LavenderOnPrimary,
+                selectedTextColor = LavenderPrimary,
+                unselectedIconColor = TextMediumEmphasis,
+                unselectedTextColor = TextMediumEmphasis,
+                indicatorColor = LavenderPrimary
+            ),
+            modifier = Modifier.testTag(tab.bottomNavigationTestTag())
+        )
+    }
+}
                 }
             }
         }
@@ -626,7 +648,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                     currentTab = MainNavigationTab.INBOX
                                 },
                                 onNavigateToRepositoriesCatalog = {
-                                    currentTab = MainNavigationTab.REPOSITORIES
+                                    currentTab = MainNavigationTab.EXPLORE
                                 },
                                 onNavigateToMe = {
                                     currentTab = MainNavigationTab.ME
@@ -646,7 +668,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                             )
                         }
 
-                        MainNavigationTab.REPOSITORIES -> {
+                        MainNavigationTab.EXPLORE -> {
                             RepositoriesScreen(
                                 repositories = scopedRepositories,
                                 organizations = scopedOrganizations,
