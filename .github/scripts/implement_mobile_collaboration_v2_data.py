@@ -1549,11 +1549,19 @@ replace_once(
     '  implementation(libs.firebase.auth)\n  // implementation(libs.androidx.credentials)'
 )
 
-replace_once(
-    ".env.example",
-    '# Firebase App Check Debug Token\n# Get this from Firebase Console > App Check > Manage debug tokens\nFIREBASE_APPCHECK_DEBUG_TOKEN=your_debug_token_here',
-    '# Firebase App Check Debug Token\n# Get this from Firebase Console > App Check > Manage debug tokens\nFIREBASE_APPCHECK_DEBUG_TOKEN=your_debug_token_here\n\n# Authenticated collaboration sync endpoint. The invalid default keeps sync disabled.\nSYNC_BASE_URL=https://sync.invalid/'
-)
+
+env_path = ROOT / ".env.example"
+env_text = env_path.read_text(encoding="utf-8")
+if "SYNC_BASE_URL=" not in env_text:
+    if env_text and not env_text.endswith("\n"):
+        env_text += "\n"
+    env_text += (
+        "\n# Authenticated collaboration sync endpoint. "
+        "The invalid default keeps sync disabled.\n"
+        "SYNC_BASE_URL=https://sync.invalid/\n"
+    )
+    env_path.write_text(env_text, encoding="utf-8")
+
 
 replace_once(
     "app/src/main/AndroidManifest.xml",
