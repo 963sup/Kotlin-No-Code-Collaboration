@@ -85,6 +85,10 @@ import com.example.ui.theme.SophisticatedSurfaceDark
 import com.example.ui.theme.TextHighEmphasis
 import com.example.ui.theme.TextMediumEmphasis
 import com.example.ui.viewmodel.GovernanceViewModel
+import com.example.navigation.CollaborationTarget
+import com.example.ui.screens.UnifiedExploreScreen
+import com.example.ui.screens.PersonalCenterSwitchScreen
+import com.example.ui.viewmodel.CollaborationExperienceViewModel
 
 enum class MainNavigationTab {
     HOME,
@@ -119,13 +123,14 @@ internal fun MainNavigationTab.bottomNavigationTestTag(): String = when (this) {
 
 class MainActivity : ComponentActivity() {
     private val viewModel: GovernanceViewModel by viewModels()
+    private val experienceViewModel: CollaborationExperienceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
-                GovernanceApp(viewModel = viewModel)
+                GovernanceApp(viewModel = viewModel, experienceViewModel = experienceViewModel)
             }
         }
     }
@@ -133,7 +138,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GovernanceApp(viewModel: GovernanceViewModel) {
+fun GovernanceApp(viewModel: GovernanceViewModel, experienceViewModel: CollaborationExperienceViewModel) {
     val enterprise by viewModel.enterprise.collectAsState()
     val enterprises by viewModel.enterprises.collectAsState()
     val organizations by viewModel.organizations.collectAsState()
@@ -160,6 +165,9 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
     val simulationResult by viewModel.simulationResult.collectAsState()
     val unreadNotificationCount by viewModel.unreadNotificationCount.collectAsState()
     val userNotifications by viewModel.userNotifications.collectAsState()
+    val savedTargets by experienceViewModel.savedTargets.collectAsState()
+    val userFollows by experienceViewModel.userFollows.collectAsState()
+    val syncStatus by experienceViewModel.syncStatus.collectAsState()
 
     val allIssues by viewModel.allIssues.collectAsState()
     val allDiscussions by viewModel.allDiscussions.collectAsState()
@@ -580,6 +588,9 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         onUpdateIssueStatus = { issueId, newStatus ->
                             viewModel.updateIssueStatus(issueId, newStatus)
                         },
+                        onUpdateIssuePlan = { id, order, start, end, weight, progress ->
+                            viewModel.updateIssuePlan(id, order, start, end, weight, progress)
+                        },
                         onAssignIssue = { issueId, assigneeType, assigneeId, assigneeName ->
                             viewModel.assignIssue(issueId, assigneeType, assigneeId, assigneeName)
                         },
@@ -620,6 +631,8 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                     when (currentTab) {
                         MainNavigationTab.HOME -> {
                             HomeScreen(
+                                scopeKind = selectedWorkspaceScope?.kind,
+                                scopeName = selectedWorkspaceScope?.name,
                                 activeUser = activeUser,
                                 enterprise = scopedEnterprise,
                                 organizations = scopedOrganizations,
@@ -669,29 +682,51 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         }
 
                         MainNavigationTab.EXPLORE -> {
-                            RepositoriesScreen(
-                                repositories = scopedRepositories,
-                                organizations = scopedOrganizations,
-                                users = scopedUsers,
-                                teams = scopedTeams,
-                                allAccessRules = scopedAccessRules,
-                                allOrgMemberships = allOrgMemberships,
-                                allTeamMemberships = allTeamMemberships,
-                                allArtifacts = scopedArtifacts,
+                            UnifiedExploreScreen(
                                 activeUser = activeUser,
-                                onSelectRepo = { repo -> viewModel.selectRepository(repo) },
-                                onCreateRepo = { name, displayName, ownerType, ownerId, ownerDisplayName, desc, category, callback ->
-                                    viewModel.createRepository(
-                                        name = name,
-                                        displayName = displayName,
-                                        ownerType = ownerType,
-                                        ownerId = ownerId,
-                                        ownerDisplayName = ownerDisplayName,
-                                        description = desc,
-                                        category = category,
-                                        onComplete = callback
-                                    )
-                                }
+                                repositories = scopedRepositories,
+                                artifacts = scopedArtifacts,
+                                issues = scopedIssues,
+                                discussions = scopedDiscussions,
+                                organizations = scopedOrganizations,
+                                teams = scopedTeams,
+                                users = scopedUsers,
+                                savedTargets = savedTargets,
+                                onOpenTarget = { target ->
+                                    when (target) {
+                                        is CollaborationTarget.Repository -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
+                                        is CollaborationTarget.Artifact -> {
+                                            val repo = repositories.firstOrNull { it.id == target.repositoryId }
+                                            val artifact = allArtifacts.firstOrNull { it.id == target.artifactId && it.repoId == target.repositoryId }
+                                            if (repo != null && artifact != null) {
+                                                viewModel.selectRepository(repo)
+                                                viewModel.selectArtifact(artifact)
+                                            }
+                                        }
+                                        is CollaborationTarget.Issue -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
+                                        is CollaborationTarget.Discussion -> repositories.firstOrNull { it.id == target.repositoryId }?.let(viewModel::selectRepository)
+                                        is CollaborationTarget.Organization -> {
+                                            organizations.firstOrNull { it.id == target.organizationId }?.let { org ->
+                                                selectedWorkspaceScope = WorkspaceScopeSelection(WorkspaceScopeKind.ORGANIZATION, org.id, org.name, org.description)
+                                                currentTab = MainNavigationTab.HOME
+                                            }
+                                        }
+                                        is CollaborationTarget.Team -> {
+                                            teams.firstOrNull { it.id == target.teamId }?.let { team ->
+                                                selectedWorkspaceScope = WorkspaceScopeSelection(WorkspaceScopeKind.TEAM, team.id, team.name, team.description)
+                                                currentTab = MainNavigationTab.HOME
+                                            }
+                                        }
+                                        is CollaborationTarget.UserProfile -> {
+                                            users.firstOrNull { it.id == target.userId }?.let { profile ->
+                                                viewModel.selectProfileUser(profile)
+                                                meSubTab = MeSubTab.PROFILE
+                                                currentTab = MainNavigationTab.ME
+                                            }
+                                        }
+                                    }
+                                },
+                                onToggleSaved = { target -> activeUser?.let { experienceViewModel.toggleSaved(it.id, target) } }
                             )
                         }
 
@@ -725,6 +760,21 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                         }
 
                         MainNavigationTab.ME -> {
+                            val currentActiveUser = activeUser
+                            val profile = inspectedProfileUser ?: currentActiveUser
+                            if (profile != null && currentActiveUser != null) {
+                                PersonalCenterSwitchScreen(
+                                    profileUser = profile,
+                                    activeUser = currentActiveUser,
+                                    auditLogs = scopedAuditLogs,
+                                    visibleRepositoryIds = scopedRepoIds,
+                                    follows = userFollows,
+                                    savedTargets = savedTargets,
+                                    syncStatus = syncStatus,
+                                    onToggleFollow = { experienceViewModel.toggleFollow(currentActiveUser.id, it) },
+                                    onSyncNow = experienceViewModel::syncNow,
+                                    governanceContent = {
+
                             MeScreen(
                                 currentSubTab = meSubTab,
                                 onSubTabChange = { meSubTab = it },
@@ -815,6 +865,9 @@ NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) 
                                     viewModel.updateEnterprisePolicies(dualApp, allowUserRepos, revGate, segDuties)
                                 }
                             )
+                                    }
+                                )
+                            }
                         }
                     }
                 }

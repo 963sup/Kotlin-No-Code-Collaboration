@@ -807,13 +807,18 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
 
         val evaluation = evaluateAction(actor, repo, null, GovernanceAction.CLOSE_ISSUE)
-        if (evaluation.verdict != PolicyVerdict.ALLOWED && issue.authorUserId != actor.id) {
+        if (evaluation.verdict != PolicyVerdict.ALLOWED) {
             return Pair(false, evaluation.finalExplanation)
         }
 
         val isClosing = newStatus == IssueStatus.CLOSED
         val updated = issue.copy(
             status = newStatus,
+            progressPercent = when {
+                newStatus == IssueStatus.CLOSED -> 100
+                issue.status == IssueStatus.CLOSED -> 0
+                else -> issue.progressPercent
+            },
             closedAt = if (isClosing) System.currentTimeMillis() else null,
             closedByUserId = if (isClosing) actor.id else null,
             closedByDisplayName = if (isClosing) actor.displayName else null,
@@ -876,6 +881,65 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             )
         )
         return Pair(true, "Issue #${issue.issueNumber} assigned to $target.")
+    }
+
+
+    suspend fun updateIssuePlan(
+        issueId: String,
+        sortOrder: Int,
+        plannedStartAt: Long?,
+        plannedEndAt: Long?,
+        wbsWeight: Double,
+        progressPercent: Int,
+        actor: User
+    ): Pair<Boolean, String> {
+        val issue = dao.getIssueByIdOnce(issueId) ?: return Pair(false, "Issue not found")
+        val repo = dao.getRepositoryByIdOnce(issue.repoId) ?: return Pair(false, "Repository not found")
+        val enterprise = dao.getEnterpriseOnce() ?: return Pair(false, "Enterprise not found")
+        val evaluation = evaluateAction(actor, repo, null, GovernanceAction.ASSIGN_ISSUE)
+        if (evaluation.verdict != PolicyVerdict.ALLOWED) {
+            return Pair(false, evaluation.finalExplanation)
+        }
+        val validationError = IssueHierarchyRules.validatePlan(
+            sortOrder = sortOrder,
+            plannedStartAt = plannedStartAt,
+            plannedEndAt = plannedEndAt,
+            wbsWeight = wbsWeight,
+            progressPercent = progressPercent
+        )
+        if (validationError != null) return Pair(false, validationError)
+
+        val hasChildren = dao.getSubIssuesOnce(issue.id).isNotEmpty()
+        val effectiveProgress = when {
+            issue.status == IssueStatus.CLOSED -> 100
+            hasChildren -> issue.progressPercent
+            else -> progressPercent
+        }
+        val now = System.currentTimeMillis()
+        dao.updateIssue(
+            issue.copy(
+                sortOrder = sortOrder,
+                plannedStartAt = plannedStartAt,
+                plannedEndAt = plannedEndAt,
+                wbsWeight = wbsWeight,
+                progressPercent = effectiveProgress,
+                updatedAt = now
+            )
+        )
+        dao.insertAuditLog(
+            AuditLog(
+                enterpriseId = enterprise.id,
+                orgId = if (repo.ownerType == OwnerType.ORGANIZATION) repo.ownerId else null,
+                repoId = repo.id,
+                repoName = repo.name,
+                actorUserId = actor.id,
+                actorDisplayName = actor.displayName,
+                actionName = "UPDATE_ISSUE_PLAN",
+                verdict = PolicyVerdict.ALLOWED,
+                reasoning = "Updated WBS plan for Issue #${issue.issueNumber}."
+            )
+        )
+        return Pair(true, "Issue #${issue.issueNumber} WBS plan updated.")
     }
 
     // --- REPO DISCUSSIONS METHODS ---

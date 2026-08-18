@@ -133,6 +133,8 @@ import com.example.ui.theme.TextMediumEmphasis
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.ui.components.WorkspaceScopeKind
+import com.example.ui.model.ScopeOperationalProjection
 
 enum class HomeWorkFilter(val label: String) {
     ASSIGNED_ISSUES("指派給我的任務"),
@@ -145,6 +147,8 @@ enum class HomeWorkFilter(val label: String) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
+    scopeKind: WorkspaceScopeKind? = null,
+    scopeName: String? = null,
     activeUser: User?,
     enterprise: Enterprise?,
     organizations: List<Organization>,
@@ -172,6 +176,20 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedWorkFilter by remember { mutableStateOf(HomeWorkFilter.ASSIGNED_ISSUES) }
+    val scopeOperationalSummary = remember(
+        scopeKind, scopeName, repositories, allIssues, allArtifacts, allReviews, allApprovals, notifications
+    ) {
+        ScopeOperationalProjection.build(
+            scopeKind = scopeKind,
+            scopeName = scopeName,
+            repositories = repositories,
+            issues = allIssues,
+            artifacts = allArtifacts,
+            reviews = allReviews,
+            approvals = allApprovals,
+            notifications = notifications
+        )
+    }
 
     // Calculate user's team IDs
     val userTeamIds = remember(activeUser, allTeamMemberships) {
@@ -255,6 +273,7 @@ fun HomeScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item { ScopeOperationalSummaryCard(scopeOperationalSummary) }
         // =========================================================================
         // 1. HOME HERO BANNER: ACTIVE IDENTITY & ATTENTION SUMMARY
         // =========================================================================
