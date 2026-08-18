@@ -151,7 +151,7 @@ fun RepositoriesScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search No-Code Repositories, Owners, Blueprints...", color = TextLowEmphasis, fontSize = 13.sp) },
+                    placeholder = { Text("搜尋儲存庫、擁有者或藍圖…", color = TextLowEmphasis, fontSize = 13.sp) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = LavenderPrimary) },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
@@ -205,7 +205,7 @@ fun RepositoriesScreen(
             // Repositories List
             if (filteredRepos.isEmpty()) {
                 item {
-                    EmptyStateCard(message = "No matching No-Code Repositories found.")
+                    EmptyStateCard(message = "找不到符合條件的無程式碼儲存庫。")
                 }
             } else {
                 items(filteredRepos) { repo ->
@@ -248,8 +248,8 @@ fun RepositoriesScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Create No-Code Repo")
-                Text("New Repository", fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.Add, contentDescription = "建立無程式碼儲存庫")
+                Text("新增儲存庫", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -307,12 +307,12 @@ fun EnterpriseGovernanceHeroBanner(
                 }
                 Column {
                     Text(
-                        text = "No-Code Collaboration Containers",
+                        text = "無程式碼協作容器",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "ENTERPRISE HIERARCHICAL GOVERNANCE",
+                        text = "企業階層治理",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             letterSpacing = 0.8.sp,
@@ -334,10 +334,10 @@ fun EnterpriseGovernanceHeroBanner(
                     .padding(vertical = 12.dp, horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                HeroStatItem(label = "Total Repos", value = totalRepos.toString(), color = TextHighEmphasis)
-                HeroStatItem(label = "Org-Owned", value = orgRepos.toString(), color = LavenderPrimary)
-                HeroStatItem(label = "User-Owned", value = userRepos.toString(), color = PinkAccent)
-                HeroStatItem(label = "Artifacts", value = totalArtifacts.toString(), color = LavenderSubtle)
+                HeroStatItem(label = "儲存庫總數", value = totalRepos.toString(), color = TextHighEmphasis)
+                HeroStatItem(label = "組織擁有", value = orgRepos.toString(), color = LavenderPrimary)
+                HeroStatItem(label = "使用者擁有", value = userRepos.toString(), color = PinkAccent)
+                HeroStatItem(label = "成果", value = totalArtifacts.toString(), color = LavenderSubtle)
             }
         }
     }
@@ -578,7 +578,7 @@ fun CreateRepositoryDialog(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     OwnerTypeOption(
-                        title = "Organization",
+                        title = "組織",
                         subtitle = "Enterprise Org Container",
                         icon = Icons.Default.Apartment,
                         isSelected = selectedOwnerType == OwnerType.ORGANIZATION,
@@ -590,7 +590,7 @@ fun CreateRepositoryDialog(
                         testTag = "owner_type_org"
                     )
                     OwnerTypeOption(
-                        title = "User",
+                        title = "使用者",
                         subtitle = "Personal Account",
                         icon = Icons.Default.Person,
                         isSelected = selectedOwnerType == OwnerType.USER,
@@ -747,7 +747,7 @@ fun CreateRepositoryDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel", color = TextMediumEmphasis)
+                        Text("取消", color = TextMediumEmphasis)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(

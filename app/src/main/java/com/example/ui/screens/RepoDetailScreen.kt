@@ -168,10 +168,10 @@ import java.util.Locale
  * Centered around active collaboration: Overview, Issues, Discussions, Artifacts.
  */
 enum class RepoWorkspaceTab(val label: String, val icon: ImageVector) {
-    OVERVIEW("Overview", Icons.Default.Dashboard),
-    ISSUES("Issues", Icons.Default.TaskAlt),
-    DISCUSSIONS("Discussions", Icons.Default.Forum),
-    ARTIFACTS("Artifacts", Icons.Default.Description)
+    OVERVIEW("總覽", Icons.Default.Dashboard),
+    ISSUES("任務", Icons.Default.TaskAlt),
+    DISCUSSIONS("討論", Icons.Default.Forum),
+    ARTIFACTS("成果", Icons.Default.Description)
 }
 
 /**
@@ -179,10 +179,10 @@ enum class RepoWorkspaceTab(val label: String, val icon: ImageVector) {
  * General, Access & Members, Policies, Audit.
  */
 enum class RepoSettingsSection(val label: String, val icon: ImageVector) {
-    GENERAL("General", Icons.Default.Info),
-    ACCESS("Access & Members", Icons.Default.Groups),
-    POLICIES("Policies", Icons.Default.Policy),
-    AUDIT("Audit", Icons.Default.History)
+    GENERAL("一般", Icons.Default.Info),
+    ACCESS("存取與成員", Icons.Default.Groups),
+    POLICIES("政策", Icons.Default.Policy),
+    AUDIT("稽核", Icons.Default.History)
 }
 
 @Composable
@@ -564,7 +564,7 @@ fun RepoWorkspaceHeader(
                     }
 
                     Text(
-                        text = "${enterprise?.name ?: "Enterprise"} > ${repo.ownerDisplayName}",
+                        text = "${enterprise?.name ?: "企業"} > ${repo.ownerDisplayName}",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis,
                         maxLines = 1,
@@ -579,7 +579,7 @@ fun RepoWorkspaceHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Repository Settings",
+                        contentDescription = "儲存庫設定",
                         tint = LavenderPrimary
                     )
                 }
@@ -675,7 +675,7 @@ fun RepoSettingsHeader(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "Repository Settings",
+                            text = "儲存庫設定",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
@@ -817,7 +817,7 @@ fun RepoOverviewSection(
                         }
 
                         Text(
-                            text = "Scope: ${enterprise?.name ?: "Enterprise"}",
+                            text = "Scope: ${enterprise?.name ?: "企業"}",
                             style = MaterialTheme.typography.labelSmall,
                             color = TextLowEmphasis
                         )
@@ -911,7 +911,7 @@ fun RepoOverviewSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OverviewMetricBox(
-                    label = "Artifacts",
+                    label = "成果",
                     count = artifacts.size,
                     icon = Icons.Default.Description,
                     accentColor = LavenderPrimary,
@@ -927,7 +927,7 @@ fun RepoOverviewSection(
                     onClick = { onNavigateToTab(RepoWorkspaceTab.ISSUES) }
                 )
                 OverviewMetricBox(
-                    label = "Discussions",
+                    label = "討論",
                     count = discussions.size,
                     icon = Icons.Default.Forum,
                     accentColor = LavenderPrimary,
@@ -1219,7 +1219,7 @@ fun RepoOverviewSection(
                                         Spacer(modifier = Modifier.height(2.dp))
 
                                         Text(
-                                            text = if (issue.assigneeName != null) "Assigned: ${issue.assigneeName}" else "Unassigned",
+                                            text = if (issue.assigneeName != null) "Assigned: ${issue.assigneeName}" else "未指派",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = TextMediumEmphasis
                                         )
@@ -1402,7 +1402,7 @@ fun RepoOverviewSection(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "Recent Activity",
+                            text = "最近活動",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
@@ -1581,12 +1581,12 @@ fun RepoGeneralSettingsContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SettingsInfoRow("Display Name", repo.displayName)
+                SettingsInfoRow("顯示名稱", repo.displayName)
                 SettingsInfoRow("Identifier", repo.name)
                 SettingsInfoRow("Owner Type", repo.ownerType.displayName())
                 SettingsInfoRow("Owner Name", repo.ownerDisplayName)
-                SettingsInfoRow("Effective Role", effectiveRole.name)
-                SettingsInfoRow("Role Source", roleSource)
+                SettingsInfoRow("有效角色", effectiveRole.name)
+                SettingsInfoRow("角色來源", roleSource)
                 SettingsInfoRow("Created On", SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(repo.createdAt)))
                 SettingsInfoRow("Last Modified", SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(repo.updatedAt)))
             }
@@ -2266,7 +2266,7 @@ fun CreateArtifactDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel", color = TextMediumEmphasis)
+                        Text("取消", color = TextMediumEmphasis)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -2451,7 +2451,7 @@ fun AddAccessRuleDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {

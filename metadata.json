@@ -1,6 +1,6 @@
 {
-  "name": "RepoGovernance",
-  "description": "Hierarchical access control policy engine and no-code repository collaboration platform enforcing strict Enterprise, Organization, Team, User, Member, Collaborator, Maintainer, Reviewer, and Approver schema mappings.",
+  "name": "協作治理",
+  "description": "以 Repository 為無程式碼協作容器的企業治理行動應用，整合組織、團隊、任務、討論、成果、權限、審查與稽核。",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

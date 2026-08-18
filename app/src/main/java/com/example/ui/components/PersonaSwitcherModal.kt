@@ -229,7 +229,7 @@ fun PersonaSwitcherDialog(
                         onClick = onDismiss,
                         modifier = Modifier.testTag("close_persona_dialog")
                     ) {
-                        Text("Close", color = LavenderPrimary)
+                        Text("關閉", color = LavenderPrimary)
                     }
                 }
             }

@@ -67,6 +67,7 @@ import com.example.ui.screens.ArtifactDetailScreen
 import com.example.ui.screens.AuditLogScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.InboxScreen
+import com.example.ui.screens.KanbanBoardScreen
 import com.example.ui.screens.MeScreen
 import com.example.ui.screens.MeSubTab
 import com.example.ui.screens.OrgTeamScreen
@@ -88,8 +89,9 @@ import com.example.ui.viewmodel.GovernanceViewModel
 
 enum class MainNavigationTab {
     HOME,
-    REPOSITORIES,
     INBOX,
+    KANBAN,
+    REPOSITORIES,
     ME
 }
 
@@ -191,7 +193,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         }
                         Column {
                             Text(
-                                text = "Access Governance",
+                                text = "存取治理",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Medium,
                                     letterSpacing = (-0.3).sp
@@ -219,7 +221,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Dashboard,
-                                contentDescription = "Repository Kanban Board and Nested Tasks",
+                                contentDescription = "儲存庫工作看板與巢狀任務",
                                 tint = LavenderPrimary
                             )
                         }
@@ -244,7 +246,7 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Unified Inbox",
+                                contentDescription = "統一收件匣",
                                 tint = if (currentTab == MainNavigationTab.INBOX) LavenderPrimary else TextHighEmphasis
                             )
                         }
@@ -268,88 +270,63 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                     color = SophisticatedSurfaceDark,
                     border = androidx.compose.foundation.BorderStroke(1.dp, SophisticatedBorder)
                 ) {
-                    NavigationBar(
-                        containerColor = SophisticatedSurfaceDark,
-                        tonalElevation = 0.dp
-                    ) {
+                    NavigationBar(containerColor = SophisticatedSurfaceDark, tonalElevation = 0.dp) {
                         NavigationBarItem(
                             selected = currentTab == MainNavigationTab.HOME,
                             onClick = { currentTab = MainNavigationTab.HOME },
-                            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                            label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
+                            icon = { Icon(Icons.Default.Home, contentDescription = "首頁") },
+                            label = { Text("首頁", style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary,
-                                selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis,
-                                unselectedTextColor = TextMediumEmphasis,
-                                indicatorColor = LavenderPrimary
-                            ),
-                            modifier = Modifier.testTag("nav_tab_home")
+                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
+                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
+                            ), modifier = Modifier.testTag("nav_tab_home")
                         )
-
-                        NavigationBarItem(
-                            selected = currentTab == MainNavigationTab.REPOSITORIES,
-                            onClick = { currentTab = MainNavigationTab.REPOSITORIES },
-                            icon = { Icon(Icons.Default.Folder, contentDescription = "Repositories") },
-                            label = { Text("Repositories", style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary,
-                                selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis,
-                                unselectedTextColor = TextMediumEmphasis,
-                                indicatorColor = LavenderPrimary
-                            ),
-                            modifier = Modifier.testTag("nav_tab_repos")
-                        )
-
                         NavigationBarItem(
                             selected = currentTab == MainNavigationTab.INBOX,
                             onClick = { currentTab = MainNavigationTab.INBOX },
                             icon = {
-                                BadgedBox(
-                                    badge = {
-                                        if (unreadNotificationCount > 0) {
-                                            Badge(
-                                                containerColor = LavenderPrimary,
-                                                contentColor = LavenderOnPrimary
-                                            ) {
-                                                Text("$unreadNotificationCount")
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    Icon(Icons.Default.Notifications, contentDescription = "Unified Inbox")
-                                }
+                                BadgedBox(badge = {
+                                    if (unreadNotificationCount > 0) Badge(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary) { Text("$unreadNotificationCount") }
+                                }) { Icon(Icons.Default.Notifications, contentDescription = "收件匣") }
                             },
-                            label = { Text("Inbox", style = MaterialTheme.typography.labelSmall) },
+                            label = { Text("收件匣", style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary,
-                                selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis,
-                                unselectedTextColor = TextMediumEmphasis,
-                                indicatorColor = LavenderPrimary
-                            ),
-                            modifier = Modifier.testTag("nav_tab_inbox")
+                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
+                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
+                            ), modifier = Modifier.testTag("nav_tab_inbox")
                         )
-
+                        NavigationBarItem(
+                            selected = currentTab == MainNavigationTab.KANBAN,
+                            onClick = { currentTab = MainNavigationTab.KANBAN },
+                            icon = { Icon(Icons.Default.Dashboard, contentDescription = "工作看板") },
+                            label = { Text("看板", style = MaterialTheme.typography.labelSmall) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
+                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
+                            ), modifier = Modifier.testTag("nav_tab_kanban")
+                        )
+                        NavigationBarItem(
+                            selected = currentTab == MainNavigationTab.REPOSITORIES,
+                            onClick = { currentTab = MainNavigationTab.REPOSITORIES },
+                            icon = { Icon(Icons.Default.Folder, contentDescription = "儲存庫") },
+                            label = { Text("儲存庫", style = MaterialTheme.typography.labelSmall) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
+                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
+                            ), modifier = Modifier.testTag("nav_tab_repos")
+                        )
                         NavigationBarItem(
                             selected = currentTab == MainNavigationTab.ME,
                             onClick = {
-                                if (inspectedProfileUser == null && activeUser != null) {
-                                    viewModel.selectProfileUser(activeUser)
-                                }
+                                if (inspectedProfileUser == null && activeUser != null) viewModel.selectProfileUser(activeUser)
                                 currentTab = MainNavigationTab.ME
                             },
-                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Me") },
-                            label = { Text("Me", style = MaterialTheme.typography.labelSmall) },
+                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "我的") },
+                            label = { Text("我的", style = MaterialTheme.typography.labelSmall) },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = LavenderOnPrimary,
-                                selectedTextColor = LavenderPrimary,
-                                unselectedIconColor = TextMediumEmphasis,
-                                unselectedTextColor = TextMediumEmphasis,
-                                indicatorColor = LavenderPrimary
-                            ),
-                            modifier = Modifier.testTag("nav_tab_me")
+                                selectedIconColor = LavenderOnPrimary, selectedTextColor = LavenderPrimary,
+                                unselectedIconColor = TextMediumEmphasis, unselectedTextColor = TextMediumEmphasis, indicatorColor = LavenderPrimary
+                            ), modifier = Modifier.testTag("nav_tab_me")
                         )
                     }
                 }
@@ -545,6 +522,15 @@ fun GovernanceApp(viewModel: GovernanceViewModel) {
                                 onSwitchPersonaClick = {
                                     showPersonaSwitcher = true
                                 }
+                            )
+                        }
+
+                        MainNavigationTab.KANBAN -> {
+                            KanbanBoardScreen(
+                                repositories = repositories,
+                                allIssues = allIssues,
+                                onUpdateIssueStatus = { issueId, status -> viewModel.updateIssueStatus(issueId, status) },
+                                onOpenRepository = { repo -> viewModel.selectRepository(repo) }
                             )
                         }
 
@@ -782,7 +768,7 @@ fun ActivePersonaPill(
 
             Icon(
                 imageVector = Icons.Default.SwapHoriz,
-                contentDescription = "Switch Persona",
+                contentDescription = "切換身分",
                 tint = LavenderPrimary,
                 modifier = Modifier.size(16.dp)
             )

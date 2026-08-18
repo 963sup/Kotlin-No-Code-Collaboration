@@ -135,11 +135,11 @@ import java.util.Date
 import java.util.Locale
 
 enum class HomeWorkFilter(val label: String) {
-    ASSIGNED_ISSUES("Assigned Issues"),
-    PENDING_REVIEWS("Review Requests"),
-    PENDING_APPROVALS("Approval Requests"),
-    MENTIONS_AND_UNREAD("Mentions & Unread"),
-    RECENT_ACTIVITY("Activity Trail")
+    ASSIGNED_ISSUES("指派給我的任務"),
+    PENDING_REVIEWS("審查請求"),
+    PENDING_APPROVALS("核准請求"),
+    MENTIONS_AND_UNREAD("提及與未讀"),
+    RECENT_ACTIVITY("活動軌跡")
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -304,7 +304,7 @@ fun HomeScreen(
                             }
                             Column {
                                 Text(
-                                    text = activeUser?.displayName ?: "Guest User",
+                                    text = activeUser?.displayName ?: "訪客使用者",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         letterSpacing = (-0.2).sp
@@ -312,7 +312,7 @@ fun HomeScreen(
                                     color = TextHighEmphasis
                                 )
                                 Text(
-                                    text = "${activeUser?.title ?: "Collaborator"} • ${enterprise?.name ?: "Enterprise"}",
+                                    text = "${activeUser?.title ?: "協作者"} • ${enterprise?.name ?: "企業"}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextMediumEmphasis
                                 )
@@ -335,12 +335,12 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Person,
-                                    contentDescription = "Switch Persona",
+                                    contentDescription = "切換身分",
                                     tint = LavenderPrimary,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
-                                    text = "Switch",
+                                    text = "切換",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                     color = LavenderPrimary
                                 )
@@ -357,7 +357,7 @@ fun HomeScreen(
                     ) {
                         AttentionMetricPill(
                             icon = Icons.Default.TaskAlt,
-                            label = "Assigned",
+                            label = "已指派",
                             count = assignedIssues.count { it.status != IssueStatus.CLOSED },
                             accentColor = if (assignedIssues.any { it.priority == IssuePriority.CRITICAL && it.status != IssueStatus.CLOSED }) RoseError else LavenderPrimary,
                             isSelected = selectedWorkFilter == HomeWorkFilter.ASSIGNED_ISSUES,
@@ -366,7 +366,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.RateReview,
-                            label = "Reviews",
+                            label = "審查",
                             count = pendingReviewArtifacts.size,
                             accentColor = AmberWarning,
                             isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_REVIEWS,
@@ -375,7 +375,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.Approval,
-                            label = "Approvals",
+                            label = "核准",
                             count = pendingApprovalArtifacts.size,
                             accentColor = EmeraldSuccess,
                             isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_APPROVALS,
@@ -384,7 +384,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.AlternateEmail,
-                            label = "Mentions",
+                            label = "提及",
                             count = mentionAndUnreadNotifications.size,
                             accentColor = if (unreadNotificationCount > 0) LavenderPrimary else TextMediumEmphasis,
                             isSelected = selectedWorkFilter == HomeWorkFilter.MENTIONS_AND_UNREAD,
@@ -410,7 +410,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Work Requiring Attention",
+                        text = "需要處理的工作",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
@@ -731,7 +731,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Inbox", color = TextHighEmphasis)
+                            Text("收件匣", color = TextHighEmphasis)
                         }
 
                         OutlinedButton(
@@ -749,7 +749,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Me", color = TextHighEmphasis)
+                            Text("我的", color = TextHighEmphasis)
                         }
                     }
                 }
@@ -934,7 +934,7 @@ fun HomeIssueCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Warning,
-                            contentDescription = "Blocked",
+                            contentDescription = "受阻",
                             tint = AmberWarning,
                             modifier = Modifier.size(12.dp)
                         )

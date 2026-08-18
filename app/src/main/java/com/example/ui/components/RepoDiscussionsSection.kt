@@ -161,12 +161,12 @@ fun RepoDiscussionsSection(
         ) {
             Column {
                 Text(
-                    text = "Community & Governance Discussions",
+                    text = "社群與治理討論",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
                 Text(
-                    text = "RFCs, Architecture Decision Records, Q&A, and policy debate",
+                    text = "提案、決策紀錄、問答與政策討論",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -184,7 +184,7 @@ fun RepoDiscussionsSection(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("New Discussion", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold))
+                Text("新增討論", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold))
             }
         }
 
@@ -197,12 +197,12 @@ fun RepoDiscussionsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("discussion_search_input"),
-            placeholder = { Text("Filter discussions by topic, RFC proposals, or author...", color = TextLowEmphasis, fontSize = 13.sp) },
+            placeholder = { Text("依主題、提案或作者篩選討論…", color = TextLowEmphasis, fontSize = 13.sp) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextMediumEmphasis) },
             trailingIcon = if (searchQuery.isNotBlank()) {
                 {
                     IconButton(onClick = { searchQuery = "" }) {
-                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "清除", tint = TextMediumEmphasis)
                     }
                 }
             } else null,
@@ -294,7 +294,7 @@ fun RepoDiscussionsSection(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = if (discussions.isEmpty()) "No Discussions Started" else "No Matching Discussions",
+                        text = if (discussions.isEmpty()) "尚未開始任何討論" else "找不到符合條件的討論",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
@@ -318,7 +318,7 @@ fun RepoDiscussionsSection(
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Start Discussion")
+                            Text("開始討論")
                         }
                     }
                 }
@@ -644,7 +644,7 @@ fun DiscussionDetailDialog(
                     }
 
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "關閉", tint = TextMediumEmphasis)
                     }
                 }
 
@@ -809,7 +809,7 @@ fun DiscussionDetailDialog(
                                             ) {
                                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldSuccess, modifier = Modifier.size(16.dp))
                                                 Text(
-                                                    text = "Accepted Answer",
+                                                    text = "已採納回答",
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                     color = EmeraldSuccess
                                                 )
@@ -884,7 +884,7 @@ fun DiscussionDetailDialog(
                                                     )
                                                     Spacer(modifier = Modifier.width(4.dp))
                                                     Text(
-                                                        text = if (isAccepted) "Accepted Answer" else "Mark as Answer",
+                                                        text = if (isAccepted) "已採納回答" else "設為回答",
                                                         color = if (isAccepted) EmeraldSuccess else TextMediumEmphasis,
                                                         fontSize = 11.sp
                                                     )
@@ -962,7 +962,7 @@ fun DiscussionDetailDialog(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.testTag("submit_discussion_reply_button")
                         ) {
-                            Text("Reply", fontSize = 12.sp)
+                            Text("回覆", fontSize = 12.sp)
                         }
                     }
                 }
@@ -1011,14 +1011,14 @@ fun CreateDiscussionDialog(
                             color = TextHighEmphasis
                         )
                         Text(
-                            text = "Repository: ${repo.name}",
+                            text = "儲存庫：${repo.name}",
                             style = MaterialTheme.typography.bodySmall,
                             color = LavenderPrimary
                         )
                     }
 
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "關閉", tint = TextMediumEmphasis)
                     }
                 }
 
@@ -1050,7 +1050,7 @@ fun CreateDiscussionDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Category Selection
-                Text("Category", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
+                Text("分類", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
                 Spacer(modifier = Modifier.height(6.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     DiscussionCategory.values().forEach { cat ->
@@ -1124,7 +1124,7 @@ fun CreateDiscussionDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel", color = TextMediumEmphasis)
+                        Text("取消", color = TextMediumEmphasis)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(

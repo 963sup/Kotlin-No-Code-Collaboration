@@ -714,7 +714,7 @@ fun SubmitReviewDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = Color(0xFF94A3B8)) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = Color(0xFF94A3B8)) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onSubmit(selectedDecision, feedback) },

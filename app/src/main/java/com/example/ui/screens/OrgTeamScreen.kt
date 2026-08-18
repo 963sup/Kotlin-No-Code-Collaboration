@@ -242,7 +242,7 @@ fun OrgTeamScreen(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             OrgHubViewTab(
-                                title = "Organizations",
+                                title = "組織",
                                 icon = Icons.Default.Apartment,
                                 isSelected = viewMode == OrgHubViewMode.ORGANIZATIONS,
                                 onClick = { viewMode = OrgHubViewMode.ORGANIZATIONS },
@@ -588,7 +588,7 @@ fun OrganizationCard(
     onRemoveTeamMember: (String, String) -> Unit,
     onNavigateToRepo: (Repository) -> Unit
 ) {
-    var expandedSection by remember { mutableStateOf<String>("TEAMS") }
+    var expandedSection by remember { mutableStateOf<String>("團隊") }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = SophisticatedSurface),
@@ -683,8 +683,8 @@ fun OrganizationCard(
             ) {
                 OrgSubTab(
                     title = "Teams (${teams.size})",
-                    isSelected = expandedSection == "TEAMS",
-                    onClick = { expandedSection = "TEAMS" },
+                    isSelected = expandedSection == "團隊",
+                    onClick = { expandedSection = "團隊" },
                     modifier = Modifier.weight(1f)
                 )
                 OrgSubTab(
@@ -702,7 +702,7 @@ fun OrganizationCard(
             }
 
             when (expandedSection) {
-                "TEAMS" -> {
+                "團隊" -> {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -974,7 +974,7 @@ fun TeamItemCard(
                                 )
                                 Icon(
                                     Icons.Default.Close,
-                                    contentDescription = "Remove",
+                                    contentDescription = "移除",
                                     tint = TextLowEmphasis,
                                     modifier = Modifier
                                         .size(10.dp)
@@ -1079,7 +1079,7 @@ fun OrgMemberRow(
                     onClick = onRemove,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = TextLowEmphasis, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Delete, contentDescription = "移除", tint = TextLowEmphasis, modifier = Modifier.size(14.dp))
                 }
             }
         }
@@ -1186,8 +1186,8 @@ fun EnterpriseGovernanceSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            MetricCard(label = "Organizations", count = organizations.size.toString(), icon = Icons.Default.Apartment, modifier = Modifier.weight(1f))
-            MetricCard(label = "Teams", count = teams.size.toString(), icon = Icons.Default.Groups, modifier = Modifier.weight(1f))
+            MetricCard(label = "組織", count = organizations.size.toString(), icon = Icons.Default.Apartment, modifier = Modifier.weight(1f))
+            MetricCard(label = "團隊", count = teams.size.toString(), icon = Icons.Default.Groups, modifier = Modifier.weight(1f))
             MetricCard(label = "Identities", count = users.size.toString(), icon = Icons.Default.Person, modifier = Modifier.weight(1f))
             MetricCard(label = "Workspaces", count = repositories.size.toString(), icon = Icons.Default.Folder, modifier = Modifier.weight(1f))
         }
@@ -1210,7 +1210,7 @@ fun EnterpriseGovernanceSection(
                 ) {
                     Column {
                         Text("Enterprise Identity Roster (${users.size})", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
-                        Text("All provisioned accounts within ${enterprise?.name ?: "Enterprise"}", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
+                        Text("All provisioned accounts within ${enterprise?.name ?: "企業"}", style = MaterialTheme.typography.bodySmall, color = TextMediumEmphasis)
                     }
 
                     Button(
@@ -1682,7 +1682,7 @@ fun CreateEnterpriseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -1781,7 +1781,7 @@ fun EditEnterprisePoliciesDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -1942,7 +1942,7 @@ fun CreateOrganizationDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -2078,7 +2078,7 @@ fun CreateUserDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -2129,7 +2129,7 @@ fun AddOrgMemberDialog(
 
                 if (availableUsers.isEmpty()) {
                     Text("All enterprise users are already members of this organization.", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Close", color = LavenderPrimary) }
+                    TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("關閉", color = LavenderPrimary) }
                 } else {
                     Text("Select User", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -2183,7 +2183,7 @@ fun AddOrgMemberDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                        TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {
@@ -2324,7 +2324,7 @@ fun CreateTeamDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -2375,7 +2375,7 @@ fun AddTeamMemberDialog(
 
                 if (availableUsers.isEmpty()) {
                     Text("All users are already assigned to this team.", color = TextMediumEmphasis, style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Close", color = LavenderPrimary) }
+                    TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("關閉", color = LavenderPrimary) }
                 } else {
                     Text("Select User", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = TextHighEmphasis)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -2428,7 +2428,7 @@ fun AddTeamMemberDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                        TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {

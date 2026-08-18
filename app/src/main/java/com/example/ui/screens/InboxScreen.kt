@@ -128,10 +128,10 @@ import java.util.Date
 import java.util.Locale
 
 enum class InboxFilterTab(val label: String) {
-    ALL("All"),
-    UNREAD("Unread"),
-    ACTIONABLE("Action Required"),
-    ARCHIVED("Archived")
+    ALL("全部"),
+    UNREAD("未讀"),
+    ACTIONABLE("需處理"),
+    ARCHIVED("已封存")
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -271,7 +271,7 @@ fun InboxScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "CATEGORY FILTER",
+                    text = "分類篩選",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextLowEmphasis,
@@ -358,17 +358,17 @@ fun InboxScreen(
                             modifier = Modifier.size(48.dp)
                         )
                         Text(
-                            text = "All Caught Up!",
+                            text = "目前都處理完了",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextHighEmphasis
                         )
                         Text(
                             text = when (selectedTab) {
-                                InboxFilterTab.ALL -> "You have no active notifications in your Inbox."
-                                InboxFilterTab.UNREAD -> "You have read all pending notifications."
-                                InboxFilterTab.ACTIONABLE -> "No pending review requests, approvals, or issue assignments."
-                                InboxFilterTab.ARCHIVED -> "No archived notifications stored."
+                                InboxFilterTab.ALL -> "收件匣目前沒有進行中的通知。"
+                                InboxFilterTab.UNREAD -> "所有待處理通知皆已讀取。"
+                                InboxFilterTab.ACTIONABLE -> "目前沒有待審查、待核准或任務指派。"
+                                InboxFilterTab.ARCHIVED -> "目前沒有已封存通知。"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextMediumEmphasis
@@ -497,7 +497,7 @@ private fun InboxHeaderCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
-                            contentDescription = "Inbox",
+                            contentDescription = "收件匣",
                             tint = LavenderPrimary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -508,7 +508,7 @@ private fun InboxHeaderCard(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Unified Inbox",
+                                text = "統一收件匣",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextHighEmphasis
@@ -519,7 +519,7 @@ private fun InboxHeaderCard(
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text(
-                                        text = "$unreadCount new",
+                                        text = "$unreadCount 則新通知",
                                         color = LavenderOnPrimary,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
@@ -529,7 +529,7 @@ private fun InboxHeaderCard(
                             }
                         }
                         Text(
-                            text = "Centralized collaboration queue & actionable events",
+                            text = "集中管理協作待辦與可執行事件",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis
                         )
@@ -554,7 +554,7 @@ private fun InboxHeaderCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MarkEmailRead,
-                                contentDescription = "Mark All Read",
+                                contentDescription = "全部標為已讀",
                                 tint = TextHighEmphasis
                             )
                         }
@@ -602,7 +602,7 @@ private fun InboxHeaderCard(
                             color = TextHighEmphasis
                         )
                         Text(
-                            text = "${activeUser?.title ?: ""} • ${if (activeUser?.isEnterpriseAdmin == true) "Enterprise Admin" else "Org Member"}",
+                            text = "${activeUser?.title ?: ""} • ${if (activeUser?.isEnterpriseAdmin == true) "企業管理員" else "組織成員"}",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis
                         )
@@ -626,7 +626,7 @@ private fun InboxHeaderCard(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Switch Persona", fontSize = 12.sp)
+                        Text("切換身分", fontSize = 12.sp)
                     }
 
                     DropdownMenu(
@@ -929,7 +929,7 @@ private fun NotificationItemCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Archive,
-                                contentDescription = "Archive",
+                                contentDescription = "封存",
                                 tint = TextMediumEmphasis,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -1014,7 +1014,7 @@ private fun InboxGovernanceArchitectureCard(
                 IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = "關閉",
                         tint = TextMediumEmphasis
                     )
                 }
@@ -1043,7 +1043,7 @@ private fun InboxGovernanceArchitectureCard(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(Icons.Default.Notifications, null, tint = LavenderPrimary, modifier = Modifier.size(16.dp))
-                            Text("Unified Inbox", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = LavenderGlow)
+                            Text("統一收件匣", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = LavenderGlow)
                         }
                         Text("• Private to active User identity", fontSize = 11.sp, color = TextHighEmphasis)
                         Text("• Interactive states: Unread / Read / Archived", fontSize = 11.sp, color = TextMediumEmphasis)
@@ -1065,7 +1065,7 @@ private fun InboxGovernanceArchitectureCard(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(Icons.Default.Security, null, tint = EmeraldSuccess, modifier = Modifier.size(16.dp))
-                            Text("Audit Log", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = EmeraldSuccess)
+                            Text("稽核紀錄", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = EmeraldSuccess)
                         }
                         Text("• Enterprise-wide immutable ledger", fontSize = 11.sp, color = TextHighEmphasis)
                         Text("• Records all policy engine verdicts", fontSize = 11.sp, color = TextMediumEmphasis)
@@ -1195,7 +1195,7 @@ private fun NotificationRelationalDetailDialog(
                             RelationalRow(label = "Enterprise Root", value = notification.enterpriseId)
                         }
                         if (notification.orgName != null || notification.orgId != null) {
-                            RelationalRow(label = "Organization", value = "${notification.orgName ?: ""} (${notification.orgId ?: ""})")
+                            RelationalRow(label = "組織", value = "${notification.orgName ?: ""} (${notification.orgId ?: ""})")
                         }
                         if (notification.teamName != null || notification.teamId != null) {
                             RelationalRow(label = "Team Context", value = "${notification.teamName ?: ""} (${notification.teamId ?: ""})")
@@ -1293,7 +1293,7 @@ private fun NotificationRelationalDetailDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = TextMediumEmphasis)
+                Text("關閉", color = TextMediumEmphasis)
             }
         },
         containerColor = SophisticatedSurface,

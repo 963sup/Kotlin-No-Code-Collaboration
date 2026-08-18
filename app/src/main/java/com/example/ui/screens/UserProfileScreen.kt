@@ -137,11 +137,11 @@ import java.util.Date
 import java.util.Locale
 
 enum class ProfileSubTab(val label: String, val icon: ImageVector) {
-    OVERVIEW("Overview", Icons.Default.Person),
+    OVERVIEW("總覽", Icons.Default.Person),
     GOVERNANCE_ACCESS("Access & Hierarchy", Icons.Default.Security),
     CONTRIBUTIONS("Contributions", Icons.Default.Description),
     SECURITY_AUTH("Auth & Security", Icons.Default.VpnKey),
-    SETTINGS("Settings", Icons.Default.Settings)
+    SETTINGS("設定", Icons.Default.Settings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -872,25 +872,25 @@ private fun ProfileMetricsGrid(
             ) {
                 MetricTile(
                     count = orgCount,
-                    label = "Organizations",
+                    label = "組織",
                     icon = Icons.Default.Apartment,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     count = teamCount,
-                    label = "Teams",
+                    label = "團隊",
                     icon = Icons.Default.Groups,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     count = ownedRepoCount + collaboratorRepoCount,
-                    label = "Repositories",
+                    label = "儲存庫",
                     icon = Icons.Default.Folder,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     count = artifactCount,
-                    label = "Artifacts",
+                    label = "成果",
                     icon = Icons.Default.Description,
                     modifier = Modifier.weight(1f)
                 )
@@ -902,13 +902,13 @@ private fun ProfileMetricsGrid(
             ) {
                 MetricTile(
                     count = reviewCount,
-                    label = "Reviews",
+                    label = "審查",
                     icon = Icons.Default.RateReview,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     count = approvalCount,
-                    label = "Approvals",
+                    label = "核准",
                     icon = Icons.Default.Approval,
                     modifier = Modifier.weight(1f)
                 )
@@ -1122,7 +1122,7 @@ private fun GovernanceHierarchyRelationalCard(
 
                     // Level 3: Teams
                     HierarchyLevelRow(
-                        level = "TEAMS",
+                        level = "團隊",
                         title = "${teamMemberships.size} Team Membership(s)",
                         subtitle = teamMemberships.joinToString(", ") { "${it.second.name} (${it.first.role.name})" }.ifEmpty { "No team assignments" },
                         icon = Icons.Default.Groups,
@@ -2491,7 +2491,7 @@ private fun AccountSettingsCard(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ProfileFieldRow(label = "Display Name", value = user.displayName)
+                ProfileFieldRow(label = "顯示名稱", value = user.displayName)
                 ProfileFieldRow(label = "Job Title / Role", value = user.title)
                 ProfileFieldRow(label = "Location", value = user.location.ifEmpty { "Not specified" })
                 ProfileFieldRow(label = "Pronouns", value = user.pronouns.ifEmpty { "Not specified" })
@@ -2614,7 +2614,7 @@ private fun EditProfileModal(
                     OutlinedTextField(
                         value = displayName,
                         onValueChange = { displayName = it },
-                        label = { Text("Display Name") },
+                        label = { Text("顯示名稱") },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LavenderPrimary,
@@ -2749,7 +2749,7 @@ private fun EditProfileModal(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(contentColor = TextMediumEmphasis)
             ) {
-                Text("Cancel")
+                Text("取消")
             }
         },
         containerColor = SophisticatedSurface,

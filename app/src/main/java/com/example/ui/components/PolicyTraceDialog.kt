@@ -141,8 +141,8 @@ fun PolicyTraceDialog(
                         if (evaluation.targetArtifact != null) {
                             TraceKeyVal("Target Artifact", "${evaluation.targetArtifact.title} [${evaluation.targetArtifact.lifecycleState.name}]")
                         }
-                        TraceKeyVal("Effective Role", evaluation.effectiveRole.name)
-                        TraceKeyVal("Role Source", evaluation.roleSource)
+                        TraceKeyVal("有效角色", evaluation.effectiveRole.name)
+                        TraceKeyVal("角色來源", evaluation.roleSource)
                     }
                 }
 

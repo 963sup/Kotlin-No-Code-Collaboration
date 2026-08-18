@@ -90,6 +90,7 @@ import com.example.data.model.DependencyType
 import com.example.data.model.GranteeType
 import com.example.data.model.IssueComment
 import com.example.data.model.IssueDependency
+import com.example.data.model.IssueHierarchyRules
 import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
 import com.example.data.model.NoCodeArtifact
@@ -224,7 +225,7 @@ fun RepoIssuesSection(
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Collaboration Issues",
+                        text = "協作任務",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
@@ -235,7 +236,7 @@ fun RepoIssuesSection(
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "${dependencies.size} links",
+                                text = "${dependencies.size} 個相依連結",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LavenderGlow,
                                 fontSize = 10.sp
@@ -244,7 +245,7 @@ fun RepoIssuesSection(
                     }
                 }
                 Text(
-                    text = "Track hierarchical sub-issues, blocked dependencies, and task assignments",
+                    text = "追蹤巢狀任務、阻擋相依與工作指派",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMediumEmphasis
                 )
@@ -265,7 +266,7 @@ fun RepoIssuesSection(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("New Issue", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold))
+                Text("新增任務", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold))
             }
         }
 
@@ -278,12 +279,12 @@ fun RepoIssuesSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("issue_search_input"),
-            placeholder = { Text("Filter issues by title, label, author, or assignee...", color = TextLowEmphasis, fontSize = 13.sp) },
+            placeholder = { Text("依標題、標籤、作者或受派者篩選任務…", color = TextLowEmphasis, fontSize = 13.sp) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextMediumEmphasis) },
             trailingIcon = if (searchQuery.isNotBlank()) {
                 {
                     IconButton(onClick = { searchQuery = "" }) {
-                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "清除", tint = TextMediumEmphasis)
                     }
                 }
             } else null,
@@ -344,7 +345,7 @@ fun RepoIssuesSection(
                         modifier = Modifier.size(14.dp)
                     )
                 },
-                label = { Text("Blocked ($blockedCount)", fontSize = 12.sp) },
+                label = { Text("受阻 ($blockedCount)", fontSize = 12.sp) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = RoseDark,
                     selectedLabelColor = RoseError,
@@ -374,7 +375,7 @@ fun RepoIssuesSection(
                         modifier = Modifier.size(14.dp)
                     )
                 },
-                label = { Text("Epics / Parents ($parentCount)", fontSize = 12.sp) },
+                label = { Text("上層任務 ($parentCount)", fontSize = 12.sp) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = LavenderContainer,
                     selectedLabelColor = LavenderGlow,
@@ -396,7 +397,7 @@ fun RepoIssuesSection(
                 },
                 label = {
                     val count = issues.count { it.status == IssueStatus.OPEN }
-                    Text("Open ($count)", fontSize = 12.sp)
+                    Text("待處理 ($count)", fontSize = 12.sp)
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = EmeraldDark,
@@ -419,7 +420,7 @@ fun RepoIssuesSection(
                 },
                 label = {
                     val count = issues.count { it.status == IssueStatus.IN_PROGRESS }
-                    Text("In Progress ($count)", fontSize = 12.sp)
+                    Text("進行中 ($count)", fontSize = 12.sp)
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = Color(0xFF422E10),
@@ -442,7 +443,7 @@ fun RepoIssuesSection(
                 },
                 label = {
                     val count = issues.count { it.status == IssueStatus.CLOSED }
-                    Text("Closed ($count)", fontSize = 12.sp)
+                    Text("已完成 ($count)", fontSize = 12.sp)
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = SophisticatedContainer,
@@ -484,16 +485,16 @@ fun RepoIssuesSection(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = if (issues.isEmpty()) "No Issues in Repository" else "No Matching Issues",
+                        text = if (issues.isEmpty()) "此儲存庫尚無任務" else "找不到符合條件的任務",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (issues.isEmpty())
-                            "Issues enable collaborative task decomposition, sub-issue progress tracking, and dependency blocking across Users & Teams."
+                            "任務可拆解成多層子任務，並追蹤進度、相依關係與跨使用者／團隊指派。"
                         else
-                            "Try clearing or adjusting your filter criteria.",
+                            "請清除或調整篩選條件。",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextMediumEmphasis,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -511,38 +512,34 @@ fun RepoIssuesSection(
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Create First Issue")
+                            Text("建立第一個任務")
                         }
                     }
                 }
             }
         } else {
+            val visibleIssueIds = filteredIssues.map { it.id }.toSet()
+            val orderedFilteredIssues = remember(issues, filteredIssues) {
+                IssueHierarchyRules.orderedForDisplay(issues).filter { (issue, _) -> issue.id in visibleIssueIds }
+            }
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                items(filteredIssues, key = { it.id }) { issue ->
-                    val subIssues = issues.filter { it.parentIssueId == issue.id }
+                items(orderedFilteredIssues, key = { it.first.id }) { (issue, depth) ->
+                    val nestedIds = IssueHierarchyRules.descendantIds(issue.id, issues)
+                    val nestedTasks = issues.filter { it.id in nestedIds }
                     val isBlocked = issue.id in blockedIssueIds
                     val blockedByList = dependencies.filter { it.blockedIssueId == issue.id }
                         .mapNotNull { dep -> issues.firstOrNull { it.id == dep.blockingIssueId } }
                     val blockingList = dependencies.filter { it.blockingIssueId == issue.id }
                         .mapNotNull { dep -> issues.firstOrNull { it.id == dep.blockedIssueId } }
-
                     HierarchicalIssueCard(
-                        issue = issue,
-                        subIssues = subIssues,
-                        isBlocked = isBlocked,
-                        blockedByIssues = blockedByList,
-                        blockingIssues = blockingList,
+                        issue = issue, subIssues = nestedTasks, depth = depth, isBlocked = isBlocked,
+                        blockedByIssues = blockedByList, blockingIssues = blockingList,
                         onClick = { viewingIssue = issue },
-                        onAddSubIssue = {
-                            preselectedParentForCreate = issue
-                            showCreateDialog = true
-                        }
+                        onAddSubIssue = { preselectedParentForCreate = issue; showCreateDialog = true }
                     )
                 }
             }
@@ -551,7 +548,8 @@ fun RepoIssuesSection(
 
     // View & Manage Issue Dialog
     if (currentViewingIssue != null) {
-        val currentIssueSubIssues = issues.filter { it.parentIssueId == currentViewingIssue.id }
+        val currentIssueNestedIds = IssueHierarchyRules.descendantIds(currentViewingIssue.id, issues)
+        val currentIssueSubIssues = IssueHierarchyRules.orderedForDisplay(issues).map { it.first }.filter { it.id in currentIssueNestedIds }
         val currentBlockedBy = dependencies.filter { it.blockedIssueId == currentViewingIssue.id }
             .mapNotNull { dep ->
                 val blocking = issues.firstOrNull { it.id == dep.blockingIssueId }
@@ -653,6 +651,7 @@ fun RepoIssuesSection(
 fun HierarchicalIssueCard(
     issue: RepoIssue,
     subIssues: List<RepoIssue>,
+    depth: Int = 0,
     isBlocked: Boolean,
     blockedByIssues: List<RepoIssue>,
     blockingIssues: List<RepoIssue>,
@@ -664,6 +663,7 @@ fun HierarchicalIssueCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = (depth.coerceAtMost(5) * 10).dp)
             .clickable(onClick = onClick)
             .testTag("issue_card_${issue.issueNumber}"),
         shape = RoundedCornerShape(12.dp),
@@ -683,12 +683,12 @@ fun HierarchicalIssueCard(
                 ) {
                     Icon(
                         Icons.Default.SubdirectoryArrowRight,
-                        contentDescription = "Sub-issue of",
+                        contentDescription = "上層任務",
                         tint = LavenderPrimary,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = "Sub-issue of #${issue.parentIssueNumber} ${issue.parentIssueTitle ?: ""}",
+                        text = "上層任務 #${issue.parentIssueNumber} ${issue.parentIssueTitle ?: ""}",
                         style = MaterialTheme.typography.labelSmall,
                         color = LavenderPrimary,
                         maxLines = 1,
@@ -781,7 +781,7 @@ fun HierarchicalIssueCard(
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Text(
-                                    text = "Sub-issues: $closedSub of $totalSub completed",
+                                    text = "子任務：$closedSub / $totalSub 已完成",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = LavenderGlow,
                                     fontSize = 11.sp
@@ -794,7 +794,7 @@ fun HierarchicalIssueCard(
                                 modifier = Modifier.clickable { expandedSubList = !expandedSubList }
                             ) {
                                 Text(
-                                    text = if (expandedSubList) "Hide" else "View tree",
+                                    text = if (expandedSubList) "收合" else "查看階層",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = LavenderPrimary,
                                     fontSize = 11.sp
@@ -971,7 +971,7 @@ fun HierarchicalIssueCard(
                                 modifier = Modifier.size(13.dp)
                             )
                             Text(
-                                text = "Spec",
+                                text = "規格",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = PinkAccent,
                                 fontSize = 11.sp
@@ -998,7 +998,7 @@ fun BlockedIndicatorBadge(blockedByCount: Int) {
         ) {
             Icon(Icons.Default.Lock, contentDescription = null, tint = RoseError, modifier = Modifier.size(11.dp))
             Text(
-                text = if (blockedByCount > 0) "Blocked ($blockedByCount)" else "Blocked",
+                text = if (blockedByCount > 0) "受阻 ($blockedByCount)" else "受阻",
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = RoseError,
                 fontSize = 10.sp
@@ -1010,9 +1010,9 @@ fun BlockedIndicatorBadge(blockedByCount: Int) {
 @Composable
 fun IssueStatusBadge(status: IssueStatus) {
     val (bgColor, textColor, text) = when (status) {
-        IssueStatus.OPEN -> Triple(EmeraldDark, EmeraldSuccess, "Open")
-        IssueStatus.IN_PROGRESS -> Triple(Color(0xFF422E10), AmberGlow, "In Progress")
-        IssueStatus.CLOSED -> Triple(SophisticatedContainer, LavenderSubtle, "Closed")
+        IssueStatus.OPEN -> Triple(EmeraldDark, EmeraldSuccess, "待處理")
+        IssueStatus.IN_PROGRESS -> Triple(Color(0xFF422E10), AmberGlow, "進行中")
+        IssueStatus.CLOSED -> Triple(SophisticatedContainer, LavenderSubtle, "已完成")
     }
 
     Box(
@@ -1033,10 +1033,10 @@ fun IssueStatusBadge(status: IssueStatus) {
 @Composable
 fun IssuePriorityBadge(priority: IssuePriority) {
     val (bgColor, textColor, label) = when (priority) {
-        IssuePriority.CRITICAL -> Triple(RoseDark, RoseError, "CRITICAL")
-        IssuePriority.HIGH -> Triple(Color(0xFF4A2800), AmberWarning, "HIGH")
-        IssuePriority.MEDIUM -> Triple(SophisticatedContainer, LavenderPrimary, "MEDIUM")
-        IssuePriority.LOW -> Triple(SophisticatedSurfaceDark, TextMediumEmphasis, "LOW")
+        IssuePriority.CRITICAL -> Triple(RoseDark, RoseError, "緊急")
+        IssuePriority.HIGH -> Triple(Color(0xFF4A2800), AmberWarning, "高")
+        IssuePriority.MEDIUM -> Triple(SophisticatedContainer, LavenderPrimary, "中")
+        IssuePriority.LOW -> Triple(SophisticatedSurfaceDark, TextMediumEmphasis, "低")
     }
 
     Box(
@@ -1090,10 +1090,10 @@ fun IssueDetailDialog(
     val openBlockersCount = blockedByDependencies.count { it.second.status != IssueStatus.CLOSED }
     val isCurrentlyBlocked = openBlockersCount > 0 && issue.status != IssueStatus.CLOSED
 
-    // Eligible issues that can be chosen as parent (must not be itself or existing child)
-    val eligibleParents = remember(allRepoIssues, issue, subIssues) {
-        val childIds = subIssues.map { it.id }.toSet()
-        allRepoIssues.filter { it.id != issue.id && it.id !in childIds && it.parentIssueId == null }
+    val eligibleParents = remember(allRepoIssues, issue) {
+        IssueHierarchyRules.orderedForDisplay(allRepoIssues).map { it.first }.filter { candidate ->
+            IssueHierarchyRules.canAssignParent(issue.id, candidate.id, allRepoIssues)
+        }
     }
 
     // Eligible issues that can block this issue (must not be itself, and not already linked)
@@ -1138,7 +1138,7 @@ fun IssueDetailDialog(
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
-                                    text = "Sub-issue of #${issue.parentIssueNumber} ${issue.parentIssueTitle ?: ""}",
+                                    text = "上層任務 #${issue.parentIssueNumber} ${issue.parentIssueTitle ?: ""}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = LavenderPrimary,
                                     maxLines = 1,
@@ -1173,7 +1173,7 @@ fun IssueDetailDialog(
                     }
 
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "關閉", tint = TextMediumEmphasis)
                     }
                 }
 
@@ -1273,7 +1273,7 @@ fun IssueDetailDialog(
                             Spacer(modifier = Modifier.height(10.dp))
 
                             Text(
-                                text = issue.description.ifBlank { "No detailed description provided." },
+                                text = issue.description.ifBlank { "尚未提供詳細說明。" },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = TextHighEmphasis
                             )
@@ -1321,7 +1321,7 @@ fun IssueDetailDialog(
                                     ) {
                                         Icon(Icons.Default.Description, contentDescription = null, tint = PinkAccent, modifier = Modifier.size(16.dp))
                                         Column {
-                                            Text("Linked No-Code Blueprint", style = MaterialTheme.typography.labelSmall, color = PinkAccent, fontSize = 10.sp)
+                                            Text("已連結無程式碼藍圖", style = MaterialTheme.typography.labelSmall, color = PinkAccent, fontSize = 10.sp)
                                             Text(issue.linkedArtifactTitle, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = TextHighEmphasis)
                                         }
                                     }
@@ -1351,7 +1351,7 @@ fun IssueDetailDialog(
                                 ) {
                                     Icon(Icons.Default.AccountTree, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(16.dp))
                                     Text(
-                                        text = "Hierarchy & Sub-issues",
+                                        text = "任務階層與子任務",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = TextHighEmphasis
                                     )
@@ -1374,7 +1374,7 @@ fun IssueDetailDialog(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = if (issue.parentIssueNumber != null) "Parent: #${issue.parentIssueNumber}" else "Set Parent",
+                                            text = if (issue.parentIssueNumber != null) "上層：#${issue.parentIssueNumber}" else "設定上層",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = TextHighEmphasis,
                                             fontSize = 11.sp
@@ -1389,7 +1389,7 @@ fun IssueDetailDialog(
                                         if (issue.parentIssueId != null) {
                                             DropdownMenuItem(
                                                 leadingIcon = { Icon(Icons.Default.LinkOff, contentDescription = null, tint = RoseError, modifier = Modifier.size(16.dp)) },
-                                                text = { Text("Unlink Parent (Make Root Issue)", color = RoseError) },
+                                                text = { Text("解除上層關聯（設為根任務）", color = RoseError) },
                                                 onClick = {
                                                     showParentMenu = false
                                                     onLinkParent(null)
@@ -1398,7 +1398,7 @@ fun IssueDetailDialog(
                                         }
                                         if (eligibleParents.isEmpty()) {
                                             DropdownMenuItem(
-                                                text = { Text("No other root issues available", color = TextLowEmphasis) },
+                                                text = { Text("沒有可用的其他上層任務", color = TextLowEmphasis) },
                                                 onClick = { showParentMenu = false }
                                             )
                                         } else {
@@ -1430,7 +1430,7 @@ fun IssueDetailDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "$closedSub of $totalSub Sub-tasks Resolved",
+                                        text = "$closedSub / $totalSub 子任務已完成",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = TextMediumEmphasis,
                                         fontSize = 11.sp
@@ -1505,7 +1505,7 @@ fun IssueDetailDialog(
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(15.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Add Sub-issue", style = MaterialTheme.typography.labelSmall, color = LavenderPrimary)
+                                Text("新增子任務", style = MaterialTheme.typography.labelSmall, color = LavenderPrimary)
                             }
                         }
                     }
@@ -1531,7 +1531,7 @@ fun IssueDetailDialog(
                                 ) {
                                     Icon(Icons.Default.Block, contentDescription = null, tint = RoseError, modifier = Modifier.size(16.dp))
                                     Text(
-                                        text = "Dependencies & Blockers",
+                                        text = "相依與阻擋",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = TextHighEmphasis
                                     )
@@ -1548,7 +1548,7 @@ fun IssueDetailDialog(
                                     ) {
                                         Icon(Icons.Default.Add, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(14.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Add Blocker", style = MaterialTheme.typography.labelSmall, color = TextHighEmphasis, fontSize = 11.sp)
+                                        Text("新增前置任務", style = MaterialTheme.typography.labelSmall, color = TextHighEmphasis, fontSize = 11.sp)
                                     }
 
                                     DropdownMenu(
@@ -1558,7 +1558,7 @@ fun IssueDetailDialog(
                                     ) {
                                         if (eligibleBlockers.isEmpty()) {
                                             DropdownMenuItem(
-                                                text = { Text("No eligible issues to block this issue", color = TextLowEmphasis) },
+                                                text = { Text("沒有可設為前置任務的項目", color = TextLowEmphasis) },
                                                 onClick = { showAddBlockerMenu = false }
                                             )
                                         } else {
@@ -1588,7 +1588,7 @@ fun IssueDetailDialog(
                             // Blocked By list
                             if (blockedByDependencies.isNotEmpty()) {
                                 Text(
-                                    text = "BLOCKED BY (Prerequisites):",
+                                    text = "受以下前置任務阻擋：",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                     color = RoseError,
                                     fontSize = 10.sp
@@ -1635,7 +1635,7 @@ fun IssueDetailDialog(
                                                 ) {
                                                     Icon(
                                                         Icons.Default.RemoveCircleOutline,
-                                                        contentDescription = "Remove dependency",
+                                                        contentDescription = "移除相依",
                                                         tint = RoseError,
                                                         modifier = Modifier.size(16.dp)
                                                     )
@@ -1741,7 +1741,7 @@ fun IssueDetailDialog(
                                 modifier = Modifier.background(SophisticatedSurfaceDark)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Unassigned", color = TextMediumEmphasis) },
+                                    text = { Text("未指派", color = TextMediumEmphasis) },
                                     onClick = {
                                         showAssignMenu = false
                                         onAssignIssue(null, null, null)
@@ -1847,7 +1847,7 @@ fun IssueDetailDialog(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "No comments yet. Start the conversation below.",
+                                text = "尚無留言，請在下方開始討論。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextMediumEmphasis,
                                 modifier = Modifier.padding(12.dp)
@@ -1917,7 +1917,7 @@ fun IssueDetailDialog(
                         modifier = Modifier
                             .weight(1f)
                             .testTag("issue_comment_input"),
-                        placeholder = { Text("Leave a comment or governance note...", color = TextLowEmphasis, fontSize = 12.sp) },
+                        placeholder = { Text("留下留言或治理備註…", color = TextLowEmphasis, fontSize = 12.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = SophisticatedSurfaceDark,
                             unfocusedContainerColor = SophisticatedSurfaceDark,
@@ -1945,7 +1945,7 @@ fun IssueDetailDialog(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.testTag("submit_issue_comment_button")
                     ) {
-                        Text("Reply", fontSize = 12.sp)
+                        Text("回覆", fontSize = 12.sp)
                     }
                 }
             }
@@ -2022,26 +2022,26 @@ fun CreateIssueDialog(
                 ) {
                     Column {
                         Text(
-                            text = if (selectedParentId != null) "New Sub-Issue" else "New Governance Issue",
+                            text = if (selectedParentId != null) "新增子任務" else "新增治理任務",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
                         Text(
-                            text = "Repository: ${repo.name}",
+                            text = "儲存庫：${repo.name}",
                             style = MaterialTheme.typography.bodySmall,
                             color = LavenderPrimary
                         )
                     }
 
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = TextMediumEmphasis)
+                        Icon(Icons.Default.Close, contentDescription = "關閉", tint = TextMediumEmphasis)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Optional Parent Issue link
-                Text("Parent Issue (Hierarchy Breakdown)", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
+                Text("上層任務（階層拆解）", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
                 Spacer(modifier = Modifier.height(6.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
@@ -2060,7 +2060,7 @@ fun CreateIssueDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = selectedParentTitle ?: "None (Top-Level Root Issue)",
+                                text = selectedParentTitle ?: "無（最上層根任務）",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (selectedParentTitle != null) LavenderGlow else TextLowEmphasis,
                                 maxLines = 1
@@ -2075,17 +2075,17 @@ fun CreateIssueDialog(
                         modifier = Modifier.background(SophisticatedSurfaceDark)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("None (Top-Level Root Issue)", color = TextMediumEmphasis) },
+                            text = { Text("無（最上層根任務）", color = TextMediumEmphasis) },
                             onClick = {
                                 selectedParentId = null
                                 selectedParentTitle = null
                                 showParentDropdown = false
                             }
                         )
-                        allRepoIssues.filter { it.parentIssueId == null }.forEach { parent ->
+                        IssueHierarchyRules.orderedForDisplay(allRepoIssues).forEach { (parent, depth) ->
                             DropdownMenuItem(
                                 leadingIcon = { Icon(Icons.Default.AccountTree, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(16.dp)) },
-                                text = { Text("#${parent.issueNumber} ${parent.title}", color = TextHighEmphasis) },
+                                text = { Text("${"· ".repeat(depth)}#${parent.issueNumber} ${parent.title}", color = TextHighEmphasis) },
                                 onClick = {
                                     selectedParentId = parent.id
                                     selectedParentTitle = "#${parent.issueNumber} ${parent.title}"
@@ -2102,7 +2102,7 @@ fun CreateIssueDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Issue Title *") },
+                    label = { Text("任務標題 *") },
                     placeholder = { Text("e.g., Update KYC schema for Tier-3 approvals") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -2127,8 +2127,8 @@ fun CreateIssueDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description & Context") },
-                    placeholder = { Text("Describe the task, security rule, or bug...") },
+                    label = { Text("說明與脈絡") },
+                    placeholder = { Text("描述任務、治理規則或問題…") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(90.dp)
@@ -2149,7 +2149,7 @@ fun CreateIssueDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Priority Selection
-                Text("Priority Level", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
+                Text("優先級", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -2188,7 +2188,7 @@ fun CreateIssueDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Assignee Selection
-                Text("Assignee (User or Team)", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
+                Text("受派者（使用者或團隊）", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
                 Spacer(modifier = Modifier.height(6.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
@@ -2209,7 +2209,7 @@ fun CreateIssueDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = assigneeName ?: "Unassigned (Select User or Team)",
+                                text = assigneeName ?: "未指派（選擇使用者或團隊）",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (assigneeName != null) TextHighEmphasis else TextLowEmphasis
                             )
@@ -2223,7 +2223,7 @@ fun CreateIssueDialog(
                         modifier = Modifier.background(SophisticatedSurfaceDark)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("None / Unassigned", color = TextMediumEmphasis) },
+                            text = { Text("無／未指派", color = TextMediumEmphasis) },
                             onClick = {
                                 assigneeType = null
                                 assigneeId = null
@@ -2276,7 +2276,7 @@ fun CreateIssueDialog(
 
                 // Link to Blueprint / Spec
                 if (repoArtifacts.isNotEmpty()) {
-                    Text("Link to No-Code Blueprint (Optional)", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
+                    Text("連結無程式碼藍圖（選填）", style = MaterialTheme.typography.labelMedium, color = TextMediumEmphasis)
                     Spacer(modifier = Modifier.height(6.dp))
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedButton(
@@ -2295,7 +2295,7 @@ fun CreateIssueDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = linkedArtifactTitle ?: "None (Select Artifact)",
+                                    text = linkedArtifactTitle ?: "無（選擇成果）",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = if (linkedArtifactTitle != null) PinkAccent else TextLowEmphasis
                                 )
@@ -2309,7 +2309,7 @@ fun CreateIssueDialog(
                             modifier = Modifier.background(SophisticatedSurfaceDark)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("None", color = TextMediumEmphasis) },
+                                text = { Text("無", color = TextMediumEmphasis) },
                                 onClick = {
                                     linkedArtifactId = null
                                     linkedArtifactTitle = null
@@ -2364,7 +2364,7 @@ fun CreateIssueDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel", color = TextMediumEmphasis)
+                        Text("取消", color = TextMediumEmphasis)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(

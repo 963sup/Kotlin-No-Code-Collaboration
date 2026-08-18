@@ -393,7 +393,7 @@ fun SchemaHierarchyVisualizer() {
             // Entity Tree Nodes
             SchemaNodeItem(
                 level = 1,
-                entity = "Enterprise",
+                entity = "企業",
                 roleScope = "Admin, Compliance Auditor",
                 detail = "Root governance scope; enforces mandatory dual approver & segregation policies across all child Orgs.",
                 color = PurpleGlow
@@ -401,7 +401,7 @@ fun SchemaHierarchyVisualizer() {
 
             SchemaNodeItem(
                 level = 2,
-                entity = "Organization",
+                entity = "組織",
                 roleScope = "Org Owner, Admin, Member, Billing",
                 detail = "Primary container; CAN Owner Repositories. Groups Teams and inherits base permissions.",
                 color = IndigoLight
@@ -433,7 +433,7 @@ fun SchemaHierarchyVisualizer() {
 
             SchemaNodeItem(
                 level = 5,
-                entity = "No-Code Artifacts",
+                entity = "無程式碼成果",
                 roleScope = "Draft -> In Review -> Pending Sign-Off -> Published",
                 detail = "Workflows, RFC Specs, Decision Records, Form Schemas, Milestone Releases.",
                 color = Color(0xFFA5F3FC)
