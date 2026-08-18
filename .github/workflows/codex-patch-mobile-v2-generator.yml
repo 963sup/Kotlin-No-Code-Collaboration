@@ -1,0 +1,39 @@
+name: Codex Patch Mobile v2 Generator
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  patch:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.issue.number == 21 &&
+      github.event.comment.user.login == '963sup' &&
+      github.event.comment.body == '/codex-patch-mobile-v2-generator'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/mobile-collaboration-v2
+          fetch-depth: 0
+      - name: Patch generator against current main API
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          python3 .github/scripts/sitecustomize.py
+          python3 -m py_compile .github/scripts/implement_mobile_collaboration_v2_data.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: align mobile v2 generator with current governance API"
+          git push origin HEAD:feature/mobile-collaboration-v2
+          sha=$(git rev-parse HEAD)
+          gh pr comment 21 --repo "$GITHUB_REPOSITORY" --body "Generator compatibility patch applied at \`$sha\`; ready for Codex finalizer rerun."
