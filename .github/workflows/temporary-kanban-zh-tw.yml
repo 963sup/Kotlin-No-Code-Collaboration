@@ -1,47 +1,65 @@
 name: Temporary Kanban zh-TW Migration
 
 on:
-  push:
-    branches:
-      - agent/kanban-navigation-zh-tw
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   contents: write
 
 jobs:
   migrate:
-    if: ${{ !contains(github.event.head_commit.message, '[generated]') && !contains(github.event.head_commit.message, '[migration-error]') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout branch
+      - name: Checkout feature branch
         uses: actions/checkout@v7
         with:
           ref: agent/kanban-navigation-zh-tw
           fetch-depth: 0
 
+      - name: Check migration marker
+        id: marker
+        shell: bash
+        run: |
+          if [ -f app/src/main/java/com/example/ui/screens/KanbanBoardScreen.kt ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Product transformation already exists; no-op."
+          elif [ -f .github/kanban-migration-output.txt ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Previous migration error evidence exists; no-op."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Apply bounded transformation
+        if: ${{ steps.marker.outputs.skip == 'false' }}
         id: migrate
         shell: bash
         run: |
           set +e
-          python .github/scripts/apply_kanban_navigation_zh_tw.py > .github/kanban-migration-output.txt 2>&1
+          python .github/scripts/apply_kanban_navigation_zh_tw.py > /tmp/kanban-migration-output.txt 2>&1
           status=$?
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          cat .github/kanban-migration-output.txt
+          cat /tmp/kanban-migration-output.txt
           exit 0
 
       - name: Commit generated product changes
-        if: ${{ steps.migrate.outputs.status == '0' }}
+        if: ${{ steps.marker.outputs.skip == 'false' && steps.migrate.outputs.status == '0' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app metadata.json .github/kanban-migration-output.txt
+          git add app metadata.json
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
           git commit -m "feat: 完成看板導覽、巢狀任務與繁體中文 UI [generated]"
           git push origin HEAD:agent/kanban-navigation-zh-tw
 
       - name: Commit migration error evidence
-        if: ${{ steps.migrate.outputs.status != '0' }}
+        if: ${{ steps.marker.outputs.skip == 'false' && steps.migrate.outputs.status != '0' }}
         run: |
+          cp /tmp/kanban-migration-output.txt .github/kanban-migration-output.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .github/kanban-migration-output.txt
