@@ -7,6 +7,7 @@ plugins {
   alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.detekt)
 }
 
 android {
@@ -58,6 +59,15 @@ android {
   }
 }
 
+detekt {
+  buildUponDefaultConfig = true
+  allRules = false
+  parallel = true
+  // Initial rollout is report-only so legacy findings do not block delivery.
+  // Konsist provides hard architecture gates below; Detekt can become blocking after a baseline cleanup.
+  ignoreFailures = true
+}
+
 secrets {
   propertiesFileName = ".env"
   defaultPropertiesFileName = ".env.example"
@@ -103,6 +113,7 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.roborazzi)
   testImplementation(libs.roborazzi.compose)
+  testImplementation(libs.konsist)
 
   debugImplementation(libs.androidx.compose.ui.test.manifest)
   debugImplementation(libs.androidx.compose.ui.tooling)
