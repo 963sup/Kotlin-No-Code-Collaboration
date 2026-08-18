@@ -63,27 +63,26 @@ jobs:
               if count == 1:
                   return text.replace(old, new, 1)
 
-              if label == 'Inbox notification action':
-                  anchor = '                    onPerformAction = {'
-                  start = text.index(anchor)
-                  container_end = text.index('\\n                )', start)
-                  close_marker = '\\n                    }\\n'
-                  end = text.rfind(close_marker, start, container_end)
-                  if end < 0:
-                      raise RuntimeError(f'{label}: structural closing marker not found')
-                  return text[:start] + new + text[end + len(close_marker):]
+              anchors = {
+                  'Inbox notification action': '                    onPerformAction = {',
+                  'Inbox inspection navigation': '            onNavigateToEntity = {',
+              }
+              anchor = anchors.get(label)
+              if anchor is None:
+                  raise RuntimeError(f'{label}: expected exactly one match, found {count}')
 
-              if label == 'Inbox inspection navigation':
-                  anchor = '            onNavigateToEntity = {'
-                  start = text.index(anchor)
-                  container_end = text.index('\\n        )', start)
-                  close_marker = '\\n            }\\n'
-                  end = text.rfind(close_marker, start, container_end)
-                  if end < 0:
-                      raise RuntimeError(f'{label}: structural closing marker not found')
-                  return text[:start] + new + text[end + len(close_marker):]
-
-              raise RuntimeError(f'{label}: expected exactly one match, found {count}')
+              start = text.index(anchor)
+              open_brace = text.index('{', start)
+              depth = 0
+              for index in range(open_brace, len(text)):
+                  char = text[index]
+                  if char == '{':
+                      depth += 1
+                  elif char == '}':
+                      depth -= 1
+                      if depth == 0:
+                          return text[:start] + new.rstrip('\\n') + text[index + 1:]
+              raise RuntimeError(f'{label}: structural closing brace not found')
           """
           if helper_old not in script:
               raise RuntimeError('replace_once helper source was not found')
