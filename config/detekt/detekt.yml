@@ -1,9 +1,14 @@
-# Detekt is advisory in the initial rollout. Keep high-signal correctness and complexity rules,
-# while removing style noise that is expected in Jetpack Compose and the existing Android codebase.
+# Detekt is advisory in the initial rollout. Keep high-signal correctness and structural findings,
+# while removing known Jetpack Compose / legacy-size noise that would otherwise reduce signal quality.
+
+config:
+  validation: true
+  warningsAsErrors: true
 
 naming:
   FunctionNaming:
-    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ignoreAnnotated:
+      - "Composable"
   MatchingDeclarationName:
     active: false
 
@@ -12,7 +17,14 @@ style:
     active: false
   MaxLineLength:
     active: false
+  ReturnCount:
+    max: 5
+    excludeGuardClauses: true
 
 complexity:
+  CyclomaticComplexMethod:
+    allowedComplexity: 25
+  LongMethod:
+    active: false
   TooManyFunctions:
     active: false
