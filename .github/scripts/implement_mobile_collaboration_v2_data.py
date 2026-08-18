@@ -1563,11 +1563,21 @@ if "SYNC_BASE_URL=" not in env_text:
     env_path.write_text(env_text, encoding="utf-8")
 
 
-replace_once(
-    "app/src/main/AndroidManifest.xml",
-    '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
-    '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n\n    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />'
-)
+
+manifest_path = ROOT / "app/src/main/AndroidManifest.xml"
+manifest_text = manifest_path.read_text(encoding="utf-8")
+if "android.permission.INTERNET" not in manifest_text:
+    opening_end = manifest_text.find(">")
+    if opening_end < 0:
+        raise RuntimeError("AndroidManifest.xml opening tag missing")
+    manifest_text = (
+        manifest_text[:opening_end + 1]
+        + "\n\n    <uses-permission android:name=\"android.permission.INTERNET\" />"
+        + "\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />"
+        + manifest_text[opening_end + 1:]
+    )
+    manifest_path.write_text(manifest_text, encoding="utf-8")
+
 replace_once(
     "app/src/main/AndroidManifest.xml",
     '''        <activity\n            android:name=".MainActivity"''',
