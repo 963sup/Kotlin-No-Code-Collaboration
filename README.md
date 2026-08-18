@@ -54,7 +54,7 @@ Google AI Studio 相關專案 metadata 保留於 `metadata.json`，`MAJOR_CAPABI
 | Network | Retrofit + OkHttp + Moshi |
 | Identity / Push | Firebase Auth + Firebase Cloud Messaging |
 | AI Integration | Google AI Studio project capability / server-side Gemini boundary |
-| Tests | JVM / Robolectric / Roborazzi / Konsist |
+| Tests | JVM / Robolectric / Konsist |
 | Static Analysis | Detekt |
 | Build | Gradle Kotlin DSL + Version Catalog |
 

@@ -4,13 +4,19 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.google.devtools.ksp)
-  alias(libs.plugins.roborazzi)
-  alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
   alias(libs.plugins.detekt)
 }
 
 android {
+  val syncBaseUrl =
+      providers.gradleProperty("SYNC_BASE_URL")
+          .orElse(providers.environmentVariable("SYNC_BASE_URL"))
+          .orElse("https://sync.invalid/")
+          .get()
+          .replace("\\", "\\\\")
+          .replace("\"", "\\\"")
+
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
@@ -20,6 +26,7 @@ android {
     targetSdk = 36
     versionCode = 1
     versionName = "1.0"
+    buildConfigField("String", "SYNC_BASE_URL", "\"$syncBaseUrl\"")
   }
 
   signingConfigs {
@@ -71,12 +78,6 @@ detekt {
   ignoreFailures = true
 }
 
-secrets {
-  propertiesFileName = ".env"
-  defaultPropertiesFileName = ".env.example"
-  ignoreList.add("FIREBASE_APPCHECK_DEBUG_TOKEN")
-}
-
 googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }
 
 dependencies {
@@ -109,16 +110,12 @@ dependencies {
   implementation(libs.okhttp)
   implementation(libs.retrofit)
 
-  testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)
-  testImplementation(libs.roborazzi)
-  testImplementation(libs.roborazzi.compose)
   testImplementation(libs.konsist)
 
-  debugImplementation(libs.androidx.compose.ui.test.manifest)
   debugImplementation(libs.androidx.compose.ui.tooling)
 
   "ksp"(libs.androidx.room.compiler)
