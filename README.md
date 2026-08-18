@@ -1,83 +1,74 @@
-# RepoGovernance - No-Code Collaboration Platform
+# Kotlin No-Code Collaboration
 
-A modern Android application engineered with **Kotlin**, **Jetpack Compose**, and **Room Database**, reverse-engineering GitHub's proven collaboration, governance, and permission models into an enterprise **No-Code Collaboration Platform**.
+Android 原生的企業無程式碼協作平台。產品語意借鑑 GitHub 的 Repository、Issue、Discussion、Team、權限與協作模式，但明確排除程式碼、Commit、Branch、Pull Request、Diff、CI/CD 等開發者功能。
 
----
+## 核心模型
 
-## 🏛️ First Principles & Core Architecture
-
-### "Repository" as a No-Code Collaboration Container
-In traditional systems, repositories are tied to source code and Git trees. **RepoGovernance** treats the Repository as a pure **governance and collaboration workspace**, stripping away code-specific mechanics (commits, branches, PRs, diffs, CI/CD) and preserving enterprise-grade collaboration semantics:
-
+```text
+Enterprise
+├─ Organization
+├─ Team
+├─ User
+└─ Repository｜無程式碼協作容器
+   ├─ Issue / 子 Issue / 依賴
+   ├─ WBS / Kanban / My Work｜同一批 RepoIssue 的不同投影
+   ├─ Discussion
+   ├─ Artifact / 文件 / 決策 / 成果
+   ├─ Review / Approval
+   ├─ Access Rule / Policy
+   └─ Audit
 ```
-Enterprise / Organization
-  └── Team
-        └── Repository (Collaboration Container)
-              ├── Issues & Nested Tasks (Status, Priority, Assignees, Dependencies)
-              ├── Kanban Work Board (Repository-scoped view over Issues)
-              ├── Discussions & Decisions (Threads, Categories, Comments)
-              ├── Artifacts (Specifications, Documents, Workflows, Trackers)
-              └── Governance & Policy Engine (RBAC/ABAC, Approvals, Audit)
-```
 
-The Kanban Board is intentionally a **view of Repository Issues**, not a separate Project ownership model. Nested Tasks reuse the recursive Issue parent relationship, avoiding duplicate task entities and unnecessary persistence layers.
+Repository 只由 Organization 或 User 擁有；Team 透過 Access Rule 取得權限。`RepoIssue` 是唯一持久化工作真相，不另外建立 WBS Task 或 Kanban Task。
 
----
+## 目前已實作
 
-## ✨ Key Features
+- Home / Inbox / Work / Explore 四個手機主入口。
+- Enterprise / Organization / Team / User 範圍切換與範圍化作業摘要。
+- Repository WBS、Issue tree、跨 Repository My Work、Kanban。
+- Canonical `CollaborationTarget`，用於通知、導覽、搜尋與收藏。
+- Explore、SavedTarget、UserFollow、公開活動與衍生成就投影。
+- `HierarchicalPolicyEngine` 權限治理、Review / Approval、Audit。
+- Room local-first persistence，明確 4→5 migration 與資料保留測試。
+- Outbox、版本、Cursor、Conflict、Retry、WorkManager 背景同步。
+- Firebase Auth ID token、FCM sync hint 與 HTTPS-only remote sync 邊界。
+- Material 3 亮色 / 暗色介面。
 
-- **Hierarchical Access Control Policy Engine**:
-  - Evaluation of permissions across **Enterprise -> Organization -> Team -> Repository -> Resource** scopes.
-  - Multi-tier role model: `Owner`, `Admin`, `Maintainer`, `Reviewer`, `Collaborator`, `Member`, `Approver`.
-  - Real-time policy simulator and trace inspection dialog.
-- **No-Code Repository Workspace**:
-  - Structured issues management with status tracking, priority filters, assignees, dependencies, and recursive Nested Tasks.
-  - Repository-scoped Kanban Board projecting the existing `Open -> In Progress -> Closed` Issue lifecycle without duplicating work data.
-  - Discussions forum with threaded replies and category segmentation.
-  - Artifact and document governance with review & approval workflows.
-- **Audit & Compliance Logging**:
-  - Comprehensive immutable event stream tracking actor actions, target entities, and policy evaluations.
-- **Local-First Resilience**:
-  - Full Room database backing with TypeConverters, indexed queries, and sample data bootstrapping.
-- **Material 3 UI**:
-  - Native dynamic color theming, high-contrast typography, edge-to-edge rendering, and adaptive layouts.
+## 開發方式
 
----
+本專案主要在 **GitHub** 與 **Google AI Studio** 開發。Repository 只保留正式產品程式碼、必要測試、架構決策與一條 Android CI；一次性生成腳本、自修改 workflow 與臨時觸發檔不應留在主幹。
 
-## 🛠️ Tech Stack
+Google AI Studio 相關專案 metadata 保留於 `metadata.json`，`MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API` 不移除。
 
-| Layer | Technology |
+## 技術棧
+
+| 層 | 技術 |
 |---|---|
-| **Language** | Kotlin 2.0+ |
-| **UI Framework** | Jetpack Compose (Material 3) |
-| **Architecture** | MVVM / Unidirectional Data Flow |
-| **Local Persistence** | Android Room Database & Coroutines Flow |
-| **Testing** | Robolectric (JVM Unit Tests), Roborazzi (Screenshot Testing) |
-| **Build Tooling** | Gradle Kotlin DSL (`build.gradle.kts`), Version Catalog (`libs.versions.toml`) |
+| Language | Kotlin 2.4.10 |
+| UI | Jetpack Compose / Material 3 |
+| State | ViewModel + StateFlow |
+| Local Data | Room |
+| Background Sync | WorkManager |
+| Network | Retrofit + OkHttp + Moshi |
+| Identity / Push | Firebase Auth + Firebase Cloud Messaging |
+| AI Integration | Firebase AI / Google AI Studio project capability |
+| Tests | JVM / Robolectric / Roborazzi |
+| Build | Gradle Kotlin DSL + Version Catalog |
 
----
+Android 設定：`minSdk 24`、`targetSdk 36`、`compileSdk 36.1`。
 
-## 🚀 Getting Started
+## 驗證
 
-### Prerequisites
-- Android Studio Ladybug | 2024.2+ or Google AI Studio
-- JDK 17+
-- Android SDK 35 (minSdk: 26, targetSdk: 35)
-
-### Build & Run
 ```bash
-# Clone the repository
-git clone https://github.com/963sup/Kotlin-No-Code-Collaboration.git
-cd Kotlin-No-Code-Collaboration
-
-# Run JVM Unit & Robolectric Tests
-gradle :app:testDebugUnitTest
-
-# Build Debug APK
-gradle :app:assembleDebug
+./gradlew :app:testDebugUnitTest :app:assembleDebug
 ```
 
----
+CI 使用 `.github/workflows/android.yml`。Room schema 變更不得使用 destructive migration；同步端點必須為 HTTPS，伺服器端必須驗證 Firebase ID token 與實際授權。
 
-## 📄 License
-Licensed under the [Apache 2.0 License](LICENSE).
+## Release boundary
+
+Android client 已具備 local-first 與 authenticated sync client 邊界，但正式多人環境仍需要一個符合 `docs/contracts/collaboration-sync-v1.md` 的後端服務。FCM payload 只作同步提示，不直接修改領域資料。
+
+## License
+
+Apache License 2.0。
