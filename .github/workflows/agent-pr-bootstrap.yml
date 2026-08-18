@@ -35,7 +35,7 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Repair bounded identifier corruption and apply feature slice
+      - name: Repair bounded baseline defects and apply feature slice
         shell: bash
         run: |
           python3 - <<'PY'
@@ -50,6 +50,7 @@ jobs:
               'sorted由': 'sortedBy',
               'distinct由': 'distinctBy',
               'then由': 'thenBy',
+              'currentBlocked由': 'currentBlockedBy',
               'onUpdateIssue狀態': 'onUpdateIssueStatus',
               'onUpdate狀態': 'onUpdateStatus',
               'new狀態': 'newStatus',
@@ -167,9 +168,20 @@ jobs:
                   kotlin_file.write_text(repaired, encoding='utf-8')
                   repaired_files.append(str(kotlin_file))
 
+          # EmptyKanban uses Modifier.weight and therefore must retain the
+          # parent ColumnScope receiver. This changes no behavior or data model.
+          kanban_path = Path('app/src/main/java/com/example/ui/screens/KanbanBoardScreen.kt')
+          kanban = kanban_path.read_text(encoding='utf-8')
+          empty_kanban_old = 'private fun EmptyKanban(title: String, message: String) {'
+          empty_kanban_new = 'private fun androidx.compose.foundation.layout.ColumnScope.EmptyKanban(title: String, message: String) {'
+          if empty_kanban_old not in kanban:
+              raise RuntimeError('EmptyKanban baseline declaration was not found')
+          kanban_path.write_text(kanban.replace(empty_kanban_old, empty_kanban_new, 1), encoding='utf-8')
+
           print('Repaired compiler-breaking Kotlin tokens in:')
           for repaired_file in repaired_files:
               print(f'  - {repaired_file}')
+          print(f'  - {kanban_path} (ColumnScope receiver)')
 
           workflow = Path('.github/workflows/agent-collaboration-target.yml').read_text(encoding='utf-8')
           start_marker = "          python3 - <<'PY'\n"
@@ -235,5 +247,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "feat: restore Kotlin identifiers and open exact Inbox targets"
+          git commit -m "feat: restore Kotlin build and open exact Inbox targets"
           git push origin HEAD:agent/collaboration-target-inbox
