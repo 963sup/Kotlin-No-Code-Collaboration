@@ -249,7 +249,9 @@ fun WorkspaceScopeSwitcherSheet(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(filteredItems, key = { "${it.kind.name}:${it.id}" }) { item ->
-                        val isSelected = selectedScope?.kind == item.kind && selectedScope.id == item.id
+                        val isSelected = selectedScope?.let {
+                            it.kind == item.kind && it.id == item.id
+                        } == true
 
                         Surface(
                             modifier = Modifier
