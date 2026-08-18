@@ -85,10 +85,8 @@ dependencies {
   implementation(libs.androidx.room.ktx)
   implementation(libs.androidx.room.runtime)
 
-  implementation(libs.firebase.ai)
   implementation(libs.firebase.auth)
   implementation(libs.firebase.messaging)
-  implementation(libs.firebase.appcheck.recaptcha)
 
   implementation(libs.converter.moshi)
   implementation(libs.kotlinx.coroutines.android)
@@ -105,7 +103,6 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.roborazzi)
   testImplementation(libs.roborazzi.compose)
-  testImplementation(libs.roborazzi.junit.rule)
 
   debugImplementation(libs.androidx.compose.ui.test.manifest)
   debugImplementation(libs.androidx.compose.ui.tooling)

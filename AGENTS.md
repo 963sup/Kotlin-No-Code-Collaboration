@@ -13,10 +13,6 @@
 - Keep `metadata.json` name aligned with `app/src/main/res/values/strings.xml` and preserve `MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API`.
 - Do not add `local.properties`.
 
-## Fast development path
-1. Inspect only files relevant to the requested change.
-2. Reuse the existing model before adding entities, screens, states or abstractions.
-3. Make the smallest coherent change that satisfies the request.
-4. Preserve ownership, permissions, persistence and audit relationships.
-5. Run only the smallest relevant verification when available; do not block routine web edits on full-project CI.
-6. Stop when the requested behavior is complete. Avoid speculative refactors and extra documentation.
+## Working scope
+- Inspect and edit only the smallest relevant surface; reuse the existing model and avoid unrelated refactors or documentation.
+- Preserve ownership, permissions, persistence and audit relationships; run the smallest relevant verification without blocking routine web edits on full-project CI.
