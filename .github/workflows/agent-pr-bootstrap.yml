@@ -51,6 +51,44 @@ jobs:
               line[10:] if line.startswith("          ") else line
               for line in script_lines
           )
+
+          helper_old = """def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise RuntimeError(f'{label}: expected exactly one match, found {count}')
+              return text.replace(old, new, 1)
+          """
+          helper_new = """def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count == 1:
+                  return text.replace(old, new, 1)
+
+              if label == 'Inbox notification action':
+                  anchor = '                    onPerformAction = {'
+                  start = text.index(anchor)
+                  container_end = text.index('\\n                )', start)
+                  close_marker = '\\n                    }\\n'
+                  end = text.rfind(close_marker, start, container_end)
+                  if end < 0:
+                      raise RuntimeError(f'{label}: structural closing marker not found')
+                  return text[:start] + new + text[end + len(close_marker):]
+
+              if label == 'Inbox inspection navigation':
+                  anchor = '            onNavigateToEntity = {'
+                  start = text.index(anchor)
+                  container_end = text.index('\\n        )', start)
+                  close_marker = '\\n            }\\n'
+                  end = text.rfind(close_marker, start, container_end)
+                  if end < 0:
+                      raise RuntimeError(f'{label}: structural closing marker not found')
+                  return text[:start] + new + text[end + len(close_marker):]
+
+              raise RuntimeError(f'{label}: expected exactly one match, found {count}')
+          """
+          if helper_old not in script:
+              raise RuntimeError('replace_once helper source was not found')
+          script = script.replace(helper_old, helper_new, 1)
+
           exec(compile(script, 'embedded-collaboration-target-implementation.py', 'exec'))
           PY
 
