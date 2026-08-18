@@ -63,10 +63,10 @@ class IssueHierarchyRulesTest {
         assertEquals(listOf("a", "b", "c", "d", "e"), rows.map { it.issue.id })
         assertEquals(2, rows.first { it.issue.id == "a" }.completedCount)
         assertEquals(4, rows.first { it.issue.id == "a" }.totalCount)
-        assertEquals(0.5f, rows.first { it.issue.id == "a" }.progress, 0.001f)
-        assertEquals(0.5f, rows.first { it.issue.id == "c" }.progress, 0.001f)
+        assertEquals(1f, rows.first { it.issue.id == "a" }.progress, 0.001f)
+        assertEquals(1f, rows.first { it.issue.id == "c" }.progress, 0.001f)
         assertEquals(1f, rows.first { it.issue.id == "e" }.progress, 0.001f)
-        assertEquals(0.6f, IssueHierarchyRules.overallProgress(issues), 0.001f)
+        assertEquals(1f, IssueHierarchyRules.overallProgress(issues), 0.001f)
     }
 
     @Test

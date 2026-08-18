@@ -446,6 +446,14 @@ data class RepoIssue(
     val parentIssueNumber: Int? = null,
     val parentIssueTitle: String? = null,
     val labels: String = "governance",     // Comma-separated labels
+    @ColumnInfo(defaultValue = "0")
+    val sortOrder: Int = issueNumber,
+    val plannedStartAt: Long? = null,
+    val plannedEndAt: Long? = null,
+    @ColumnInfo(defaultValue = "1.0")
+    val wbsWeight: Double = 1.0,
+    @ColumnInfo(defaultValue = "0")
+    val progressPercent: Int = if (status == IssueStatus.CLOSED) 100 else 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val closedAt: Long? = null,

@@ -575,6 +575,30 @@ class GovernanceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+
+    fun updateIssuePlan(
+        issueId: String,
+        sortOrder: Int,
+        plannedStartAt: Long?,
+        plannedEndAt: Long?,
+        wbsWeight: Double,
+        progressPercent: Int
+    ) {
+        val user = _activeUser.value ?: return
+        viewModelScope.launch {
+            val (success, msg) = repository.updateIssuePlan(
+                issueId = issueId,
+                sortOrder = sortOrder,
+                plannedStartAt = plannedStartAt,
+                plannedEndAt = plannedEndAt,
+                wbsWeight = wbsWeight,
+                progressPercent = progressPercent,
+                actor = user
+            )
+            _uiMessages.emit(UiMessage(msg, isError = !success))
+        }
+    }
+
     // --- DISCUSSION VM ACTIONS ---
     fun loadDiscussionComments(discussionId: String) {
         viewModelScope.launch {

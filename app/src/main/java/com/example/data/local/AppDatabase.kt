@@ -16,13 +16,21 @@ import com.example.data.model.IssueDependency
 import com.example.data.model.NoCodeArtifact
 import com.example.data.model.OrgMembership
 import com.example.data.model.Organization
+import com.example.data.model.PushRegistration
 import com.example.data.model.RepoAccessRule
 import com.example.data.model.RepoDiscussion
 import com.example.data.model.RepoIssue
 import com.example.data.model.Repository
+import com.example.data.model.SavedTarget
+import com.example.data.model.SyncConflict
+import com.example.data.model.SyncCursor
+import com.example.data.model.SyncMetadata
+import com.example.data.model.SyncOutbox
+import com.example.data.model.SyncRuntimeState
 import com.example.data.model.Team
 import com.example.data.model.TeamMembership
 import com.example.data.model.User
+import com.example.data.model.UserFollow
 
 @Database(
     entities = [
@@ -43,14 +51,23 @@ import com.example.data.model.User
         IssueComment::class,
         RepoDiscussion::class,
         DiscussionComment::class,
-        AppNotification::class
+        AppNotification::class,
+        SavedTarget::class,
+        UserFollow::class,
+        SyncOutbox::class,
+        SyncMetadata::class,
+        SyncCursor::class,
+        SyncConflict::class,
+        PushRegistration::class,
+        SyncRuntimeState::class
     ],
-    version = 4,
+    version = AppMigrations.CURRENT_VERSION,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun governanceDao(): GovernanceDao
+    abstract fun collaborationExperienceDao(): CollaborationExperienceDao
 
     companion object {
         @Volatile
@@ -62,7 +79,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "repo_governance_db"
-                ).fallbackToDestructiveMigration().build()
+                )
+                    .addMigrations(AppMigrations.MIGRATION_4_5)
+                    .addCallback(DatabaseSyncTriggers.callback)
+                    .build()
                 INSTANCE = instance
                 instance
             }

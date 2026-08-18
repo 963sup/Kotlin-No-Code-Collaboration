@@ -169,6 +169,7 @@ import java.util.Locale
  */
 enum class RepoWorkspaceTab(val label: String, val icon: ImageVector) {
     OVERVIEW("總覽", Icons.Default.Dashboard),
+    WBS("WBS", Icons.Default.AccountTree),
     ISSUES("任務", Icons.Default.TaskAlt),
     DISCUSSIONS("討論", Icons.Default.Forum),
     ARTIFACTS("成果", Icons.Default.Description)
@@ -213,6 +214,7 @@ fun RepoDetailScreen(
     onRemoveDependency: (dependencyId: String, () -> Unit) -> Unit = { _, _ -> },
     onAddIssueComment: (issueId: String, content: String, () -> Unit) -> Unit = { _, _, _ -> },
     onUpdateIssueStatus:(issueId: String, newStatus:IssueStatus) -> Unit = { _, _ -> },
+    onUpdateIssuePlan: (String, Int, Long?, Long?, Double, Int) -> Unit = { _, _, _, _, _, _ -> },
     onAssignIssue: (issueId: String, assigneeType: GranteeType?, assigneeId: String?, assigneeName: String?) -> Unit = { _, _, _, _ -> },
     onLoadIssueComments: (issueId: String) -> Unit = {},
     onCreateDiscussion: (title: String, category: DiscussionCategory, body: String, () -> Unit) -> Unit = { _, _, _, _ -> },
@@ -283,6 +285,7 @@ fun RepoDetailScreen(
                     RepoWorkspaceTab.values().forEach { tab ->
                         val count = when (tab) {
                             RepoWorkspaceTab.OVERVIEW -> null
+                            RepoWorkspaceTab.WBS -> issues.size
                             RepoWorkspaceTab.ISSUES -> issues.count { it.status != IssueStatus.CLOSED }
                             RepoWorkspaceTab.DISCUSSIONS -> discussions.size
                             RepoWorkspaceTab.ARTIFACTS -> artifacts.size
@@ -337,6 +340,11 @@ fun RepoDetailScreen(
                             inSettingsMode = true
                         },
                         onSelectArtifact = onSelectArtifact
+                    )
+
+                    RepoWorkspaceTab.WBS -> RepositoryWbsSection(
+                        issues = issues,
+                        onUpdatePlan = onUpdateIssuePlan
                     )
 
                     RepoWorkspaceTab.ISSUES -> RepoIssuesSection(
