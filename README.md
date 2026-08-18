@@ -36,7 +36,7 @@ Repository 只由 Organization 或 User 擁有；Team 透過 Access Rule 取得�
 
 ## 開發方式
 
-本專案主要在 **GitHub** 與 **Google AI Studio** 開發。Repository 只保留正式產品程式碼、必要測試、架構決策與一條 Android CI；一次性生成腳本、自修改 workflow 與臨時觸發檔不應留在主幹。
+本專案主要在 **GitHub** 與 **Google AI Studio** 開發。Repository 只保留正式產品程式碼、必要測試、架構決策與按需 Android Verification；一次性生成腳本、自修改 workflow、臨時觸發檔與重複代理規則不應留在主幹。
 
 Google AI Studio 相關專案 metadata 保留於 `metadata.json`，`MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API` 不移除。
 
@@ -60,10 +60,10 @@ Android 設定：`minSdk 24`、`targetSdk 36`、`compileSdk 36.1`。
 ## 驗證
 
 ```bash
-./gradlew :app:testDebugUnitTest :app:assembleDebug
+gradle :app:testDebugUnitTest :app:assembleDebug
 ```
 
-CI 使用 `.github/workflows/android.yml`。Room schema 變更不得使用 destructive migration；同步端點必須為 HTTPS，伺服器端必須驗證 Firebase ID token 與實際授權。
+`.github/workflows/android.yml` 只在 Pull Request 的 Android/Gradle 變更或手動觸發時執行，不阻塞直接推送 `main` 的 Web/AI Studio 快速路徑。Room schema 變更不得使用 destructive migration；同步端點必須為 HTTPS，伺服器端必須驗證 Firebase ID token 與實際授權。
 
 ## Release boundary
 
