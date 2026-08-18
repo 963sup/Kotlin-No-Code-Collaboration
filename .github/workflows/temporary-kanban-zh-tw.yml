@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  migrate:
+  residual-zh-tw:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout feature branch
@@ -17,51 +17,48 @@ jobs:
           ref: agent/kanban-navigation-zh-tw
           fetch-depth: 0
 
-      - name: Check migration marker
+      - name: Check residual marker
         id: marker
         shell: bash
         run: |
-          if [ -f app/src/main/java/com/example/ui/screens/KanbanBoardScreen.kt ]; then
+          if [ -f .github/zh-tw-residual-audit.txt ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Product transformation already exists; no-op."
-          elif [ -f .github/kanban-migration-output.txt ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Previous migration error evidence exists; no-op."
+            echo "Residual zh-TW pass already exists; no-op."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Apply bounded transformation
+      - name: Apply residual zh-TW transformation
         if: ${{ steps.marker.outputs.skip == 'false' }}
-        id: migrate
+        id: transform
         shell: bash
         run: |
           set +e
-          python .github/scripts/apply_kanban_navigation_zh_tw.py > /tmp/kanban-migration-output.txt 2>&1
+          python .github/scripts/apply_zh_tw_residuals.py > /tmp/zh-tw-pass-output.txt 2>&1
           status=$?
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          cat /tmp/kanban-migration-output.txt
+          cat /tmp/zh-tw-pass-output.txt
           exit 0
 
-      - name: Commit generated product changes
-        if: ${{ steps.marker.outputs.skip == 'false' && steps.migrate.outputs.status == '0' }}
+      - name: Commit second-pass product changes
+        if: ${{ steps.marker.outputs.skip == 'false' && steps.transform.outputs.status == '0' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app metadata.json
+          git add app metadata.json .github/zh-tw-residual-audit.txt
           if git diff --cached --quiet; then
-            echo "No generated changes"
+            echo "No residual changes"
             exit 0
           fi
-          git commit -m "feat: 完成看板導覽、巢狀任務與繁體中文 UI [generated]"
+          git commit -m "fix: 完成繁體中文 UI 第二輪校正 [generated-zh]"
           git push origin HEAD:agent/kanban-navigation-zh-tw
 
-      - name: Commit migration error evidence
-        if: ${{ steps.marker.outputs.skip == 'false' && steps.migrate.outputs.status != '0' }}
+      - name: Commit residual translation error
+        if: ${{ steps.marker.outputs.skip == 'false' && steps.transform.outputs.status != '0' }}
         run: |
-          cp /tmp/kanban-migration-output.txt .github/kanban-migration-output.txt
+          cp /tmp/zh-tw-pass-output.txt .github/zh-tw-residual-error.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/kanban-migration-output.txt
-          git commit -m "chore: record Kanban migration error [migration-error]"
+          git add .github/zh-tw-residual-error.txt
+          git commit -m "chore: record residual translation error [zh-error]"
           git push origin HEAD:agent/kanban-navigation-zh-tw
