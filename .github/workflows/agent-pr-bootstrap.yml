@@ -35,11 +35,40 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Execute bounded implementation script
+      - name: Repair bounded identifier corruption and apply feature slice
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
+
+          # A prior UI localization pass translated fragments inside Kotlin API
+          # identifiers. Repair only the exact compiler-breaking tokens observed
+          # in the baseline build; leave all user-visible Traditional Chinese text
+          # unchanged.
+          identifier_repairs = {
+              'associate由': 'associateBy',
+              'group由': 'groupBy',
+              'sorted由': 'sortedBy',
+              'distinct由': 'distinctBy',
+              'then由': 'thenBy',
+              'onUpdateIssue狀態': 'onUpdateIssueStatus',
+              'onUpdate狀態': 'onUpdateStatus',
+              'role範圍': 'roleScope',
+          }
+
+          repaired_files = []
+          for kotlin_file in Path('app/src/main/java').rglob('*.kt'):
+              original = kotlin_file.read_text(encoding='utf-8')
+              repaired = original
+              for corrupted, canonical in identifier_repairs.items():
+                  repaired = repaired.replace(corrupted, canonical)
+              if repaired != original:
+                  kotlin_file.write_text(repaired, encoding='utf-8')
+                  repaired_files.append(str(kotlin_file))
+
+          print('Repaired compiler-breaking identifiers in:')
+          for repaired_file in repaired_files:
+              print(f'  - {repaired_file}')
 
           workflow = Path('.github/workflows/agent-collaboration-target.yml').read_text(encoding='utf-8')
           start_marker = "          python3 - <<'PY'\n"
@@ -105,5 +134,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "feat: open exact collaboration targets from inbox"
+          git commit -m "feat: restore Kotlin identifiers and open exact Inbox targets"
           git push origin HEAD:agent/collaboration-target-inbox
