@@ -112,12 +112,12 @@ fun AuditLogScreen(
                         }
                         Column {
                             Text(
-                                text = "Enterprise Audit Trail & Telemetry",
+                                text = "企業稽核軌跡與監測",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = TextHighEmphasis
                             )
                             Text(
-                                text = "IMMUTABLE REAL-TIME GOVERNANCE LOG",
+                                text = "不可任意竄改的即時治理紀錄",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     letterSpacing = 0.8.sp,
@@ -136,7 +136,7 @@ fun AuditLogScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Filter audit trail by action, actor, repository...", color = TextLowEmphasis, fontSize = 13.sp) },
+                placeholder = { Text("依動作、執行者或儲存庫篩選稽核軌跡…", color = TextLowEmphasis, fontSize = 13.sp) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = LavenderPrimary) },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
@@ -161,7 +161,7 @@ fun AuditLogScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AuditFilterChip(
-                    label = "All Events (${auditLogs.size})",
+                    label = "All 個事件 (${auditLogs.size})",
                     isSelected = filterBlockedOnly == null,
                     onClick = { filterBlockedOnly = null }
                 )
@@ -234,7 +234,7 @@ fun AuditLogScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Actor: ${log.actorDisplayName} • Repo: ${log.repoName ?: "N/A"}",
+                                text = "執行者：${log.actorDisplayName} • 儲存庫：${log.repoName ?: "N/A"}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LavenderSubtle
                             )

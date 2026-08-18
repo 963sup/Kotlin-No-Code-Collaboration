@@ -105,7 +105,7 @@ fun ArtifactDetailScreen(
 ) {
     var showReviewDialog by remember { mutableStateOf(false) }
 
-    val distinctApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+    val distinctApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinct由 { it.approverUserId }.size
     val requiredApprovers = repo.requiredApproverCount
     val isAlreadySignedByActiveUser = activeUser != null && approvals.any { it.approverUserId == activeUser.id && it.status == ApprovalStatus.APPROVED }
 
@@ -198,7 +198,7 @@ fun ArtifactHeader(
                     onClick = onBack,
                     modifier = Modifier.size(32.dp).testTag("back_from_artifact_button")
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = IndigoLight)
+                    Icon(Icons.Default.ArrowBack, contentDescription = "返回", tint = IndigoLight)
                 }
 
                 Text(
@@ -223,7 +223,7 @@ fun ArtifactHeader(
                         color = Color.White
                     )
                     Text(
-                        text = "Author: ${artifact.authorDisplayName} • Version ${artifact.version}",
+                        text = "作者：${artifact.authorDisplayName} • 版本 ${artifact.version}",
                         style = MaterialTheme.typography.labelSmall,
                         color = CyanAccent
                     )
@@ -259,7 +259,7 @@ fun LifecyclePipelineView(currentState: LifecycleState) {
                 .padding(14.dp)
         ) {
             Text(
-                text = "Hierarchical Governance Lifecycle Pipeline",
+                text = "階層治理生命週期流程",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color.White
             )
@@ -330,7 +330,7 @@ fun NoCodeBlueprintViewer(artifact: NoCodeArtifact) {
                 .padding(14.dp)
         ) {
             Text(
-                text = "No-Code Blueprint Specification",
+                text = "無程式碼藍圖規格",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = CyanAccent
             )
@@ -397,13 +397,13 @@ fun GovernanceActionPanel(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Governance Sign-Off & Lifecycle Gates",
+                    text = "治理簽核與生命週期關卡",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
 
                 Text(
-                    text = "Active: ${activeUser?.displayName ?: "Guest"}",
+                    text = "目前身分：${activeUser?.displayName ?: "Guest"}",
                     style = MaterialTheme.typography.labelSmall,
                     color = CyanAccent
                 )
@@ -412,7 +412,7 @@ fun GovernanceActionPanel(
             when (artifact.lifecycleState) {
                 LifecycleState.DRAFT -> {
                     Text(
-                        text = "This blueprint is currently in DRAFT. A Collaborator or Maintainer can submit it to begin formal peer review.",
+                        text = "此藍圖目前為草稿；協作者或維護者可送出以開始正式同儕審查。",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF94A3B8)
                     )
@@ -427,13 +427,13 @@ fun GovernanceActionPanel(
                     ) {
                         Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Submit Blueprint for Peer Review")
+                        Text("送出藍圖進行同儕審查")
                     }
                 }
 
                 LifecycleState.IN_REVIEW -> {
                     Text(
-                        text = "This blueprint is undergoing Reviewer inspection. Designated Reviewers can evaluate and approve or request changes.",
+                        text = "此藍圖正在審查中；指定審查者可核准或要求修改。",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF94A3B8)
                     )
@@ -448,13 +448,13 @@ fun GovernanceActionPanel(
                     ) {
                         Icon(Icons.Default.RateReview, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Submit Reviewer Decision & Feedback", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("送出審查決定與回饋", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
 
                 LifecycleState.PENDING_APPROVAL, LifecycleState.APPROVED -> {
                     Text(
-                        text = "Multi-Signature Approver Gate: $collectedApprovals of $requiredApprovers required signatures recorded.",
+                        text = "多重簽核關卡：已取得 $collectedApprovals / $requiredApprovers 個必要簽核。",
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                         color = if (collectedApprovals >= requiredApprovers) EmeraldSuccess else PurpleGlow
                     )
@@ -486,7 +486,7 @@ fun GovernanceActionPanel(
                         ) {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Publish & Lock Blueprint", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text("發布並鎖定藍圖", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -505,7 +505,7 @@ fun GovernanceActionPanel(
                         ) {
                             Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = EmeraldSuccess)
                             Text(
-                                text = "Artifact is officially Published & Locked under Enterprise cryptographic policy.",
+                                text = "成果已依企業簽核政策正式發布並鎖定。",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                                 color = Color.White
                             )
@@ -514,7 +514,7 @@ fun GovernanceActionPanel(
                 }
 
                 LifecycleState.ARCHIVED -> {
-                    Text("This blueprint has been archived.", color = Color(0xFF94A3B8))
+                    Text("此藍圖已封存。", color = Color(0xFF94A3B8))
                 }
             }
 
@@ -537,7 +537,7 @@ fun GovernanceActionPanel(
             ) {
                 Icon(Icons.Default.Shield, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Inspect Access Control Policy for This Action", color = CyanAccent, fontSize = 12.sp)
+                Text("檢視此動作的存取控制政策", color = CyanAccent, fontSize = 12.sp)
             }
         }
     }
@@ -549,16 +549,16 @@ fun SignaturesAndReviewsSection(
     reviews: List<ArtifactReview>,
     requiredApprovers: Int
 ) {
-    val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinctBy { it.approverUserId }.size
+    val validApprovalsCount = approvals.filter { it.status == ApprovalStatus.APPROVED }.distinct由 { it.approverUserId }.size
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            text = "Approvals & Cryptographic Signatures ($validApprovalsCount of $requiredApprovers)",
+            text = "核准與簽章（$validApprovalsCount / $requiredApprovers）",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             color = Color.White
         )
 
         if (approvals.isEmpty()) {
-            Text("No approvals recorded yet.", style = MaterialTheme.typography.bodySmall, color = Color(0xFF64748B))
+            Text("尚無核准紀錄。", style = MaterialTheme.typography.bodySmall, color = Color(0xFF64748B))
         } else {
             approvals.forEach { approval ->
                 Card(
@@ -594,13 +594,13 @@ fun SignaturesAndReviewsSection(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Peer Review Decisions (${reviews.size})",
+            text = "同儕審查決定（${reviews.size}）",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             color = Color.White
         )
 
         if (reviews.isEmpty()) {
-            Text("No peer reviews logged yet.", style = MaterialTheme.typography.bodySmall, color = Color(0xFF64748B))
+            Text("尚無同儕審查紀錄。", style = MaterialTheme.typography.bodySmall, color = Color(0xFF64748B))
         } else {
             reviews.forEach { review ->
                 Card(
@@ -664,13 +664,13 @@ fun SubmitReviewDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Submit Reviewer Sign-Off",
+                    text = "送出審查者簽核",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
 
                 Text(
-                    text = "Evaluating: ${artifact.title}",
+                    text = "評估中：${artifact.title}",
                     style = MaterialTheme.typography.bodySmall,
                     color = CyanAccent
                 )
@@ -705,7 +705,7 @@ fun SubmitReviewDialog(
                 OutlinedTextField(
                     value = feedback,
                     onValueChange = { feedback = it },
-                    label = { Text("Reviewer Notes & Verification Feedback") },
+                    label = { Text("審查備註與驗證回饋") },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth().testTag("review_feedback_input")
                 )
@@ -714,14 +714,14 @@ fun SubmitReviewDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = Color(0xFF94A3B8)) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = Color(0xFF94A3B8)) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onSubmit(selectedDecision, feedback) },
                         colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimary),
                         modifier = Modifier.testTag("submit_review_decision_button")
                     ) {
-                        Text("Submit Decision")
+                        Text("送出決定")
                     }
                 }
             }

@@ -13,6 +13,7 @@ import com.example.data.model.GovernanceAction
 import com.example.data.model.GranteeType
 import com.example.data.model.IssueComment
 import com.example.data.model.IssueDependency
+import com.example.data.model.IssueHierarchyRules
 import com.example.data.model.IssuePriority
 import com.example.data.model.IssueStatus
 import com.example.data.model.LifecycleState
@@ -672,9 +673,10 @@ class GovernanceRepository(private val dao: GovernanceDao) {
             return Pair(false, "Parent issue must reside within the same repository.")
         }
 
-        // Prevent direct circular hierarchy (parent cannot have issue as its parent)
-        if (parent.parentIssueId == issueId) {
-            return Pair(false, "Circular hierarchy detected: Issue #${parent.issueNumber} is already a child of Issue #${issue.issueNumber}.")
+        // Nested tasks may have arbitrary depth, but the hierarchy must stay acyclic.
+        val repoIssues = dao.getIssuesByRepoOnce(issue.repoId)
+        if (!IssueHierarchyRules.canAssignParent(issueId, parentIssueId, repoIssues)) {
+            return Pair(false, "無法將任務設為自己或其任一子孫任務的下層，避免形成循環階層。")
         }
 
         val updated = issue.copy(
@@ -829,7 +831,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
                 actorDisplayName = actor.displayName,
                 actionName = if (isClosing) "CLOSE_ISSUE" else "REOPEN_ISSUE",
                 verdict = PolicyVerdict.ALLOWED,
-                reasoning = "${if (isClosing) "Closed" else "Reopened"} Issue #${issue.issueNumber} '${issue.title}'."
+                reasoning = "${if (isClosing) "已完成" else "Reopened"} Issue #${issue.issueNumber} '${issue.title}'."
             )
         )
         return Pair(true, "Issue #${issue.issueNumber} updated to ${newStatus.label}.")
@@ -859,7 +861,7 @@ class GovernanceRepository(private val dao: GovernanceDao) {
         )
         dao.updateIssue(updated)
 
-        val target = if (assigneeName != null) "${assigneeType?.name}: $assigneeName" else "Unassigned"
+        val target = if (assigneeName != null) "${assigneeType?.name}: $assigneeName" else "未指派"
         dao.insertAuditLog(
             AuditLog(
                 enterpriseId = enterprise.id,

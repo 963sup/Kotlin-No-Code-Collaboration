@@ -165,24 +165,24 @@ import java.util.Locale
 
 /**
  * Primary Repository Workspace Navigation Tabs:
- * Centered around active collaboration: Overview, Issues, Discussions, Artifacts.
+ * Centered around active collaboration: Overview, Issues, Discussions, 個成果.
  */
 enum class RepoWorkspaceTab(val label: String, val icon: ImageVector) {
-    OVERVIEW("Overview", Icons.Default.Dashboard),
-    ISSUES("Issues", Icons.Default.TaskAlt),
-    DISCUSSIONS("Discussions", Icons.Default.Forum),
-    ARTIFACTS("Artifacts", Icons.Default.Description)
+    OVERVIEW("總覽", Icons.Default.Dashboard),
+    ISSUES("任務", Icons.Default.TaskAlt),
+    DISCUSSIONS("討論", Icons.Default.Forum),
+    ARTIFACTS("成果", Icons.Default.Description)
 }
 
 /**
  * Repository Governance Settings Subsections:
- * General, Access & Members, Policies, Audit.
+ * General, Access & 個成員, Policies, Audit.
  */
 enum class RepoSettingsSection(val label: String, val icon: ImageVector) {
-    GENERAL("General", Icons.Default.Info),
-    ACCESS("Access & Members", Icons.Default.Groups),
-    POLICIES("Policies", Icons.Default.Policy),
-    AUDIT("Audit", Icons.Default.History)
+    GENERAL("一般", Icons.Default.Info),
+    ACCESS("存取與成員", Icons.Default.Groups),
+    POLICIES("政策", Icons.Default.Policy),
+    AUDIT("稽核", Icons.Default.History)
 }
 
 @Composable
@@ -212,7 +212,7 @@ fun RepoDetailScreen(
     onAddDependency: (repoId: String, blockedIssueId: String, blockingIssueId: String, () -> Unit) -> Unit = { _, _, _, _ -> },
     onRemoveDependency: (dependencyId: String, () -> Unit) -> Unit = { _, _ -> },
     onAddIssueComment: (issueId: String, content: String, () -> Unit) -> Unit = { _, _, _ -> },
-    onUpdateIssueStatus: (issueId: String, newStatus: IssueStatus) -> Unit = { _, _ -> },
+    onUpdateIssue狀態：(issueId: String, new狀態：IssueStatus) -> Unit = { _, _ -> },
     onAssignIssue: (issueId: String, assigneeType: GranteeType?, assigneeId: String?, assigneeName: String?) -> Unit = { _, _, _, _ -> },
     onLoadIssueComments: (issueId: String) -> Unit = {},
     onCreateDiscussion: (title: String, category: DiscussionCategory, body: String, () -> Unit) -> Unit = { _, _, _, _ -> },
@@ -253,7 +253,7 @@ fun RepoDetailScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             if (!inSettingsMode) {
                 // =========================================================================
-                // 1. WORKSPACE HEADER & PRIMARY TABS (Overview, Issues, Discussions, Artifacts)
+                // 1. WORKSPACE HEADER & PRIMARY TABS (Overview, Issues, Discussions, 個成果)
                 // =========================================================================
                 RepoWorkspaceHeader(
                     repo = repo,
@@ -376,7 +376,7 @@ fun RepoDetailScreen(
                         onLoadComments = onLoadDiscussionComments
                     )
 
-                    RepoWorkspaceTab.ARTIFACTS -> ArtifactsTabContent(
+                    RepoWorkspaceTab.ARTIFACTS -> 個成果TabContent(
                         artifacts = artifacts,
                         onSelectArtifact = onSelectArtifact,
                         canCreateArtifact = canCreateArtifact,
@@ -385,7 +385,7 @@ fun RepoDetailScreen(
                 }
             } else {
                 // =========================================================================
-                // 2. CONTEXTUAL REPOSITORY GOVERNANCE SETTINGS (General, Access & Members, Policies, Audit)
+                // 2. CONTEXTUAL REPOSITORY GOVERNANCE SETTINGS (General, Access & 個成員, Policies, Audit)
                 // =========================================================================
                 RepoSettingsHeader(
                     repo = repo,
@@ -477,7 +477,7 @@ fun RepoDetailScreen(
             }
         }
 
-        // Floating Action Button (Only on Artifacts tab in workspace mode when Collaborator+)
+        // Floating Action Button (Only on 個成果 tab in workspace mode when Collaborator+)
         if (!inSettingsMode && selectedWorkspaceTab == RepoWorkspaceTab.ARTIFACTS && canCreateArtifact) {
             FloatingActionButton(
                 onClick = { showCreateArtifactDialog = true },
@@ -494,8 +494,8 @@ fun RepoDetailScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add No-Code Artifact")
-                    Text("New Blueprint", fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Add, contentDescription = "新增無程式碼成果")
+                    Text("新增藍圖", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -560,11 +560,11 @@ fun RepoWorkspaceHeader(
                         onClick = onBack,
                         modifier = Modifier.size(32.dp).testTag("back_to_repos_button")
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = LavenderPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回", tint = LavenderPrimary)
                     }
 
                     Text(
-                        text = "${enterprise?.name ?: "Enterprise"} > ${repo.ownerDisplayName}",
+                        text = "${enterprise?.name ?: "企業"} > ${repo.ownerDisplayName}",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis,
                         maxLines = 1,
@@ -579,7 +579,7 @@ fun RepoWorkspaceHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Repository Settings",
+                        contentDescription = "儲存庫設定",
                         tint = LavenderPrimary
                     )
                 }
@@ -623,7 +623,7 @@ fun RepoWorkspaceHeader(
                 OwnerTypeTag(ownerType = repo.ownerType, ownerDisplayName = repo.ownerDisplayName)
 
                 Text(
-                    text = "Role via: $roleSource",
+                    text = "角色來源：$roleSource",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis,
                     maxLines = 1
@@ -658,7 +658,7 @@ fun RepoSettingsHeader(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back to Repository Workspace",
+                        contentDescription = "返回儲存庫工作區",
                         tint = LavenderPrimary
                     )
                 }
@@ -675,7 +675,7 @@ fun RepoSettingsHeader(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "Repository Settings",
+                            text = "儲存庫設定",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
@@ -763,7 +763,7 @@ fun RepoOverviewSection(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = "Repository Purpose & Scope",
+                                text = "儲存庫目的與範圍",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.SemiBold,
                                     letterSpacing = 0.5.sp
@@ -777,7 +777,7 @@ fun RepoOverviewSection(
                             color = SophisticatedContainer
                         ) {
                             Text(
-                                text = "${repo.ownerType.name} OWNED",
+                                text = "${repo.ownerType.name} 擁有",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
                                 color = TextMediumEmphasis,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -810,14 +810,14 @@ fun RepoOverviewSection(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = "Approver Quorum: ${repo.requiredApproverCount} Sign-off${if (repo.requiredApproverCount > 1) "s" else ""}",
+                                text = "核准門檻：${repo.requiredApproverCount} 個簽核${if (repo.requiredApproverCount > 1) "s" else ""}",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                 color = EmeraldSuccess
                             )
                         }
 
                         Text(
-                            text = "Scope: ${enterprise?.name ?: "Enterprise"}",
+                            text = "範圍：${enterprise?.name ?: "企業"}",
                             style = MaterialTheme.typography.labelSmall,
                             color = TextLowEmphasis
                         )
@@ -856,7 +856,7 @@ fun RepoOverviewSection(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Your Effective Access",
+                                text = "你的有效存取權限",
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = TextHighEmphasis
                             )
@@ -885,7 +885,7 @@ fun RepoOverviewSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Resolved via: $roleSource",
+                            text = "解析來源：$roleSource",
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                             color = TextLowEmphasis
                         )
@@ -896,7 +896,7 @@ fun RepoOverviewSection(
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                                 modifier = Modifier.height(28.dp)
                             ) {
-                                Text("Manage Access", color = LavenderPrimary, fontSize = 11.sp)
+                                Text("管理存取", color = LavenderPrimary, fontSize = 11.sp)
                             }
                         }
                     }
@@ -911,7 +911,7 @@ fun RepoOverviewSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OverviewMetricBox(
-                    label = "Artifacts",
+                    label = "成果",
                     count = artifacts.size,
                     icon = Icons.Default.Description,
                     accentColor = LavenderPrimary,
@@ -927,7 +927,7 @@ fun RepoOverviewSection(
                     onClick = { onNavigateToTab(RepoWorkspaceTab.ISSUES) }
                 )
                 OverviewMetricBox(
-                    label = "Discussions",
+                    label = "討論",
                     count = discussions.size,
                     icon = Icons.Default.Forum,
                     accentColor = LavenderPrimary,
@@ -967,7 +967,7 @@ fun RepoOverviewSection(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "Pending Reviews & Approvals",
+                            text = "待審查與核准",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
@@ -979,7 +979,7 @@ fun RepoOverviewSection(
                             color = AmberWarning.copy(alpha = 0.15f)
                         ) {
                             Text(
-                                text = "${pendingArtifacts.size} ACTION REQUIRED",
+                                text = "${pendingArtifacts.size} 需處理",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold
@@ -1013,12 +1013,12 @@ fun RepoOverviewSection(
                             )
                             Column {
                                 Text(
-                                    text = "All Blueprints Up to Date",
+                                    text = "所有藍圖皆為最新",
                                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                                     color = TextHighEmphasis
                                 )
                                 Text(
-                                    text = "No pending peer reviews or approval quorum sign-offs required.",
+                                    text = "目前沒有待處理的同儕審查或核准門檻簽核。",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = TextMediumEmphasis
                                 )
@@ -1068,7 +1068,7 @@ fun RepoOverviewSection(
                                         Spacer(modifier = Modifier.height(2.dp))
 
                                         Text(
-                                            text = "By ${artifact.authorDisplayName} • Type: ${artifact.type.label}",
+                                            text = "由 ${artifact.authorDisplayName} • 類型：${artifact.type.label}",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = TextMediumEmphasis
                                         )
@@ -1083,7 +1083,7 @@ fun RepoOverviewSection(
             }
         }
 
-        // 5. Important Blueprints & Artifacts Section
+        // 5. Important Blueprints & 個成果 Section
         item {
             Column(
                 modifier = Modifier.fillMaxWidth().testTag("repo_overview_artifacts_section"),
@@ -1095,12 +1095,12 @@ fun RepoOverviewSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Important Blueprints & Specs",
+                        text = "重要藍圖與規格",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     TextButton(onClick = { onNavigateToTab(RepoWorkspaceTab.ARTIFACTS) }) {
-                        Text("View All (${artifacts.size})", color = LavenderPrimary, fontSize = 12.sp)
+                        Text("查看全部（${artifacts.size})", color = LavenderPrimary, fontSize = 12.sp)
                     }
                 }
 
@@ -1112,7 +1112,7 @@ fun RepoOverviewSection(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "No blueprints created yet. Switch to Artifacts tab to create specifications, workflows, or schemas.",
+                            text = "尚未建立藍圖；請切換至成果分頁建立規格、工作流程或資料結構。",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis,
                             modifier = Modifier.padding(16.dp)
@@ -1144,12 +1144,12 @@ fun RepoOverviewSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Open Action Items",
+                        text = "未完成行動項目",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     TextButton(onClick = { onNavigateToTab(RepoWorkspaceTab.ISSUES) }) {
-                        Text("View All (${issues.size})", color = LavenderPrimary, fontSize = 12.sp)
+                        Text("查看全部（${issues.size})", color = LavenderPrimary, fontSize = 12.sp)
                     }
                 }
 
@@ -1161,7 +1161,7 @@ fun RepoOverviewSection(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "No open action items. Everything is on track.",
+                            text = "目前沒有未完成的行動項目，進度正常。",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis,
                             modifier = Modifier.padding(16.dp)
@@ -1204,7 +1204,7 @@ fun RepoOverviewSection(
                                                     color = AmberWarning.copy(alpha = 0.2f)
                                                 ) {
                                                     Text(
-                                                        text = "BLOCKED",
+                                                        text = "受阻",
                                                         style = MaterialTheme.typography.labelSmall.copy(
                                                             fontSize = 8.sp,
                                                             fontWeight = FontWeight.Bold
@@ -1219,7 +1219,7 @@ fun RepoOverviewSection(
                                         Spacer(modifier = Modifier.height(2.dp))
 
                                         Text(
-                                            text = if (issue.assigneeName != null) "Assigned: ${issue.assigneeName}" else "Unassigned",
+                                            text = if (issue.assigneeName != null) "Assigned: ${issue.assigneeName}" else "未指派",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = TextMediumEmphasis
                                         )
@@ -1266,12 +1266,12 @@ fun RepoOverviewSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Active Discussions & RFCs",
+                        text = "進行中的討論與 RFC",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     TextButton(onClick = { onNavigateToTab(RepoWorkspaceTab.DISCUSSIONS) }) {
-                        Text("View All (${discussions.size})", color = LavenderPrimary, fontSize = 12.sp)
+                        Text("查看全部（${discussions.size})", color = LavenderPrimary, fontSize = 12.sp)
                     }
                 }
 
@@ -1283,7 +1283,7 @@ fun RepoOverviewSection(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "No discussions started yet. Start an RFC or proposal in the Discussions tab.",
+                            text = "尚未開始討論；請在討論分頁建立 RFC 或提案。",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis,
                             modifier = Modifier.padding(16.dp)
@@ -1339,7 +1339,7 @@ fun RepoOverviewSection(
                                         Spacer(modifier = Modifier.height(2.dp))
 
                                         Text(
-                                            text = "By ${discussion.authorDisplayName} • ${discussion.upvoteCount} upvotes",
+                                            text = "由 ${discussion.authorDisplayName} • ${discussion.upvoteCount} 票贊成",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = TextMediumEmphasis
                                         )
@@ -1362,7 +1362,7 @@ fun RepoOverviewSection(
                                                     modifier = Modifier.size(12.dp)
                                                 )
                                                 Text(
-                                                    text = "ANSWERED",
+                                                    text = "已回答",
                                                     style = MaterialTheme.typography.labelSmall.copy(
                                                         fontSize = 8.sp,
                                                         fontWeight = FontWeight.Bold
@@ -1402,14 +1402,14 @@ fun RepoOverviewSection(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "Recent Activity",
+                            text = "最近活動",
                             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                             color = TextHighEmphasis
                         )
                     }
 
                     TextButton(onClick = { onNavigateToSettings(RepoSettingsSection.AUDIT) }) {
-                        Text("View Full Trail", color = LavenderPrimary, fontSize = 12.sp)
+                        Text("查看完整軌跡", color = LavenderPrimary, fontSize = 12.sp)
                     }
                 }
 
@@ -1421,7 +1421,7 @@ fun RepoOverviewSection(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "No recent activity recorded yet.",
+                            text = "尚無近期活動紀錄。",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextMediumEmphasis,
                             modifier = Modifier.padding(16.dp)
@@ -1564,7 +1564,7 @@ fun RepoGeneralSettingsContent(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text(
-            text = "General Container Information",
+            text = "一般容器資訊",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = TextHighEmphasis
         )
@@ -1581,19 +1581,19 @@ fun RepoGeneralSettingsContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SettingsInfoRow("Display Name", repo.displayName)
+                SettingsInfoRow("顯示名稱", repo.displayName)
                 SettingsInfoRow("Identifier", repo.name)
                 SettingsInfoRow("Owner Type", repo.ownerType.displayName())
                 SettingsInfoRow("Owner Name", repo.ownerDisplayName)
-                SettingsInfoRow("Effective Role", effectiveRole.name)
-                SettingsInfoRow("Role Source", roleSource)
+                SettingsInfoRow("有效角色", effectiveRole.name)
+                SettingsInfoRow("角色來源", roleSource)
                 SettingsInfoRow("Created On", SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(repo.createdAt)))
                 SettingsInfoRow("Last Modified", SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(repo.updatedAt)))
             }
         }
 
         Text(
-            text = "Container Resource Summary",
+            text = "容器資源摘要",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             color = TextHighEmphasis
         )
@@ -1635,7 +1635,7 @@ fun SettingsInfoRow(label: String, value: String) {
 // ARTIFACTS TAB CONTENT
 // =========================================================================
 @Composable
-fun ArtifactsTabContent(
+fun 個成果TabContent(
     artifacts: List<NoCodeArtifact>,
     onSelectArtifact: (NoCodeArtifact) -> Unit,
     canCreateArtifact: Boolean = false,
@@ -1659,7 +1659,7 @@ fun ArtifactsTabContent(
                     modifier = Modifier.size(36.dp)
                 )
                 Text(
-                    text = "No blueprints or documents created yet in this container.",
+                    text = "此容器尚未建立藍圖或文件。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextMediumEmphasis,
                     textAlign = TextAlign.Center
@@ -1672,7 +1672,7 @@ fun ArtifactsTabContent(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Create Blueprint", fontWeight = FontWeight.Bold)
+                        Text("建立藍圖", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1771,7 +1771,7 @@ fun ArtifactCardItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Author: ${artifact.authorDisplayName} • ${artifact.version}",
+                    text = "作者：${artifact.authorDisplayName} • ${artifact.version}",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextLowEmphasis
                 )
@@ -1781,8 +1781,8 @@ fun ArtifactCardItem(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(Icons.Default.Lock, contentDescription = "Locked", tint = EmeraldSuccess, modifier = Modifier.size(14.dp))
-                        Text("Locked", style = MaterialTheme.typography.labelSmall, color = EmeraldSuccess)
+                        Icon(Icons.Default.Lock, contentDescription = "已鎖定", tint = EmeraldSuccess, modifier = Modifier.size(14.dp))
+                        Text("已鎖定", style = MaterialTheme.typography.labelSmall, color = EmeraldSuccess)
                     }
                 }
             }
@@ -1815,12 +1815,12 @@ fun AccessHierarchyTabContent(
             ) {
                 Column {
                     Text(
-                        text = "Collaborators & Team Access Mappings",
+                        text = "協作者與團隊存取映射",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = TextHighEmphasis
                     )
                     Text(
-                        text = "Hierarchical permissions mapped to Users and Teams",
+                        text = "映射至使用者與團隊的階層權限",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextMediumEmphasis
                     )
@@ -1835,7 +1835,7 @@ fun AccessHierarchyTabContent(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Assign Role", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("指派角色", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1850,7 +1850,7 @@ fun AccessHierarchyTabContent(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "No explicit access rules configured for this container.",
+                        text = "此容器尚未設定明確的存取規則。",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextMediumEmphasis,
                         modifier = Modifier.padding(16.dp)
@@ -1937,7 +1937,7 @@ fun AccessRuleCardItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Remove Role",
+                            contentDescription = "移除角色",
                             tint = RoseError,
                             modifier = Modifier.size(16.dp)
                         )
@@ -1961,7 +1961,7 @@ fun PoliciesTabContent(repo: Repository, enterprise: Enterprise?) {
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text(
-            text = "Repository Hierarchical Governance Policies",
+            text = "儲存庫階層治理政策",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = TextHighEmphasis
         )
@@ -1992,7 +1992,7 @@ fun PoliciesTabContent(repo: Repository, enterprise: Enterprise?) {
 
         PolicySettingCard(
             title = "Enterprise Owner Constraint",
-            description = "Strictly enforces that only an Organization or User can be assigned as the Owner of this container. Teams cannot own repositories.",
+            description = "Strictly enforces that only an Organization or User can be assigned as the Owner of this container. 個團隊 cannot own repositories.",
             isActive = true,
             icon = Icons.Default.Lock,
             accentColor = CyanAccent
@@ -2090,7 +2090,7 @@ fun RepoAuditTabContent(repo: Repository, auditLogs: List<AuditLog>) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No audit log events recorded for this repository yet.",
+                text = "此儲存庫尚無稽核事件紀錄。",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextMediumEmphasis
             )
@@ -2140,7 +2140,7 @@ fun RepoAuditTabContent(repo: Repository, auditLogs: List<AuditLog>) {
                         )
 
                         Text(
-                            text = "Actor: ${log.actorDisplayName} • $dateStr",
+                            text = "執行者：${log.actorDisplayName} • $dateStr",
                             style = MaterialTheme.typography.labelSmall,
                             color = TextLowEmphasis
                         )
@@ -2195,7 +2195,7 @@ fun CreateArtifactDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "New No-Code Artifact / Blueprint",
+                    text = "新增無程式碼成果／藍圖",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2203,13 +2203,13 @@ fun CreateArtifactDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Artifact Title") },
+                    label = { Text("成果標題") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("artifact_title_input")
                 )
 
                 Text(
-                    text = "Artifact Schema Type",
+                    text = "成果結構類型",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextMediumEmphasis
                 )
@@ -2247,7 +2247,7 @@ fun CreateArtifactDialog(
                 OutlinedTextField(
                     value = summary,
                     onValueChange = { summary = it },
-                    label = { Text("Executive Summary") },
+                    label = { Text("摘要") },
                     maxLines = 2,
                     modifier = Modifier.fillMaxWidth().testTag("artifact_summary_input")
                 )
@@ -2255,7 +2255,7 @@ fun CreateArtifactDialog(
                 OutlinedTextField(
                     value = structuredContent,
                     onValueChange = { structuredContent = it },
-                    label = { Text("Structured No-Code Blueprint (JSON / Schema)") },
+                    label = { Text("結構化無程式碼藍圖（JSON／Schema）") },
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth().testTag("artifact_content_input")
                 )
@@ -2266,7 +2266,7 @@ fun CreateArtifactDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel", color = TextMediumEmphasis)
+                        Text("取消", color = TextMediumEmphasis)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -2280,7 +2280,7 @@ fun CreateArtifactDialog(
                         enabled = title.isNotBlank(),
                         modifier = Modifier.testTag("submit_create_artifact_button")
                     ) {
-                        Text("Create Draft", fontWeight = FontWeight.Bold)
+                        Text("建立草稿", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -2324,7 +2324,7 @@ fun AddAccessRuleDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Assign Access Role",
+                    text = "指派存取角色",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextHighEmphasis
                 )
@@ -2346,7 +2346,7 @@ fun AddAccessRuleDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("User Entity")
+                        Text("使用者實體")
                     }
 
                     Button(
@@ -2361,12 +2361,12 @@ fun AddAccessRuleDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Team Entity")
+                        Text("團隊實體")
                     }
                 }
 
                 // Grantee Selection List
-                Text("Select ${selectedGranteeType.name}", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                Text("選擇 ${selectedGranteeType.name}", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (selectedGranteeType == GranteeType.USER) {
                         allUsers.forEach { u ->
@@ -2414,7 +2414,7 @@ fun AddAccessRuleDialog(
                 }
 
                 // Role Selection
-                Text("Assign Hierarchical Role", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
+                Text("指派階層角色", style = MaterialTheme.typography.labelSmall, color = TextMediumEmphasis)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     listOf(
                         RepoRole.MAINTAINER,
@@ -2451,7 +2451,7 @@ fun AddAccessRuleDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel", color = TextMediumEmphasis) }
+                    TextButton(onClick = onDismiss) { Text("取消", color = TextMediumEmphasis) }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
@@ -2462,7 +2462,7 @@ fun AddAccessRuleDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = LavenderPrimary, contentColor = LavenderOnPrimary),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Grant Role", fontWeight = FontWeight.Bold)
+                        Text("授予角色", fontWeight = FontWeight.Bold)
                     }
                 }
             }

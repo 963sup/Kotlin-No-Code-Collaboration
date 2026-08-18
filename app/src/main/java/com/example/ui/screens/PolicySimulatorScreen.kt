@@ -135,12 +135,12 @@ fun PolicySimulatorScreen(
                     Icon(Icons.Default.Policy, contentDescription = null, tint = IndigoLight, modifier = Modifier.size(24.dp))
                     Column {
                         Text(
-                            text = "Access Policy Engine & Simulator",
+                            text = "存取政策引擎與模擬器",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = Color.White
                         )
                         Text(
-                            text = "Reverse-Engineered GitHub Enterprise Access Control Semantics",
+                            text = "逆向 GitHub Enterprise 的存取控制語意",
                             style = MaterialTheme.typography.labelSmall,
                             color = CyanAccent
                         )
@@ -174,13 +174,13 @@ fun PolicySimulatorScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Live Access Evaluation Inspector",
+                    text = "即時存取評估檢視器",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
 
                 Text(
-                    text = "Simulate how enterprise policies, team inheritances, and segregation of duties resolve for any combination of Actor, Repository, and Action.",
+                    text = "模擬企業政策、團隊繼承與職責分離如何針對任意執行者、儲存庫與動作產生最終判定。",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF94A3B8)
                 )
@@ -194,7 +194,7 @@ fun PolicySimulatorScreen(
                         value = "${selectedActor?.displayName ?: ""} (${selectedActor?.title ?: ""})",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Actor (User Persona)") },
+                        label = { Text("執行者（使用者身分）") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actorExpanded) },
                         modifier = Modifier
                             .menuAnchor()
@@ -228,7 +228,7 @@ fun PolicySimulatorScreen(
                         value = "${selectedRepo?.displayName ?: ""} [${selectedRepo?.ownerType?.displayName() ?: ""}]",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Target Repository Container") },
+                        label = { Text("目標儲存庫容器") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repoExpanded) },
                         modifier = Modifier
                             .menuAnchor()
@@ -263,7 +263,7 @@ fun PolicySimulatorScreen(
                         value = selectedArtifact?.title ?: "None (Evaluate on Repository Scope)",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Target No-Code Artifact (Optional)") },
+                        label = { Text("目標無程式碼成果（選填）") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = artifactExpanded) },
                         modifier = Modifier
                             .menuAnchor()
@@ -276,7 +276,7 @@ fun PolicySimulatorScreen(
                         modifier = Modifier.background(SlateDark900)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("None (Repository Scope)", color = Color.White) },
+                            text = { Text("無（儲存庫範圍）", color = Color.White) },
                             onClick = {
                                 selectedArtifactId = ""
                                 artifactExpanded = false
@@ -303,7 +303,7 @@ fun PolicySimulatorScreen(
                         value = "${selectedAction.label} (Requires ${selectedAction.minimumRole.name}+)",
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Governance Action to Test") },
+                        label = { Text("要測試的治理動作") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded) },
                         modifier = Modifier
                             .menuAnchor()
@@ -318,7 +318,7 @@ fun PolicySimulatorScreen(
                     ) {
                         GovernanceAction.values().forEach { act ->
                             DropdownMenuItem(
-                                text = { Text("${act.label} (Min: ${act.minimumRole.name})", color = Color.White) },
+                                text = { Text("${act.label} (最低：${act.minimumRole.name})", color = Color.White) },
                                 onClick = {
                                     selectedAction = act
                                     actionExpanded = false
@@ -342,7 +342,7 @@ fun PolicySimulatorScreen(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Evaluate Access Policy", fontWeight = FontWeight.Bold)
+                    Text("評估存取政策", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -378,14 +378,14 @@ fun SchemaHierarchyVisualizer() {
             ) {
                 Icon(Icons.Default.AccountTree, contentDescription = null, tint = CyanAccent, modifier = Modifier.size(20.dp))
                 Text(
-                    text = "Hierarchy & Entity Schema Mapping",
+                    text = "階層與實體結構映射",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
             }
 
             Text(
-                text = "Strict structural constraints reverse-engineered from GitHub enterprise governance:",
+                text = "由 GitHub 企業治理逆向整理出的嚴格結構限制：",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color(0xFF94A3B8)
             )
@@ -393,7 +393,7 @@ fun SchemaHierarchyVisualizer() {
             // Entity Tree Nodes
             SchemaNodeItem(
                 level = 1,
-                entity = "Enterprise",
+                entity = "企業",
                 roleScope = "Admin, Compliance Auditor",
                 detail = "Root governance scope; enforces mandatory dual approver & segregation policies across all child Orgs.",
                 color = PurpleGlow
@@ -401,9 +401,9 @@ fun SchemaHierarchyVisualizer() {
 
             SchemaNodeItem(
                 level = 2,
-                entity = "Organization",
+                entity = "組織",
                 roleScope = "Org Owner, Admin, Member, Billing",
-                detail = "Primary container; CAN Owner Repositories. Groups Teams and inherits base permissions.",
+                detail = "Primary container; CAN Owner Repositories. Groups 個團隊 and inherits base permissions.",
                 color = IndigoLight
             )
 
@@ -433,7 +433,7 @@ fun SchemaHierarchyVisualizer() {
 
             SchemaNodeItem(
                 level = 5,
-                entity = "No-Code Artifacts",
+                entity = "無程式碼成果",
                 roleScope = "Draft -> In Review -> Pending Sign-Off -> Published",
                 detail = "Workflows, RFC Specs, Decision Records, Form Schemas, Milestone Releases.",
                 color = Color(0xFFA5F3FC)
@@ -446,7 +446,7 @@ fun SchemaHierarchyVisualizer() {
 fun SchemaNodeItem(
     level: Int,
     entity: String,
-    roleScope: String,
+    role範圍：String,
     detail: String,
     color: Color
 ) {
@@ -526,14 +526,14 @@ fun EnterprisePolicyControlsCard(
             ) {
                 Icon(Icons.Default.Security, contentDescription = null, tint = IndigoLight, modifier = Modifier.size(20.dp))
                 Text(
-                    text = "Enterprise Compliance Guardrails",
+                    text = "企業守規護欄",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )
             }
 
             Text(
-                text = "These global policies cascade strictly down to all Organizations, Teams, and Repositories:",
+                text = "這些全域政策會嚴格向下套用至所有組織、團隊與儲存庫：",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color(0xFF94A3B8)
             )
@@ -550,7 +550,7 @@ fun EnterprisePolicyControlsCard(
             )
 
             PolicySwitchRow(
-                title = "Allow User-Owned Repositories",
+                title = "允許使用者擁有儲存庫",
                 subtitle = "If disabled, only Organizations are allowed to own repository workspaces.",
                 checked = allowUserRepos,
                 onCheckedChange = {

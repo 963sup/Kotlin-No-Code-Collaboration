@@ -75,29 +75,29 @@ internal data class NestedTaskProgress(val total: Int, val closed: Int)
 /** RepoIssue.parentIssueId is already the canonical recursive task relationship. */
 internal fun flattenNestedTasks(issues: List<RepoIssue>): List<NestedTaskRow> {
     if (issues.isEmpty()) return emptyList()
-    val byId = issues.associateBy { it.id }
-    val children = issues.groupBy { it.parentIssueId }
+    val byId = issues.associate由 { it.id }
+    val children = issues.group由 { it.parentIssueId }
     val result = mutableListOf<NestedTaskRow>()
     val visited = mutableSetOf<String>()
 
     fun visit(issue: RepoIssue, depth: Int) {
         if (!visited.add(issue.id)) return
         result += NestedTaskRow(issue, depth)
-        children[issue.id].orEmpty().sortedBy { it.issueNumber }.forEach { visit(it, depth + 1) }
+        children[issue.id].orEmpty().sorted由 { it.issueNumber }.forEach { visit(it, depth + 1) }
     }
 
     issues
         .filter { it.parentIssueId == null || it.parentIssueId !in byId }
-        .sortedBy { it.issueNumber }
+        .sorted由 { it.issueNumber }
         .forEach { visit(it, 0) }
 
     // Keep malformed cyclic/unreachable records visible exactly once instead of recursing forever.
-    issues.sortedBy { it.issueNumber }.filterNot { it.id in visited }.forEach { visit(it, 0) }
+    issues.sorted由 { it.issueNumber }.filterNot { it.id in visited }.forEach { visit(it, 0) }
     return result
 }
 
 internal fun nestedTaskProgress(issueId: String, issues: List<RepoIssue>): NestedTaskProgress {
-    val children = issues.groupBy { it.parentIssueId }
+    val children = issues.group由 { it.parentIssueId }
     val visited = mutableSetOf(issueId)
     var total = 0
     var closed = 0
@@ -128,16 +128,16 @@ private fun nextStatus(status: IssueStatus) = when (status) {
 }
 
 private fun boardLabel(status: IssueStatus) = when (status) {
-    IssueStatus.OPEN -> "To do"
-    IssueStatus.IN_PROGRESS -> "In progress"
-    IssueStatus.CLOSED -> "Done"
+    IssueStatus.OPEN -> "待處理"
+    IssueStatus.IN_PROGRESS -> "進行中"
+    IssueStatus.CLOSED -> "已完成"
 }
 
 @Composable
 fun RepositoryWorkBoardDialog(
     repo: Repository,
     issues: List<RepoIssue>,
-    onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+    onUpdateIssue狀態：(String, IssueStatus) -> Unit,
     onDismiss: () -> Unit
 ) {
     var view by remember { mutableStateOf(RepositoryWorkView.KANBAN) }
@@ -177,11 +177,11 @@ private fun BoardHeader(repo: Repository, issues: List<RepoIssue>, onDismiss: ()
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text(repo.displayName, fontWeight = FontWeight.Bold, color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${issues.size} tasks • ${issues.count { it.parentIssueId != null }} nested", color = TextMediumEmphasis, fontSize = 12.sp)
+                Text("${issues.size} 個任務 • ${issues.count { it.parentIssueId != null }} 個巢狀任務", color = TextMediumEmphasis, fontSize = 12.sp)
             }
         }
         IconButton(onClick = onDismiss, modifier = Modifier.size(48.dp).testTag("close_repository_work_board")) {
-            Icon(Icons.Default.Close, "Close work board", tint = TextHighEmphasis)
+            Icon(Icons.Default.Close, "關閉工作看板", tint = TextHighEmphasis)
         }
     }
 }
@@ -194,14 +194,14 @@ private fun ViewSelector(selected: RepositoryWorkView, onSelect: (RepositoryWork
     ) {
         ViewButton(
             selected = selected == RepositoryWorkView.KANBAN,
-            label = "Kanban Board",
+            label = "工作看板",
             icon = { Icon(Icons.Default.Dashboard, null, Modifier.size(18.dp)) },
             tag = "work_view_kanban",
             modifier = Modifier.weight(1f)
         ) { onSelect(RepositoryWorkView.KANBAN) }
         ViewButton(
             selected = selected == RepositoryWorkView.NESTED,
-            label = "Nested Tasks",
+            label = "巢狀任務",
             icon = { Icon(Icons.Default.AccountTree, null, Modifier.size(18.dp)) },
             tag = "work_view_nested",
             modifier = Modifier.weight(1f)
@@ -228,7 +228,7 @@ private fun ViewButton(
 
 @Composable
 private fun KanbanBoard(issues: List<RepoIssue>, onUpdate: (String, IssueStatus) -> Unit) {
-    if (issues.isEmpty()) return EmptyState("#", "No tasks yet", "Create an Issue in this Repository; it will appear here automatically.")
+    if (issues.isEmpty()) return EmptyState("#", "尚無任務", "在此儲存庫建立任務後，會自動顯示於工作看板。")
     LazyRow(
         Modifier.fillMaxSize().padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -238,7 +238,7 @@ private fun KanbanBoard(issues: List<RepoIssue>, onUpdate: (String, IssueStatus)
             val columnIssues = issues.filter { it.status == status }.sortedWith(
                 compareByDescending<RepoIssue> { it.priority == IssuePriority.CRITICAL }
                     .thenByDescending { it.priority == IssuePriority.HIGH }
-                    .thenBy { it.issueNumber }
+                    .then由 { it.issueNumber }
             )
             KanbanColumn(status, columnIssues, issues, onUpdate)
         }
@@ -282,7 +282,7 @@ private fun KanbanColumn(
 @Composable
 private fun NestedTasks(issues: List<RepoIssue>, onUpdate: (String, IssueStatus) -> Unit) {
     val rows = remember(issues) { flattenNestedTasks(issues) }
-    if (rows.isEmpty()) return EmptyState("↳", "No nested tasks yet", "Create sub-issues in Issues to build the hierarchy.")
+    if (rows.isEmpty()) return EmptyState("↳", "尚無巢狀任務", "請在任務中建立子任務以形成階層。")
     LazyColumn(
         Modifier.fillMaxSize().padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -321,13 +321,13 @@ private fun TaskCard(
                 )
                 Spacer(Modifier.width(8.dp)); Priority(issue.priority)
             }
-            issue.parentIssueTitle?.let { Text("Parent: $it", color = LavenderGlow, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            issue.parentIssueTitle?.let { Text("上層任務：$it", color = LavenderGlow, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             if (progress.total > 0) Text(
-                "Nested: ${progress.closed}/${progress.total} complete",
+                "巢狀任務：${progress.closed}/${progress.total} 已完成",
                 color = if (progress.closed == progress.total) EmeraldSuccess else TextMediumEmphasis,
                 fontSize = 11.sp
             )
-            Text("${issue.assigneeName ?: "Unassigned"} • ${issue.labels.ifBlank { "No labels" }}", color = TextMediumEmphasis, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("${issue.assigneeName ?: "未指派"} • ${issue.labels.ifBlank { "無標籤" }}", color = TextMediumEmphasis, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             MoveActions(issue, onUpdate)
         }
     }

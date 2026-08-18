@@ -20,18 +20,18 @@ enum class OwnerType {
     USER;
 
     fun displayName(): String = when (this) {
-        ORGANIZATION -> "Organization"
-        USER -> "User"
+        ORGANIZATION -> "組織"
+        USER -> "使用者"
     }
 }
 
 enum class RepoRole(val rank: Int, val description: String) {
-    VIEWER(1, "Read-only access to published artifacts and documents"),
-    COLLABORATOR(2, "Can create drafts, build no-code workflows, and submit proposals for review"),
-    REVIEWER(3, "Authorized to review proposals, submit change requests, and validate quality"),
-    APPROVER(4, "Sign-off authority for releases, workflow promotions, and artifact approvals"),
-    MAINTAINER(5, "Full access to repository settings, access mappings, and policy enforcement"),
-    OWNER(6, "Ultimate authority over repository lifecycle, policy overrides, and ownership transfer");
+    VIEWER(1, "僅能檢視已發布的成果與文件"),
+    COLLABORATOR(2, "可建立草稿、無程式碼工作流程並送出審查"),
+    REVIEWER(3, "可審查提案、要求修改並驗證品質"),
+    APPROVER(4, "可對發布、工作流程提升與成果進行正式簽核"),
+    MAINTAINER(5, "可管理儲存庫設定、存取映射與政策執行"),
+    OWNER(6, "對儲存庫生命週期、政策例外與所有權移轉負最終權責");
 
     fun canPerform(requiredRole: RepoRole): Boolean = this.rank >= requiredRole.rank
 }
@@ -61,21 +61,21 @@ enum class GranteeType {
 }
 
 enum class ArtifactType(val label: String, val iconName: String) {
-    SPECIFICATION_DOC("Product Specification", "Description"),
-    PROCESS_WORKFLOW("No-Code Workflow", "AccountTree"),
-    DECISION_RECORD("Architecture Decision Record (RFC)", "Gavel"),
-    FORM_SCHEMA("Form & Data Schema", "DynamicForm"),
-    CANVAS_BOARD("Visual Process Canvas", "DashboardCustomize"),
-    MILESTONE_RELEASE("Milestone Release Gate", "Flag")
+    SPECIFICATION_DOC("產品規格", "說明"),
+    PROCESS_WORKFLOW("無程式碼工作流程", "AccountTree"),
+    DECISION_RECORD("決策紀錄（RFC）", "Gavel"),
+    FORM_SCHEMA("表單與資料結構", "DynamicForm"),
+    CANVAS_BOARD("視覺流程畫布", "DashboardCustomize"),
+    MILESTONE_RELEASE("里程碑發布關卡", "Flag")
 }
 
 enum class LifecycleState(val label: String) {
-    DRAFT("Draft"),
-    IN_REVIEW("In Review"),
-    PENDING_APPROVAL("Pending Sign-Off"),
-    APPROVED("Approved"),
-    PUBLISHED("Published & Locked"),
-    ARCHIVED("Archived")
+    DRAFT("草稿"),
+    IN_REVIEW("審查中"),
+    PENDING_APPROVAL("待簽核"),
+    APPROVED("已核准"),
+    PUBLISHED("已發布並鎖定"),
+    ARCHIVED("已封存")
 }
 
 enum class ReviewDecision {
@@ -90,25 +90,25 @@ enum class ApprovalStatus {
 }
 
 enum class IssueStatus(val label: String) {
-    OPEN("Open"),
-    IN_PROGRESS("In Progress"),
-    CLOSED("Closed")
+    OPEN("待處理"),
+    IN_PROGRESS("進行中"),
+    CLOSED("已完成")
 }
 
 enum class IssuePriority(val label: String) {
-    LOW("Low"),
-    MEDIUM("Medium"),
-    HIGH("High"),
-    CRITICAL("Critical")
+    LOW("低"),
+    MEDIUM("中"),
+    HIGH("高"),
+    CRITICAL("緊急")
 }
 
 enum class DiscussionCategory(val label: String, val iconName: String, val description: String) {
-    GENERAL("General", "Forum", "General community & repository discussions"),
-    RFC_PROPOSALS("RFC Proposals", "Gavel", "Formal blueprints, architecture, and schema proposals"),
-    ANNOUNCEMENTS("Announcements", "Campaign", "Official updates from repository maintainers and owners"),
-    IDEAS_AND_BRAINSTORM("Ideas & Brainstorm", "Lightbulb", "Collaborative brainstorms for no-code workflows"),
-    Q_AND_A("Q & A", "Help", "Ask questions and get verified answers"),
-    GOVERNANCE_DEBATE("Governance & Policy", "Policy", "Discussion on compliance gates, access roles, and audit rules")
+    GENERAL("一般", "Forum", "一般社群與儲存庫討論"),
+    RFC_PROPOSALS("RFC 提案", "Gavel", "正式藍圖、架構與結構提案"),
+    ANNOUNCEMENTS("公告", "Campaign", "由儲存庫維護者與擁有者發布的正式更新"),
+    IDEAS_AND_BRAINSTORM("想法與腦力激盪", "Lightbulb", "無程式碼工作流程的協作腦力激盪"),
+    Q_AND_A("問答", "Help", "提問並取得已驗證的回答"),
+    GOVERNANCE_DEBATE("治理與政策", "Policy", "討論守規關卡、存取角色與稽核規則")
 }
 
 enum class PolicyVerdict {
@@ -122,28 +122,28 @@ enum class PolicyVerdict {
 }
 
 enum class GovernanceAction(val label: String, val minimumRole: RepoRole) {
-    VIEW_ARTIFACT("View Artifact", RepoRole.VIEWER),
-    CREATE_DRAFT("Create No-Code Draft", RepoRole.COLLABORATOR),
-    EDIT_DRAFT("Edit No-Code Draft", RepoRole.COLLABORATOR),
-    SUBMIT_FOR_REVIEW("Submit for Peer Review", RepoRole.COLLABORATOR),
-    SUBMIT_REVIEW("Submit Formal Review", RepoRole.REVIEWER),
-    REQUEST_CHANGES("Request Artifact Changes", RepoRole.REVIEWER),
-    SUBMIT_FINAL_APPROVAL("Grant Approver Sign-Off", RepoRole.APPROVER),
-    PUBLISH_AND_LOCK("Publish & Lock Artifact", RepoRole.APPROVER),
-    MANAGE_ACCESS_RULES("Manage Collaborators & Roles", RepoRole.MAINTAINER),
-    UPDATE_REPO_POLICY("Update Repository Policies", RepoRole.MAINTAINER),
-    TRANSFER_OWNERSHIP("Transfer Repository Ownership", RepoRole.OWNER),
-    DELETE_REPOSITORY("Delete Repository", RepoRole.OWNER),
+    VIEW_ARTIFACT("查看成果", RepoRole.VIEWER),
+    CREATE_DRAFT("建立無程式碼草稿", RepoRole.COLLABORATOR),
+    EDIT_DRAFT("編輯無程式碼草稿", RepoRole.COLLABORATOR),
+    SUBMIT_FOR_REVIEW("送出同儕審查", RepoRole.COLLABORATOR),
+    SUBMIT_REVIEW("提交正式審查", RepoRole.REVIEWER),
+    REQUEST_CHANGES("要求修改成果", RepoRole.REVIEWER),
+    SUBMIT_FINAL_APPROVAL("核准人簽核", RepoRole.APPROVER),
+    PUBLISH_AND_LOCK("發布並鎖定成果", RepoRole.APPROVER),
+    MANAGE_ACCESS_RULES("管理協作者與角色", RepoRole.MAINTAINER),
+    UPDATE_REPO_POLICY("更新儲存庫政策", RepoRole.MAINTAINER),
+    TRANSFER_OWNERSHIP("移轉儲存庫所有權", RepoRole.OWNER),
+    DELETE_REPOSITORY("刪除儲存庫", RepoRole.OWNER),
     // Collaboration Features: Issues & Discussions
-    CREATE_ISSUE("Create Repository Issue", RepoRole.COLLABORATOR),
-    COMMENT_ISSUE("Comment on Issue", RepoRole.VIEWER),
-    ASSIGN_ISSUE("Assign Issue (User/Team)", RepoRole.COLLABORATOR),
-    CLOSE_ISSUE("Close/Reopen Issue", RepoRole.COLLABORATOR),
-    DELETE_ISSUE("Delete Issue", RepoRole.MAINTAINER),
-    CREATE_DISCUSSION("Create Discussion Thread", RepoRole.COLLABORATOR),
-    COMMENT_DISCUSSION("Reply to Discussion", RepoRole.VIEWER),
-    LOCK_DISCUSSION("Lock/Unlock Discussion", RepoRole.MAINTAINER),
-    ACCEPT_DISCUSSION_ANSWER("Mark Accepted Answer", RepoRole.COLLABORATOR)
+    CREATE_ISSUE("建立儲存庫任務", RepoRole.COLLABORATOR),
+    COMMENT_ISSUE("回覆任務", RepoRole.VIEWER),
+    ASSIGN_ISSUE("指派任務（使用者／團隊）", RepoRole.COLLABORATOR),
+    CLOSE_ISSUE("關閉／重開任務", RepoRole.COLLABORATOR),
+    DELETE_ISSUE("刪除任務", RepoRole.MAINTAINER),
+    CREATE_DISCUSSION("建立討論串", RepoRole.COLLABORATOR),
+    COMMENT_DISCUSSION("回覆討論", RepoRole.VIEWER),
+    LOCK_DISCUSSION("鎖定／解除鎖定討論", RepoRole.MAINTAINER),
+    ACCEPT_DISCUSSION_ANSWER("標記採納回答", RepoRole.COLLABORATOR)
 }
 
 // -------------------------------------------------------------
@@ -151,14 +151,14 @@ enum class GovernanceAction(val label: String, val minimumRole: RepoRole) {
 // -------------------------------------------------------------
 
 enum class NotificationCategory(val label: String, val description: String) {
-    REVIEW_REQUEST("Review Requests", "Peers requesting your formal review on artifacts or RFCs"),
-    APPROVAL_GATE("Approvals & Sign-offs", "Governance gates awaiting your cryptographic sign-off"),
-    ISSUE_ASSIGNMENT("Issue Assignments", "Repository issues assigned directly or to your team"),
-    MENTION_AND_REPLY("Mentions & Replies", "Direct @mentions and replies to your threads"),
-    ACCESS_CHANGE("Access & Permissions", "Direct repository collaborator grants and role updates"),
-    MEMBERSHIP_CHANGE("Org & Team Memberships", "Organization invitations and team assignment changes"),
-    PUBLICATION("Releases & Publications", "Artifact milestones published and locked"),
-    GOVERNANCE_EVENT("Governance & Policy Alerts", "Enterprise policy checks, dual-approval alerts, and compliance gates")
+    REVIEW_REQUEST("審查請求", "同儕要求你正式審查成果或 RFC"),
+    APPROVAL_GATE("核准與簽核", "等待你完成正式簽核的治理關卡"),
+    ISSUE_ASSIGNMENT("任務指派", "直接指派給你或你的團隊的儲存庫任務"),
+    MENTION_AND_REPLY("提及與回覆", "直接提及你或回覆你參與的討論串"),
+    ACCESS_CHANGE("存取與權限", "儲存庫協作者授權與角色更新"),
+    MEMBERSHIP_CHANGE("組織與團隊成員關係", "組織邀請與團隊指派異動"),
+    PUBLICATION("發布與公告", "成果里程碑已發布並鎖定"),
+    GOVERNANCE_EVENT("治理與政策警示", "企業政策檢查、雙重核准警示與守規關卡")
 }
 
 enum class NotificationStatus {
@@ -168,10 +168,10 @@ enum class NotificationStatus {
 }
 
 enum class NotificationPriority(val label: String) {
-    LOW("Low"),
-    NORMAL("Normal"),
-    HIGH("High"),
-    URGENT("Urgent")
+    LOW("低"),
+    NORMAL("一般"),
+    HIGH("高"),
+    URGENT("緊急")
 }
 
 // -------------------------------------------------------------

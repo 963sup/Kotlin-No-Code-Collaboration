@@ -135,11 +135,11 @@ import java.util.Date
 import java.util.Locale
 
 enum class HomeWorkFilter(val label: String) {
-    ASSIGNED_ISSUES("Assigned Issues"),
-    PENDING_REVIEWS("Review Requests"),
-    PENDING_APPROVALS("Approval Requests"),
-    MENTIONS_AND_UNREAD("Mentions & Unread"),
-    RECENT_ACTIVITY("Activity Trail")
+    ASSIGNED_ISSUES("指派給我的任務"),
+    PENDING_REVIEWS("審查請求"),
+    PENDING_APPROVALS("核准請求"),
+    MENTIONS_AND_UNREAD("提及與未讀"),
+    RECENT_ACTIVITY("活動軌跡")
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -194,7 +194,7 @@ fun HomeScreen(
         )
     }
 
-    // Artifacts waiting for review in user's accessible scope
+    // 個成果 waiting for review in user's accessible scope
     val pendingReviewArtifacts = remember(activeUser, allArtifacts, allReviews, repositories) {
         if (activeUser == null) emptyList()
         else {
@@ -204,7 +204,7 @@ fun HomeScreen(
         }
     }
 
-    // Artifacts waiting for multi-signatory approval
+    // 個成果 waiting for multi-signatory approval
     val pendingApprovalArtifacts = remember(activeUser, allArtifacts, allApprovals, repositories) {
         if (activeUser == null) emptyList()
         else {
@@ -304,7 +304,7 @@ fun HomeScreen(
                             }
                             Column {
                                 Text(
-                                    text = activeUser?.displayName ?: "Guest User",
+                                    text = activeUser?.displayName ?: "訪客使用者",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         letterSpacing = (-0.2).sp
@@ -312,7 +312,7 @@ fun HomeScreen(
                                     color = TextHighEmphasis
                                 )
                                 Text(
-                                    text = "${activeUser?.title ?: "Collaborator"} • ${enterprise?.name ?: "Enterprise"}",
+                                    text = "${activeUser?.title ?: "協作者"} • ${enterprise?.name ?: "企業"}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextMediumEmphasis
                                 )
@@ -335,12 +335,12 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Person,
-                                    contentDescription = "Switch Persona",
+                                    contentDescription = "切換身分",
                                     tint = LavenderPrimary,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
-                                    text = "Switch",
+                                    text = "切換",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                                     color = LavenderPrimary
                                 )
@@ -357,7 +357,7 @@ fun HomeScreen(
                     ) {
                         AttentionMetricPill(
                             icon = Icons.Default.TaskAlt,
-                            label = "Assigned",
+                            label = "已指派",
                             count = assignedIssues.count { it.status != IssueStatus.CLOSED },
                             accentColor = if (assignedIssues.any { it.priority == IssuePriority.CRITICAL && it.status != IssueStatus.CLOSED }) RoseError else LavenderPrimary,
                             isSelected = selectedWorkFilter == HomeWorkFilter.ASSIGNED_ISSUES,
@@ -366,7 +366,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.RateReview,
-                            label = "Reviews",
+                            label = "審查",
                             count = pendingReviewArtifacts.size,
                             accentColor = AmberWarning,
                             isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_REVIEWS,
@@ -375,7 +375,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.Approval,
-                            label = "Approvals",
+                            label = "核准",
                             count = pendingApprovalArtifacts.size,
                             accentColor = EmeraldSuccess,
                             isSelected = selectedWorkFilter == HomeWorkFilter.PENDING_APPROVALS,
@@ -384,7 +384,7 @@ fun HomeScreen(
                         )
                         AttentionMetricPill(
                             icon = Icons.Default.AlternateEmail,
-                            label = "Mentions",
+                            label = "提及",
                             count = mentionAndUnreadNotifications.size,
                             accentColor = if (unreadNotificationCount > 0) LavenderPrimary else TextMediumEmphasis,
                             isSelected = selectedWorkFilter == HomeWorkFilter.MENTIONS_AND_UNREAD,
@@ -410,7 +410,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Work Requiring Attention",
+                        text = "需要處理的工作",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
@@ -612,7 +612,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Recently Accessed Repositories",
+                        text = "最近存取的儲存庫",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = TextHighEmphasis
                     )
@@ -621,7 +621,7 @@ fun HomeScreen(
                         modifier = Modifier.testTag("home_view_all_repos_btn")
                     ) {
                         Text(
-                            text = "View All (${repositories.size})",
+                            text = "查看全部（${repositories.size}）",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = LavenderPrimary
                         )
@@ -686,7 +686,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Quick Navigation",
+                        text = "快速導覽",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.5.sp
@@ -713,7 +713,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Containers", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("協作容器", color = TextHighEmphasis, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
 
                         OutlinedButton(
@@ -731,7 +731,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Inbox", color = TextHighEmphasis)
+                            Text("收件匣", color = TextHighEmphasis)
                         }
 
                         OutlinedButton(
@@ -749,7 +749,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text("Me", color = TextHighEmphasis)
+                            Text("我的", color = TextHighEmphasis)
                         }
                     }
                 }
@@ -870,7 +870,7 @@ fun HomeIssueCard(
                             color = LavenderContainer
                         ) {
                             Text(
-                                text = "You",
+                                text = "你",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.SemiBold
@@ -934,7 +934,7 @@ fun HomeIssueCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Warning,
-                            contentDescription = "Blocked",
+                            contentDescription = "受阻",
                             tint = AmberWarning,
                             modifier = Modifier.size(12.dp)
                         )
@@ -968,7 +968,7 @@ fun HomeIssueCard(
                             modifier = Modifier.size(10.dp)
                         )
                         Text(
-                            text = "Linked: ${issue.linkedArtifactTitle}",
+                            text = "連結：${issue.linkedArtifactTitle}",
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                             color = TextMediumEmphasis,
                             maxLines = 1,
@@ -984,7 +984,7 @@ fun HomeIssueCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Status: ${issue.status.name.replace("_", " ")}",
+                    text = "狀態：${issue.status.name.replace("_", " ")}",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = when (issue.status) {
                         IssueStatus.OPEN -> LavenderPrimary
@@ -1040,7 +1040,7 @@ fun HomeArtifactReviewCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = if (isApproval) "Approval Sign-off" else "Peer Review Request",
+                        text = if (isApproval) "Approval 個簽核" else "Peer Review Request",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = if (isApproval) EmeraldSuccess else AmberWarning
@@ -1086,7 +1086,7 @@ fun HomeArtifactReviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Container: ${repo?.displayName ?: "Repository"}",
+                    text = "容器：${repo?.displayName ?: "Repository"}",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis
                 )
@@ -1362,7 +1362,7 @@ fun HomeRepositoryRowCard(
                     }
                 }
                 Text(
-                    text = "${repo.ownerDisplayName} • $artifactCount Blueprints • $openIssueCount Issues • $discussionCount Discussions",
+                    text = "${repo.ownerDisplayName} • $artifactCount 個藍圖 • $openIssueCount 個任務 • $discussionCount 個討論",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = TextMediumEmphasis
                 )
@@ -1370,7 +1370,7 @@ fun HomeRepositoryRowCard(
 
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Open Repository",
+                contentDescription = "開啟儲存庫",
                 tint = TextMediumEmphasis,
                 modifier = Modifier.size(16.dp)
             )

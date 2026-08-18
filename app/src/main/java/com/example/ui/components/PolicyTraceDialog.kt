@@ -101,12 +101,12 @@ fun PolicyTraceDialog(
                     }
                     Column {
                         Text(
-                            text = "Policy Evaluation Trace",
+                            text = "政策評估軌跡",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                             color = LavenderPrimary
                         )
                         Text(
-                            text = "HIERARCHICAL GOVERNANCE ENGINE",
+                            text = "階層治理引擎",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 9.sp,
                                 letterSpacing = 1.sp,
@@ -141,8 +141,8 @@ fun PolicyTraceDialog(
                         if (evaluation.targetArtifact != null) {
                             TraceKeyVal("Target Artifact", "${evaluation.targetArtifact.title} [${evaluation.targetArtifact.lifecycleState.name}]")
                         }
-                        TraceKeyVal("Effective Role", evaluation.effectiveRole.name)
-                        TraceKeyVal("Role Source", evaluation.roleSource)
+                        TraceKeyVal("有效角色", evaluation.effectiveRole.name)
+                        TraceKeyVal("角色來源", evaluation.roleSource)
                     }
                 }
 
@@ -150,7 +150,7 @@ fun PolicyTraceDialog(
 
                 // Enterprise Checks Section
                 Text(
-                    text = "1. Enterprise Guardrail Evaluations",
+                    text = "1. 企業護欄評估",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = LavenderPrimary
                 )
@@ -165,7 +165,7 @@ fun PolicyTraceDialog(
 
                 // Repository & Role Checks Section
                 Text(
-                    text = "2. Repository Role & Lifecycle Quorum Checks",
+                    text = "2. 儲存庫角色與生命週期門檻檢查",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = LavenderSubtle
                 )
@@ -214,7 +214,7 @@ fun PolicyTraceDialog(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Acknowledge & Close", fontWeight = FontWeight.Bold)
+                    Text("確認並關閉", fontWeight = FontWeight.Bold)
                 }
             }
         }
