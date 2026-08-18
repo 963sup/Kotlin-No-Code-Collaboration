@@ -1,0 +1,909 @@
+name: Apply My Work Projection
+
+on:
+  push:
+    branches:
+      - feat/fpt-mobile-workflow-mvp
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v7
+        with:
+          ref: feat/fpt-mobile-workflow-mvp
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Apply bounded My Work slice
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: Path, old: str, new: str) -> None:
+              text = path.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise RuntimeError(f"Expected exactly one match in {path}, found {count}")
+              path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          def replace_between(path: Path, start_marker: str, end_marker: str, replacement: str) -> None:
+              text = path.read_text(encoding="utf-8")
+              start = text.index(start_marker)
+              end = text.index(end_marker, start)
+              path.write_text(text[:start] + replacement + text[end:], encoding="utf-8")
+
+          main = Path("app/src/main/java/com/example/MainActivity.kt")
+          replace_once(
+              main,
+              """                            KanbanBoardScreen(
+                                  repositories = scopedRepositories,
+                                  allIssues = scopedIssues,
+                                  onUpdateIssueStatus = { issueId, status -> viewModel.updateIssueStatus(issueId, status) },
+                                  onOpenRepository = { repo -> viewModel.selectRepository(repo) }
+                              )""",
+              """                            KanbanBoardScreen(
+                                  repositories = scopedRepositories,
+                                  allIssues = scopedIssues,
+                                  activeUser = activeUser,
+                                  teamMemberships = allTeamMemberships,
+                                  onUpdateIssueStatus = { issueId, status -> viewModel.updateIssueStatus(issueId, status) },
+                                  onOpenRepository = { repo -> viewModel.selectRepository(repo) }
+                              )"""
+          )
+
+          screen = Path("app/src/main/java/com/example/ui/screens/KanbanBoardScreen.kt")
+          replace_once(
+              screen,
+              """import com.example.data.model.Repository
+          import com.example.data.model.WbsProjectionRow""",
+              """import com.example.data.model.Repository
+          import com.example.data.model.TeamMembership
+          import com.example.data.model.User
+          import com.example.data.model.WbsProjectionRow"""
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nfun KanbanBoardScreen(",
+              "    Column(\n        modifier = modifier",
+              '''@Composable
+          fun KanbanBoardScreen(
+              repositories: List<Repository>,
+              allIssues: List<RepoIssue>,
+              activeUser: User?,
+              teamMemberships: List<TeamMembership>,
+              onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+              onOpenRepository: (Repository) -> Unit,
+              modifier: Modifier = Modifier
+          ) {
+              var selectedRepoId by remember { mutableStateOf<String?>(null) }
+              var assignmentScope by remember { mutableStateOf(WorkAssignmentScope.MINE) }
+              var projectionMode by remember { mutableStateOf(WorkProjectionMode.KANBAN) }
+
+              LaunchedEffect(repositories) {
+                  if (selectedRepoId != null && repositories.none { it.id == selectedRepoId }) {
+                      selectedRepoId = null
+                      projectionMode = WorkProjectionMode.KANBAN
+                  }
+              }
+
+              val selectedRepo = repositories.firstOrNull { it.id == selectedRepoId }
+              val assignmentScopedIssues = remember(
+                  allIssues,
+                  activeUser?.id,
+                  teamMemberships,
+                  assignmentScope
+              ) {
+                  projectWorkIssues(
+                      allIssues = allIssues,
+                      activeUserId = activeUser?.id,
+                      teamMemberships = teamMemberships,
+                      assignmentScope = assignmentScope,
+                      repositoryId = null
+                  )
+              }
+              val issues = remember(assignmentScopedIssues, selectedRepoId) {
+                  if (selectedRepoId == null) {
+                      assignmentScopedIssues
+                  } else {
+                      assignmentScopedIssues.filter { it.repoId == selectedRepoId }
+                  }
+              }
+              val ordered = remember(issues) { IssueHierarchyRules.orderedForDisplay(issues) }
+              val wbsRows = remember(issues, selectedRepoId) {
+                  if (selectedRepoId == null) emptyList() else IssueHierarchyRules.wbsProjection(issues)
+              }
+              val overallProgress = remember(issues) { IssueHierarchyRules.overallProgress(issues) }
+              val repositoryById = remember(repositories) { repositories.associateBy { it.id } }
+              val visibleRepositoryCount = remember(issues) { issues.map { it.repoId }.toSet().size }
+
+          '''
+          )
+
+          replace_once(
+              screen,
+              """        WorkHeader(
+                      projectionMode = projectionMode,
+                      selectedRepo = selectedRepo,
+                      issues = issues,
+                      overallProgress = overallProgress,
+                      onOpenRepository = onOpenRepository
+                  )""",
+              """        WorkHeader(
+                      projectionMode = projectionMode,
+                      assignmentScope = assignmentScope,
+                      selectedRepo = selectedRepo,
+                      issues = issues,
+                      visibleRepositoryCount = visibleRepositoryCount,
+                      overallProgress = overallProgress,
+                      onOpenRepository = onOpenRepository
+                  )"""
+          )
+
+          replace_between(
+              screen,
+              "        RepositorySelector(\n",
+              "@Composable\nprivate fun WorkHeader(",
+              '''        AssignmentScopeSelector(
+              selectedScope = assignmentScope,
+              onSelectScope = { assignmentScope = it }
+          )
+
+          RepositorySelector(
+              repositories = repositories,
+              issues = assignmentScopedIssues,
+              selectedRepoId = selectedRepoId,
+              onSelectAll = {
+                  selectedRepoId = null
+                  projectionMode = WorkProjectionMode.KANBAN
+              },
+              onSelectRepository = { selectedRepoId = it.id }
+          )
+
+          ProjectionModeSelector(
+              selectedMode = projectionMode,
+              wbsEnabled = selectedRepo != null,
+              onSelectMode = { projectionMode = it }
+          )
+
+          when {
+              assignmentScope == WorkAssignmentScope.MINE && activeUser == null -> {
+                  EmptyWorkState("尚未選擇用戶", "切換有效用戶，或改看目前範圍內的全部工作。")
+              }
+
+              issues.isEmpty() && selectedRepo == null && assignmentScope == WorkAssignmentScope.MINE -> {
+                  EmptyWorkState("目前沒有指派工作", "直接指派給你或你的團隊的任務會集中顯示在這裡。")
+              }
+
+              issues.isEmpty() && selectedRepo == null -> {
+                  EmptyWorkState("目前沒有可顯示的工作", "目前工作範圍內尚未建立任何任務。")
+              }
+
+              issues.isEmpty() -> {
+                  EmptyWorkState("此儲存庫尚無符合條件的任務", "調整工作範圍，或在儲存庫中建立與指派任務。")
+              }
+
+              projectionMode == WorkProjectionMode.KANBAN -> {
+                  KanbanProjection(
+                      ordered = ordered,
+                      issues = issues,
+                      repositoryById = repositoryById,
+                      showRepository = selectedRepo == null,
+                      onUpdateIssueStatus = onUpdateIssueStatus,
+                      modifier = Modifier.fillMaxWidth().weight(1f)
+                  )
+              }
+
+              else -> {
+                  WbsProjection(
+                      rows = wbsRows,
+                      overallProgress = overallProgress,
+                      onUpdateIssueStatus = onUpdateIssueStatus,
+                      modifier = Modifier.fillMaxWidth().weight(1f)
+                  )
+              }
+          }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun WorkHeader(",
+              "@Composable\nprivate fun RepositorySelector(",
+              '''@Composable
+          private fun WorkHeader(
+              projectionMode: WorkProjectionMode,
+              assignmentScope: WorkAssignmentScope,
+              selectedRepo: Repository?,
+              issues: List<RepoIssue>,
+              visibleRepositoryCount: Int,
+              overallProgress: Float,
+              onOpenRepository: (Repository) -> Unit
+          ) {
+              Card(
+                  modifier = Modifier.fillMaxWidth(),
+                  colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
+                  border = BorderStroke(1.dp, SophisticatedBorder),
+                  shape = RoundedCornerShape(16.dp)
+              ) {
+                  Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                      Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                          Box(
+                              Modifier.size(40.dp).background(LavenderContainer, RoundedCornerShape(12.dp)),
+                              contentAlignment = Alignment.Center
+                          ) {
+                              Icon(
+                                  imageVector = if (projectionMode == WorkProjectionMode.WBS) Icons.Default.AccountTree else Icons.Default.Dashboard,
+                                  contentDescription = null,
+                                  tint = LavenderPrimary
+                              )
+                          }
+                          Column(Modifier.weight(1f)) {
+                              Text(
+                                  if (assignmentScope == WorkAssignmentScope.MINE) "我的工作" else "全部工作",
+                                  color = TextHighEmphasis,
+                                  style = MaterialTheme.typography.titleMedium,
+                                  fontWeight = FontWeight.Bold
+                              )
+                              Text(
+                                  when {
+                                      projectionMode == WorkProjectionMode.WBS ->
+                                          "WBS 顯示單一儲存庫的上下層分解；資料仍是 Repository Issue。"
+                                      selectedRepo == null && assignmentScope == WorkAssignmentScope.MINE ->
+                                          "跨儲存庫聚合直接與團隊指派；不建立第二份工作資料。"
+                                      selectedRepo == null ->
+                                          "顯示目前範圍內全部可存取任務；資料仍由 Repository 持有。"
+                                      else ->
+                                          "看板依狀態投影任務；資料仍是 Repository Issue。"
+                                  },
+                                  color = TextMediumEmphasis,
+                                  style = MaterialTheme.typography.bodySmall
+                              )
+                          }
+                          if (selectedRepo != null) {
+                              OutlinedButton(
+                                  onClick = { onOpenRepository(selectedRepo) },
+                                  modifier = Modifier.heightIn(min = 48.dp).testTag("kanban_open_repository")
+                              ) {
+                                  Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(17.dp))
+                                  Spacer(Modifier.width(5.dp))
+                                  Text("儲存庫")
+                              }
+                          }
+                      }
+                      val percentage = (overallProgress * 100).toInt()
+                      val scopeLabel = selectedRepo?.displayName
+                          ?: if (assignmentScope == WorkAssignmentScope.MINE) "全部指派" else "全部儲存庫"
+                      val repositoryCount = if (selectedRepo != null) 1 else visibleRepositoryCount
+                      Text(
+                          "$scopeLabel · ${issues.size} 個任務 · $repositoryCount 個儲存庫 · $percentage%",
+                          color = LavenderGlow,
+                          style = MaterialTheme.typography.labelMedium
+                      )
+                  }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun RepositorySelector(",
+              "@Composable\nprivate fun ProjectionModeSelector(",
+              '''@Composable
+          private fun AssignmentScopeSelector(
+              selectedScope: WorkAssignmentScope,
+              onSelectScope: (WorkAssignmentScope) -> Unit
+          ) {
+              Row(
+                  modifier = Modifier
+                      .fillMaxWidth()
+                      .background(SophisticatedSurfaceDark, RoundedCornerShape(14.dp))
+                      .padding(4.dp),
+                  horizontalArrangement = Arrangement.spacedBy(4.dp)
+              ) {
+                  WorkAssignmentScope.entries.forEach { scope ->
+                      val selected = scope == selectedScope
+                      Surface(
+                          modifier = Modifier
+                              .weight(1f)
+                              .heightIn(min = 48.dp)
+                              .clickable { onSelectScope(scope) }
+                              .testTag("work_scope_${scope.name.lowercase()}"),
+                          shape = RoundedCornerShape(10.dp),
+                          color = if (selected) LavenderPrimary else SophisticatedSurfaceDark
+                      ) {
+                          Row(
+                              modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.Center
+                          ) {
+                              Icon(
+                                  imageVector = if (scope == WorkAssignmentScope.MINE) Icons.Default.Person else Icons.Default.Dashboard,
+                                  contentDescription = null,
+                                  tint = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                                  modifier = Modifier.size(18.dp)
+                              )
+                              Spacer(Modifier.width(6.dp))
+                              Text(
+                                  scope.label,
+                                  color = if (selected) LavenderOnPrimary else TextHighEmphasis,
+                                  fontWeight = FontWeight.Bold
+                              )
+                          }
+                      }
+                  }
+              }
+          }
+
+          @Composable
+          private fun RepositorySelector(
+              repositories: List<Repository>,
+              issues: List<RepoIssue>,
+              selectedRepoId: String?,
+              onSelectAll: () -> Unit,
+              onSelectRepository: (Repository) -> Unit
+          ) {
+              LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+                  item(key = "all_repositories") {
+                      val selected = selectedRepoId == null
+                      Surface(
+                          modifier = Modifier
+                              .heightIn(min = 48.dp)
+                              .clickable(onClick = onSelectAll)
+                              .testTag("kanban_repo_all"),
+                          shape = RoundedCornerShape(12.dp),
+                          color = if (selected) LavenderPrimary else SophisticatedSurface,
+                          border = BorderStroke(1.dp, if (selected) LavenderPrimary else SophisticatedBorder)
+                      ) {
+                          Column(Modifier.padding(horizontal = 13.dp, vertical = 8.dp)) {
+                              Text(
+                                  "全部儲存庫",
+                                  color = if (selected) LavenderOnPrimary else TextHighEmphasis,
+                                  fontWeight = FontWeight.SemiBold,
+                                  maxLines = 1
+                              )
+                              Text(
+                                  "${issues.size} 個任務",
+                                  color = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                                  fontSize = 10.sp
+                              )
+                          }
+                      }
+                  }
+                  items(repositories, key = { it.id }) { repo ->
+                      val selected = repo.id == selectedRepoId
+                      Surface(
+                          modifier = Modifier
+                              .heightIn(min = 48.dp)
+                              .clickable { onSelectRepository(repo) }
+                              .testTag("kanban_repo_${repo.id}"),
+                          shape = RoundedCornerShape(12.dp),
+                          color = if (selected) LavenderPrimary else SophisticatedSurface,
+                          border = BorderStroke(1.dp, if (selected) LavenderPrimary else SophisticatedBorder)
+                      ) {
+                          Column(Modifier.padding(horizontal = 13.dp, vertical = 8.dp)) {
+                              Text(
+                                  repo.displayName,
+                                  color = if (selected) LavenderOnPrimary else TextHighEmphasis,
+                                  fontWeight = FontWeight.SemiBold,
+                                  maxLines = 1
+                              )
+                              Text(
+                                  "${issues.count { it.repoId == repo.id }} 個任務",
+                                  color = if (selected) LavenderOnPrimary else TextMediumEmphasis,
+                                  fontSize = 10.sp
+                              )
+                          }
+                      }
+                  }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun ProjectionModeSelector(",
+              "@Composable\nprivate fun KanbanProjection(",
+              '''@Composable
+          private fun ProjectionModeSelector(
+              selectedMode: WorkProjectionMode,
+              wbsEnabled: Boolean,
+              onSelectMode: (WorkProjectionMode) -> Unit
+          ) {
+              Row(
+                  modifier = Modifier
+                      .fillMaxWidth()
+                      .background(SophisticatedSurfaceDark, RoundedCornerShape(14.dp))
+                      .padding(4.dp),
+                  horizontalArrangement = Arrangement.spacedBy(4.dp)
+              ) {
+                  WorkProjectionMode.entries.forEach { mode ->
+                      val selected = mode == selectedMode
+                      val enabled = mode != WorkProjectionMode.WBS || wbsEnabled
+                      Surface(
+                          modifier = Modifier
+                              .weight(1f)
+                              .heightIn(min = 48.dp)
+                              .clickable(enabled = enabled) { onSelectMode(mode) }
+                              .testTag("work_projection_${mode.name.lowercase()}"),
+                          shape = RoundedCornerShape(10.dp),
+                          color = when {
+                              selected -> LavenderPrimary
+                              enabled -> SophisticatedSurfaceDark
+                              else -> SophisticatedContainer
+                          }
+                      ) {
+                          Row(
+                              modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.Center
+                          ) {
+                              Icon(
+                                  imageVector = if (mode == WorkProjectionMode.WBS) Icons.Default.AccountTree else Icons.Default.Dashboard,
+                                  contentDescription = null,
+                                  tint = when {
+                                      selected -> LavenderOnPrimary
+                                      enabled -> TextMediumEmphasis
+                                      else -> TextLowEmphasis
+                                  },
+                                  modifier = Modifier.size(18.dp)
+                              )
+                              Spacer(Modifier.width(6.dp))
+                              Text(
+                                  if (mode == WorkProjectionMode.WBS && !enabled) "WBS（先選儲存庫）" else mode.label,
+                                  color = when {
+                                      selected -> LavenderOnPrimary
+                                      enabled -> TextHighEmphasis
+                                      else -> TextLowEmphasis
+                                  },
+                                  fontWeight = FontWeight.Bold,
+                                  fontSize = if (mode == WorkProjectionMode.WBS && !enabled) 11.sp else 14.sp
+                              )
+                          }
+                      }
+                  }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun KanbanProjection(",
+              "@Composable\nprivate fun WbsProjection(",
+              '''@Composable
+          private fun KanbanProjection(
+              ordered: List<Pair<RepoIssue, Int>>,
+              issues: List<RepoIssue>,
+              repositoryById: Map<String, Repository>,
+              showRepository: Boolean,
+              onUpdateIssueStatus: (String, IssueStatus) -> Unit,
+              modifier: Modifier = Modifier
+          ) {
+              LazyRow(
+                  modifier = modifier,
+                  horizontalArrangement = Arrangement.spacedBy(12.dp),
+                  contentPadding = PaddingValues(bottom = 18.dp, end = 8.dp)
+              ) {
+                  items(IssueStatus.entries, key = { it.name }) { status ->
+                      KanbanColumn(
+                          status = status,
+                          tasks = ordered.filter { (issue, _) -> issue.status == status },
+                          allIssues = issues,
+                          repositoryById = repositoryById,
+                          showRepository = showRepository,
+                          onUpdateIssueStatus = onUpdateIssueStatus
+                      )
+                  }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun KanbanColumn(",
+              "@Composable\nprivate fun KanbanTaskCard(",
+              '''@Composable
+          private fun KanbanColumn(
+              status: IssueStatus,
+              tasks: List<Pair<RepoIssue, Int>>,
+              allIssues: List<RepoIssue>,
+              repositoryById: Map<String, Repository>,
+              showRepository: Boolean,
+              onUpdateIssueStatus: (String, IssueStatus) -> Unit
+          ) {
+              val title = status.label
+              Surface(
+                  modifier = Modifier.width(300.dp).fillMaxHeight(),
+                  shape = RoundedCornerShape(16.dp),
+                  color = SophisticatedSurface,
+                  border = BorderStroke(1.dp, SophisticatedBorder)
+              ) {
+                  Column(Modifier.fillMaxSize().padding(12.dp)) {
+                      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                          Text(title, color = TextHighEmphasis, fontWeight = FontWeight.Bold)
+                          Surface(shape = RoundedCornerShape(10.dp), color = SophisticatedContainer) {
+                              Text(tasks.size.toString(), Modifier.padding(horizontal = 9.dp, vertical = 4.dp), color = LavenderGlow, fontWeight = FontWeight.Bold)
+                          }
+                      }
+                      Spacer(Modifier.height(10.dp))
+                      LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                          items(tasks, key = { it.first.id }) { (issue, depth) ->
+                              KanbanTaskCard(
+                                  issue = issue,
+                                  depth = depth,
+                                  allIssues = allIssues,
+                                  repositoryName = if (showRepository) repositoryById[issue.repoId]?.displayName else null,
+                                  onUpdate = onUpdateIssueStatus
+                              )
+                          }
+                      }
+                  }
+              }
+          }
+
+          '''
+          )
+
+          replace_between(
+              screen,
+              "@Composable\nprivate fun KanbanTaskCard(",
+              "@Composable\nprivate fun KanbanMoveActions(",
+              '''@Composable
+          private fun KanbanTaskCard(
+              issue: RepoIssue,
+              depth: Int,
+              allIssues: List<RepoIssue>,
+              repositoryName: String?,
+              onUpdate: (String, IssueStatus) -> Unit
+          ) {
+              val descendants = remember(issue.id, allIssues) { IssueHierarchyRules.descendantIds(issue.id, allIssues) }
+              val nested = allIssues.filter { it.id in descendants }
+              val nestedClosed = nested.count { it.status == IssueStatus.CLOSED }
+              val accent = priorityColor(issue.priority)
+              Card(
+                  modifier = Modifier.fillMaxWidth().testTag("kanban_task_${issue.id}"),
+                  colors = CardDefaults.cardColors(containerColor = SophisticatedSurfaceDark),
+                  border = BorderStroke(1.dp, SophisticatedBorder),
+                  shape = RoundedCornerShape(14.dp)
+              ) {
+                  Column(Modifier.fillMaxWidth().padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+                          Text("#${issue.issueNumber} ${issue.title}", Modifier.weight(1f), color = TextHighEmphasis, fontWeight = FontWeight.SemiBold)
+                          Spacer(Modifier.width(8.dp))
+                          Surface(shape = RoundedCornerShape(8.dp), color = accent.copy(alpha = 0.12f)) {
+                              Text(issue.priority.label, Modifier.padding(horizontal = 7.dp, vertical = 3.dp), color = accent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                          }
+                      }
+                      if (repositoryName != null) {
+                          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                              Icon(Icons.Default.FolderOpen, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(14.dp))
+                              Text(repositoryName, color = LavenderGlow, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                          }
+                      }
+                      if (depth > 0) {
+                          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                              Icon(Icons.Default.AccountTree, contentDescription = null, tint = LavenderPrimary, modifier = Modifier.size(15.dp))
+                              Text("第 ${depth + 1} 層巢狀任務", color = LavenderGlow, fontSize = 11.sp)
+                          }
+                      }
+                      issue.parentIssueTitle?.let {
+                          Text("上層任務：$it", color = TextMediumEmphasis, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                      }
+                      if (nested.isNotEmpty()) {
+                          Text(
+                              "子孫任務：$nestedClosed/${nested.size} 已完成",
+                              color = if (nestedClosed == nested.size) EmeraldSuccess else TextMediumEmphasis,
+                              fontSize = 11.sp
+                          )
+                      }
+                      Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                          Icon(Icons.Default.Person, contentDescription = null, tint = TextLowEmphasis, modifier = Modifier.size(14.dp))
+                          Text(issue.assigneeName ?: "未指派", color = TextMediumEmphasis, fontSize = 11.sp)
+                      }
+                      KanbanMoveActions(issue, onUpdate)
+                  }
+              }
+          }
+
+          '''
+          )
+
+          Path("app/src/main/java/com/example/ui/screens/WorkProjection.kt").write_text('''package com.example.ui.screens
+
+          import com.example.data.model.GranteeType
+          import com.example.data.model.RepoIssue
+          import com.example.data.model.TeamMembership
+
+          internal enum class WorkAssignmentScope(val label: String) {
+              MINE("我的工作"),
+              ALL("全部工作")
+          }
+
+          /**
+           * Projects existing Repository-owned Issues into a user-centered work view.
+           * This function never creates or mutates work records.
+           */
+          internal fun projectWorkIssues(
+              allIssues: List<RepoIssue>,
+              activeUserId: String?,
+              teamMemberships: List<TeamMembership>,
+              assignmentScope: WorkAssignmentScope,
+              repositoryId: String?
+          ): List<RepoIssue> {
+              val activeTeamIds = if (activeUserId == null) {
+                  emptySet()
+              } else {
+                  teamMemberships
+                      .asSequence()
+                      .filter { it.userId == activeUserId }
+                      .map { it.teamId }
+                      .toSet()
+              }
+
+              return allIssues.filter { issue ->
+                  val matchesRepository = repositoryId == null || issue.repoId == repositoryId
+                  val matchesAssignment = when (assignmentScope) {
+                      WorkAssignmentScope.ALL -> true
+                      WorkAssignmentScope.MINE -> when (issue.assigneeType) {
+                          GranteeType.USER -> activeUserId != null && issue.assigneeId == activeUserId
+                          GranteeType.TEAM -> issue.assigneeId != null && issue.assigneeId in activeTeamIds
+                          null -> false
+                      }
+                  }
+                  matchesRepository && matchesAssignment
+              }
+          }
+          '''.replace("          ", ""), encoding="utf-8")
+
+          Path("app/src/test/java/com/example/ui/screens").mkdir(parents=True, exist_ok=True)
+          Path("app/src/test/java/com/example/ui/screens/WorkProjectionTest.kt").write_text('''package com.example.ui.screens
+
+          import com.example.data.model.GranteeType
+          import com.example.data.model.RepoIssue
+          import com.example.data.model.TeamMembership
+          import org.junit.Assert.assertEquals
+          import org.junit.Assert.assertTrue
+          import org.junit.Test
+
+          class WorkProjectionTest {
+              private val memberships = listOf(
+                  TeamMembership(id = "tm_me", teamId = "team_alpha", userId = "usr_me"),
+                  TeamMembership(id = "tm_other", teamId = "team_beta", userId = "usr_other")
+              )
+
+              @Test
+              fun `mine includes direct and active team assignments across repositories`() {
+                  val issues = listOf(
+                      issue("direct", "repo_a", GranteeType.USER, "usr_me"),
+                      issue("team", "repo_b", GranteeType.TEAM, "team_alpha"),
+                      issue("other_user", "repo_a", GranteeType.USER, "usr_other"),
+                      issue("other_team", "repo_b", GranteeType.TEAM, "team_beta"),
+                      issue("unassigned", "repo_b", null, null)
+                  )
+
+                  val projected = projectWorkIssues(
+                      allIssues = issues,
+                      activeUserId = "usr_me",
+                      teamMemberships = memberships,
+                      assignmentScope = WorkAssignmentScope.MINE,
+                      repositoryId = null
+                  )
+
+                  assertEquals(setOf("direct", "team"), projected.map { it.id }.toSet())
+              }
+
+              @Test
+              fun `repository filter narrows the already assignment scoped view`() {
+                  val issues = listOf(
+                      issue("repo_a_direct", "repo_a", GranteeType.USER, "usr_me"),
+                      issue("repo_b_team", "repo_b", GranteeType.TEAM, "team_alpha")
+                  )
+
+                  val projected = projectWorkIssues(
+                      allIssues = issues,
+                      activeUserId = "usr_me",
+                      teamMemberships = memberships,
+                      assignmentScope = WorkAssignmentScope.MINE,
+                      repositoryId = "repo_b"
+                  )
+
+                  assertEquals(listOf("repo_b_team"), projected.map { it.id })
+              }
+
+              @Test
+              fun `all preserves every accessible issue while respecting repository filter`() {
+                  val issues = listOf(
+                      issue("mine", "repo_a", GranteeType.USER, "usr_me"),
+                      issue("other", "repo_a", GranteeType.USER, "usr_other"),
+                      issue("unassigned", "repo_b", null, null)
+                  )
+
+                  val allRepositories = projectWorkIssues(
+                      allIssues = issues,
+                      activeUserId = "usr_me",
+                      teamMemberships = memberships,
+                      assignmentScope = WorkAssignmentScope.ALL,
+                      repositoryId = null
+                  )
+                  val repoA = projectWorkIssues(
+                      allIssues = issues,
+                      activeUserId = "usr_me",
+                      teamMemberships = memberships,
+                      assignmentScope = WorkAssignmentScope.ALL,
+                      repositoryId = "repo_a"
+                  )
+
+                  assertEquals(issues.map { it.id }, allRepositories.map { it.id })
+                  assertEquals(setOf("mine", "other"), repoA.map { it.id }.toSet())
+              }
+
+              @Test
+              fun `mine is empty without an active user`() {
+                  val projected = projectWorkIssues(
+                      allIssues = listOf(issue("team", "repo_a", GranteeType.TEAM, "team_alpha")),
+                      activeUserId = null,
+                      teamMemberships = memberships,
+                      assignmentScope = WorkAssignmentScope.MINE,
+                      repositoryId = null
+                  )
+
+                  assertTrue(projected.isEmpty())
+              }
+
+              private fun issue(
+                  id: String,
+                  repoId: String,
+                  assigneeType: GranteeType?,
+                  assigneeId: String?
+              ) = RepoIssue(
+                  id = id,
+                  repoId = repoId,
+                  issueNumber = id.hashCode().and(0x7fffffff),
+                  title = id,
+                  description = "",
+                  authorUserId = "usr_author",
+                  authorDisplayName = "Author",
+                  assigneeType = assigneeType,
+                  assigneeId = assigneeId,
+                  assigneeName = assigneeId
+              )
+          }
+          '''.replace("          ", ""), encoding="utf-8")
+
+          Path("docs/architecture/my-work-projection.md").write_text('''# My Work Projection｜First Principles Decision Record
+
+          ## Objective
+
+          Let a field member see and update every Issue assigned directly to them or to one of their Teams without first discovering and selecting each Repository.
+
+          ## Facts
+
+          - `RepoIssue` already stores optional USER or TEAM assignment.
+          - MainActivity already restricts the Work screen to Repositories and Issues visible in the selected workspace scope.
+          - The existing Work screen requires one Repository selection before any task is shown.
+          - Kanban and WBS are projections of the same Repository-owned Issues.
+          - WBS numbering is meaningful only inside one Repository tree.
+
+          ## Assumptions
+
+          - The active user is the correct default work audience.
+          - Team assignment includes every TeamMembership held by the active user.
+
+          ## Invariants
+
+          - Repository remains the owner of every Issue.
+          - No task, project, assignment, or WBS persistence model is added.
+          - Existing access filtering remains authoritative; the projection cannot expand visibility.
+          - WBS remains restricted to one Repository.
+          - Status mutation continues through GovernanceViewModel and the existing repository path.
+
+          ## Core Model
+
+          - Entities: User, TeamMembership, Repository, RepoIssue.
+          - Relationships: User belongs to Team; Issue is assigned to User or Team; Repository owns Issue.
+          - States: assignment scope, optional Repository filter, Issue status, projection mode.
+          - Events: choose My Work or All Work, choose optional Repository, move Issue status.
+          - Responsibilities: pure projection filters records; MainActivity supplies scoped truth; ViewModel owns mutation.
+
+          ## Root Constraint
+
+          A mandatory Repository selector sits upstream of the work view, forcing repeated navigation even though assignment data already identifies the user's work.
+
+          ## Highest-Leverage Change
+
+          Make Repository filtering optional and project direct plus Team assignments across the already-authorized Issue set.
+
+          ## Minimum Viable Change
+
+          1. My Work is the default audience.
+          2. Direct and Team assignments are aggregated across accessible Repositories.
+          3. All Work remains available for the current workspace scope.
+          4. Repository filtering is optional and includes an All Repositories choice.
+          5. Cross-Repository cards identify their Repository.
+          6. WBS is disabled until one Repository is selected.
+          7. Pure unit tests lock assignment and Repository-filter behavior.
+
+          ## Rejected Complexity
+
+          - No new Room entity, DAO query, remote sync, due-date model, saved filter, global search, Favorite, Follow, or Achievement.
+          - No new top-level screen or navigation framework.
+          - No policy-engine change and no UI-side authorization decision.
+          - No cross-Repository WBS numbering.
+
+          ## Product Guardian
+
+          - Verdict: ACCEPT.
+          - Canonical owner: Repository owns Issues; User and Team are assignment grantees only.
+          - Canonical container: current authorized workspace scope across Repositories.
+          - Mobile placement: existing Work destination.
+          - Governance impact: visibility is narrowed or preserved, never widened.
+
+          ## Files To Change
+
+          - MainActivity.kt
+          - KanbanBoardScreen.kt
+          - WorkProjection.kt
+          - WorkProjectionTest.kt
+          - this decision record
+
+          ## Files Explicitly Not Changing
+
+          - Room entities, DAO, database version, repository mutation logic, policy engine, Inbox, Repository workspace, and sync architecture.
+
+          ## Verification Evidence
+
+          - Pure tests prove direct assignment, Team assignment, unrelated exclusion, optional Repository filtering, All Work behavior, and null-user behavior.
+          - `gradle :app:testDebugUnitTest` passes.
+          - `gradle :app:assembleDebug` passes.
+          - Diff inspection confirms no persistence, permission, ownership, or prohibited developer-product semantics.
+
+          ## Stop Condition
+
+          Stop when the existing Work destination opens on cross-Repository My Work, preserves optional All Work and Repository filters, restricts WBS to one Repository, and all declared checks pass.
+          '''.replace("          ", ""), encoding="utf-8")
+          PY
+
+      - name: Run JVM tests
+        run: gradle :app:testDebugUnitTest --continue
+
+      - name: Assemble debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Commit verified implementation and remove temporary workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/agent-my-work-projection.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: aggregate assigned work across repositories"
+          git push origin HEAD:feat/fpt-mobile-workflow-mvp
