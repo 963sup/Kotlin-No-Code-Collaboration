@@ -1,0 +1,41 @@
+name: Apply First Principles Safety Patch
+
+on:
+  push:
+    branches:
+      - feat/fpt-occam-8020-collaboration-20260818
+
+permissions:
+  contents: write
+
+concurrency:
+  group: first-principles-safety-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore: apply deterministic first-principles safety patch') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/fpt-occam-8020-collaboration-20260818
+          fetch-depth: 0
+
+      - name: Apply deterministic corrections
+        run: python3 .github/scripts/apply_first_principles_safety_patch.py
+
+      - name: Commit corrections when needed
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic correction required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main FIRST_PRINCIPLES_SAFETY_PATCH.json
+          git commit -m "chore: apply deterministic first-principles safety patch"
+          git push origin HEAD:feat/fpt-occam-8020-collaboration-20260818
