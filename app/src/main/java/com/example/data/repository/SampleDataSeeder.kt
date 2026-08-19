@@ -124,6 +124,50 @@ object SampleDataSeeder {
                 isEnterpriseAdmin = false,
                 canOwnerRepository = true,
             ),
+            User(
+                id = "usr_wang",
+                enterpriseId = enterprise.id,
+                username = "wang_xiaoming",
+                displayName = "王小明",
+                email = "wang.xm@acme.io",
+                title = "製造工程師",
+                avatarColorHex = "#8B5CF6",
+                isEnterpriseAdmin = false,
+                canOwnerRepository = true,
+            ),
+            User(
+                id = "usr_li",
+                enterpriseId = enterprise.id,
+                username = "li_jiaying",
+                displayName = "李佳穎",
+                email = "li.jy@acme.io",
+                title = "品質核驗專家",
+                avatarColorHex = "#10B981",
+                isEnterpriseAdmin = false,
+                canOwnerRepository = true,
+            ),
+            User(
+                id = "usr_zhang",
+                enterpriseId = enterprise.id,
+                username = "zhang_xiaohua",
+                displayName = "張小華",
+                email = "zhang.xh@acme.io",
+                title = "系統架構師",
+                avatarColorHex = "#06B6D4",
+                isEnterpriseAdmin = false,
+                canOwnerRepository = true,
+            ),
+            User(
+                id = "usr_chen",
+                enterpriseId = enterprise.id,
+                username = "chen_zhiqiang",
+                displayName = "陳志強",
+                email = "chen.zq@acme.io",
+                title = "運營主管",
+                avatarColorHex = "#EC4899",
+                isEnterpriseAdmin = false,
+                canOwnerRepository = true,
+            ),
         )
         dao.insertUsers(users)
 
@@ -244,7 +288,77 @@ object SampleDataSeeder {
             requireReviewerPass = true,
             preventSelfApproval = false,
         )
-        dao.insertRepositories(listOf(repo1, repo2, repo3))
+        val repoMfg = Repository(
+            id = "repo_mfg_opt",
+            name = "manufacturing-line-optimization",
+            displayName = "製造線優化專案",
+            ownerType = OwnerType.ORGANIZATION,
+            ownerId = orgCloud.id,
+            ownerDisplayName = orgCloud.name,
+            enterpriseId = enterprise.id,
+            description = "產線效能監控、基座沉降觀測與自動化調校作業規範。",
+            category = "製造工程",
+            requiredApproverCount = 2,
+            requireReviewerPass = true,
+            preventSelfApproval = true,
+        )
+        val repoEquip = Repository(
+            id = "repo_equip_insp",
+            name = "equipment-inspection-management",
+            displayName = "設備檢修管理系統",
+            ownerType = OwnerType.ORGANIZATION,
+            ownerId = orgCloud.id,
+            ownerDisplayName = orgCloud.name,
+            enterpriseId = enterprise.id,
+            description = "定期檢修流程、巡檢標準作業程序與故障診斷決策庫。",
+            category = "設備運維",
+            requiredApproverCount = 2,
+            requireReviewerPass = true,
+            preventSelfApproval = true,
+        )
+        val repoCust = Repository(
+            id = "repo_cust_serv",
+            name = "customer-service-optimization",
+            displayName = "客服流程優化專案",
+            ownerType = OwnerType.ORGANIZATION,
+            ownerId = orgFintech.id,
+            ownerDisplayName = orgFintech.name,
+            enterpriseId = enterprise.id,
+            description = "客戶服務 SLA 升級與智能工單分派節點定義。",
+            category = "客戶運營",
+            requiredApproverCount = 1,
+            requireReviewerPass = true,
+            preventSelfApproval = false,
+        )
+        val repoMkt = Repository(
+            id = "repo_mkt_exec",
+            name = "marketing-campaign-execution",
+            displayName = "市場推廣執行專案",
+            ownerType = OwnerType.ORGANIZATION,
+            ownerId = orgFintech.id,
+            ownerDisplayName = orgFintech.name,
+            enterpriseId = enterprise.id,
+            description = "季末推廣活動排期、廣告投放預算決策與成效追蹤。",
+            category = "市場推廣",
+            requiredApproverCount = 1,
+            requireReviewerPass = true,
+            preventSelfApproval = false,
+        )
+        val repoTrain = Repository(
+            id = "repo_train_prog",
+            name = "internal-training-program",
+            displayName = "內部培訓計畫",
+            ownerType = OwnerType.ORGANIZATION,
+            ownerId = orgCloud.id,
+            ownerDisplayName = orgCloud.name,
+            enterpriseId = enterprise.id,
+            description = "新進工程師培育手冊、安全合規考試與技能矩陣評鑑。",
+            category = "組織發展",
+            requiredApproverCount = 1,
+            requireReviewerPass = false,
+            preventSelfApproval = false,
+        )
+        dao.insertRepositories(listOf(repoMfg, repoEquip, repoCust, repoMkt, repoTrain, repo1, repo2, repo3))
 
         // 8. REPOSITORY ACCESS RULES (Collaborator / Team / Role Mappings)
         val accessRules = listOf(
@@ -633,7 +747,63 @@ object SampleDataSeeder {
             labels = "compliance,override,sub-issue",
         )
 
-        dao.insertIssues(listOf(issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8, issue9))
+        // Photo Items (Manufacturing Line Optimization)
+        val issue128 = RepoIssue(
+            id = "iss_128_sinking_opt",
+            repoId = repoMfg.id,
+            issueNumber = 128,
+            title = "基座沉降問題優化",
+            description = "產線機台基座出現微幅沉降趨勢，需進行現場高程精準量測、成因分析與結構補強優化方案。",
+            status = IssueStatus.IN_PROGRESS,
+            priority = IssuePriority.HIGH,
+            authorUserId = "usr_wang",
+            authorDisplayName = "王小明",
+            authorRole = "COLLABORATOR",
+            assigneeType = GranteeType.USER,
+            assigneeId = "usr_wang",
+            assigneeName = "王小明",
+            parentIssueTitle = "WBS-3.2 原因分析",
+            labels = "製造,沉降,優化,WBS-3.2",
+        )
+
+        val issue110 = RepoIssue(
+            id = "iss_110_site_check",
+            repoId = repoMfg.id,
+            issueNumber = 110,
+            title = "現場檢查完成",
+            description = "第 3 號產線基礎現場檢查與水平儀校準已完成。",
+            status = IssueStatus.CLOSED,
+            priority = IssuePriority.MEDIUM,
+            authorUserId = "usr_li",
+            authorDisplayName = "李佳穎",
+            authorRole = "REVIEWER",
+            assigneeType = GranteeType.USER,
+            assigneeId = "usr_li",
+            assigneeName = "李佳穎",
+            closedAt = System.currentTimeMillis() - 86400000L,
+            closedByUserId = "usr_li",
+            closedByDisplayName = "李佳穎",
+            labels = "現場,檢查,已驗證",
+        )
+
+        val issue131 = RepoIssue(
+            id = "iss_131_design_opt",
+            repoId = repoMfg.id,
+            issueNumber = 131,
+            title = "優化方案設計",
+            description = "根據沉降測量數據與結構應力分析提出加固設計圖面與工法。",
+            status = IssueStatus.OPEN,
+            priority = IssuePriority.HIGH,
+            authorUserId = "usr_zhang",
+            authorDisplayName = "張小華",
+            authorRole = "MAINTAINER",
+            assigneeType = GranteeType.USER,
+            assigneeId = "usr_wang",
+            assigneeName = "王小明",
+            labels = "設計,結構,加固",
+        )
+
+        dao.insertIssues(listOf(issue128, issue110, issue131, issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8, issue9))
 
         // 11b. ISSUE DEPENDENCIES (BLOCKED-BY / BLOCKING RELATIONSHIPS)
         val dependencies = listOf(
@@ -1130,15 +1300,15 @@ object SampleDataSeeder {
         )
 
         // 9. WORK EVIDENCE, VERIFICATION & CHECKLISTS
-        val mainIssueId = issue1.id // Baseline sinking problem
+        val mainIssueId = issue128.id
         dao.insertTaskChecklist(
             com.example.data.model.TaskChecklist(
                 id = "chk_001",
                 issueId = mainIssueId,
                 title = "現場測量與數據收集",
                 isCompleted = true,
-                completedByUserId = "usr_marcus_wong",
-                completedByDisplayName = "Marcus Wong",
+                completedByUserId = "usr_wang",
+                completedByDisplayName = "王小明",
                 completedAt = System.currentTimeMillis() - 86400000 * 5,
             ),
         )
@@ -1148,8 +1318,8 @@ object SampleDataSeeder {
                 issueId = mainIssueId,
                 title = "根因分析",
                 isCompleted = true,
-                completedByUserId = "usr_sarah_chen",
-                completedByDisplayName = "Sarah Chen",
+                completedByUserId = "usr_li",
+                completedByDisplayName = "李佳穎",
                 completedAt = System.currentTimeMillis() - 86400000 * 3,
             ),
         )
@@ -1162,16 +1332,106 @@ object SampleDataSeeder {
             ),
         )
 
-        val evd = com.example.data.model.WorkEvidence(
+        val evd1 = com.example.data.model.WorkEvidence(
             id = "evd_001",
             issueId = mainIssueId,
-            submitterUserId = "usr_marcus_wong",
-            submitterDisplayName = "Marcus Wong",
-            description = "現場測量數據報告",
+            submitterUserId = "usr_wang",
+            submitterDisplayName = "王小明",
+            description = "現場高程相片與基座沉降測量報告",
             status = "PENDING",
         )
-        dao.insertWorkEvidence(evd)
+        dao.insertWorkEvidence(evd1)
 
-        dao.insertNotifications(notifications)
+        val photoNotifications = listOf(
+            AppNotification(
+                id = "notif_wang_evidence_wait_verify",
+                recipientUserId = "usr_wang",
+                actorUserId = "usr_wang",
+                actorDisplayName = "王小明",
+                actorAvatarColorHex = "#8B5CF6",
+                category = NotificationCategory.APPROVAL_GATE,
+                priority = NotificationPriority.URGENT,
+                status = NotificationStatus.UNREAD,
+                title = "等待驗證: #128 基座沉降問題優化",
+                body = "王小明 提交了 Evidence",
+                isActionable = true,
+                actionType = "VERIFY",
+                enterpriseId = enterprise.id,
+                orgId = orgCloud.id,
+                orgName = orgCloud.name,
+                repoId = repoMfg.id,
+                repoName = repoMfg.name,
+                issueId = issue128.id,
+                issueTitle = issue128.title,
+                createdAt = now - 1800000L,
+            ),
+            AppNotification(
+                id = "notif_zhang_assign_step",
+                recipientUserId = "usr_wang",
+                actorUserId = "usr_zhang",
+                actorDisplayName = "張小華",
+                actorAvatarColorHex = "#06B6D4",
+                category = NotificationCategory.ISSUE_ASSIGNMENT,
+                priority = NotificationPriority.HIGH,
+                status = NotificationStatus.UNREAD,
+                title = "需要你處理: #131 優化方案設計",
+                body = "張小華 指定你執行下一步",
+                isActionable = true,
+                actionType = "VIEW_ISSUE",
+                enterpriseId = enterprise.id,
+                orgId = orgCloud.id,
+                orgName = orgCloud.name,
+                repoId = repoMfg.id,
+                repoName = repoMfg.name,
+                issueId = issue131.id,
+                issueTitle = issue131.title,
+                createdAt = now - 5400000L,
+            ),
+            AppNotification(
+                id = "notif_li_mention_disc",
+                recipientUserId = "usr_wang",
+                actorUserId = "usr_li",
+                actorDisplayName = "李佳穎",
+                actorAvatarColorHex = "#10B981",
+                category = NotificationCategory.MENTION_AND_REPLY,
+                priority = NotificationPriority.NORMAL,
+                status = NotificationStatus.UNREAD,
+                title = "需要回覆: 討論: #128 優化方案",
+                body = "李佳穎 @你",
+                isActionable = true,
+                actionType = "VIEW_DISCUSSION",
+                enterpriseId = enterprise.id,
+                orgId = orgCloud.id,
+                orgName = orgCloud.name,
+                repoId = repoMfg.id,
+                repoName = repoMfg.name,
+                createdAt = now - 7200000L,
+            ),
+            AppNotification(
+                id = "notif_sys_check_done",
+                recipientUserId = "usr_wang",
+                actorUserId = "usr_li",
+                actorDisplayName = "系統提醒",
+                actorAvatarColorHex = "#F59E0B",
+                category = NotificationCategory.GOVERNANCE_EVENT,
+                priority = NotificationPriority.LOW,
+                status = NotificationStatus.READ,
+                title = "系統提醒: #110 現場檢查完成",
+                body = "已完成，等待驗證",
+                isActionable = true,
+                actionType = "VIEW_ISSUE",
+                enterpriseId = enterprise.id,
+                orgId = orgCloud.id,
+                orgName = orgCloud.name,
+                repoId = repoMfg.id,
+                repoName = repoMfg.name,
+                issueId = issue110.id,
+                issueTitle = issue110.title,
+                createdAt = now - 86400000L,
+                readAt = now - 43200000L,
+            ),
+        )
+
+        dao.insertNotifications(photoNotifications + notifications)
     }
 }

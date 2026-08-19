@@ -102,6 +102,7 @@ internal val PrimaryBottomNavigationTabs = listOf(
     MainNavigationTab.INBOX,
     MainNavigationTab.WORK,
     MainNavigationTab.EXPLORE,
+    MainNavigationTab.PROFILE,
 )
 
 internal fun MainNavigationTab.bottomNavigationLabel(): String = when (this) {

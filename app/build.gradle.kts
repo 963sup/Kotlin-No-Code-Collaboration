@@ -64,16 +64,6 @@ android {
     unitTests {
       isIncludeAndroidResources = true
       all { testTask ->
-        testTask.jvmArgumentProviders.add(
-          CommandLineArgumentProvider {
-            val agentJar = mockkAgent.files.find { it.name.startsWith("byte-buddy-agent") }
-            if (agentJar != null) {
-              listOf("-javaagent:${agentJar.absolutePath}")
-            } else {
-              emptyList()
-            }
-          },
-        )
         testTask.jvmArgs(
           "-XX:+EnableDynamicAgentLoading",
           "-Djdk.attach.allowAttachSelf=true",
@@ -148,4 +138,13 @@ dependencies {
   "ksp"(libs.moshi.kotlin.codegen)
 
   detektPlugins(libs.detekt.formatting)
+}
+
+tasks.withType<Test>().configureEach {
+  doFirst {
+    val agentFile = configurations.getByName("mockkAgent").files.find { it.name.contains("byte-buddy-agent") }
+    if (agentFile != null) {
+      jvmArgs("-javaagent:${agentFile.absolutePath}")
+    }
+  }
 }
