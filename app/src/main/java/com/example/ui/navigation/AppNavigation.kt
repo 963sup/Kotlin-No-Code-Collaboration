@@ -38,6 +38,7 @@ import com.example.ui.screens.MeSubTab
 import com.example.ui.screens.PersonalCenterSwitchScreen
 import com.example.ui.screens.VerificationScreen
 import com.example.ui.screens.WorkItemDetailScreen
+import com.example.ui.settings.SettingsScreen
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CollaborationExperienceViewModel
 import com.example.ui.viewmodel.GovernanceViewModel
@@ -100,6 +101,7 @@ fun AppNavigationHost(
     var selectedIssueDetail by remember { mutableStateOf<RepoIssue?>(null) }
     var verificationIssueId by remember { mutableStateOf<String?>(null) }
     var selectedWorkspaceScope by remember { mutableStateOf<WorkspaceScopeSelection?>(null) }
+    var isSettingsOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(activeUser?.id) {
         if (selectedWorkspaceScope == null && activeUser != null) {
@@ -112,67 +114,13 @@ fun AppNavigationHost(
         }
     }
 
-    val isDetailScreenOpen = selectedRepo != null || selectedArtifact != null || selectedIssueDetail != null || verificationIssueId != null
+    val isDetailScreenOpen = selectedRepo != null || selectedArtifact != null || selectedIssueDetail != null || verificationIssueId != null || isSettingsOpen
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isExpanded = maxWidth >= 600.dp
 
         Scaffold(
-            topBar = {
-                if (!isDetailScreenOpen) {
-                    TopAppBar(
-                        title = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Text(
-                                    text = when (currentTab) {
-                                        MainNavigationTab.HOME -> "企業協作工作台"
-                                        MainNavigationTab.INBOX -> "收件匣"
-                                        MainNavigationTab.WORK -> "工作管理"
-                                        MainNavigationTab.EXPLORE -> "探索倉庫與專案"
-                                        MainNavigationTab.PROFILE -> "個人中心"
-                                    },
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = TextHighEmphasis,
-                                )
-                                selectedWorkspaceScope?.let { scope ->
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = LavenderContainer,
-                                        modifier = Modifier.padding(start = 4.dp),
-                                    ) {
-                                        Text(
-                                            text = scope.name,
-                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = LavenderPrimary,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        actions = {
-                            ActivePersonaPill(user = activeUser, onClick = { showPersonaSwitcher = true })
-                            IconButton(
-                                onClick = { showWorkspaceScopeSwitcher = true },
-                                modifier = Modifier.testTag("topbar_scope_switcher_btn"),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = "切換範圍",
-                                    tint = LavenderPrimary,
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = SophisticatedSurfaceDark,
-                            titleContentColor = TextHighEmphasis,
-                        ),
-                    )
-                }
-            },
+            topBar = {},
             bottomBar = {
                 if (!isDetailScreenOpen && !isExpanded) {
                     Surface(
@@ -280,6 +228,12 @@ fun AppNavigationHost(
                 // Main Display Content
                 Box(modifier = Modifier.weight(1f).fillMaxSize()) {
                     when {
+                        isSettingsOpen -> {
+                            SettingsScreen(
+                                onNavigateBack = { isSettingsOpen = false },
+                            )
+                        }
+
                         verificationIssueId != null -> {
                             val verIssue = allIssues.firstOrNull { it.id == verificationIssueId }
                             if (verIssue != null) {
@@ -440,7 +394,12 @@ fun AppNavigationHost(
                                 MainNavigationTab.HOME -> {
                                     HomeScreen(
                                         repositories = repositories,
+                                        activeUser = activeUser,
                                         onSelectRepository = { repo -> viewModel.selectRepository(repo) },
+                                        onNavigateToTab = { tab -> currentTab = tab },
+                                        onOpenPersonaSwitcher = { showPersonaSwitcher = true },
+                                        onOpenProfile = { currentTab = MainNavigationTab.PROFILE },
+                                        onSyncRefresh = { experienceViewModel.syncNow() },
                                     )
                                 }
 
@@ -462,6 +421,7 @@ fun AppNavigationHost(
                                     InboxScreen(
                                         notifications = userNotifications,
                                         onNotificationClick = { notification ->
+                                            viewModel.markNotificationAsRead(notification.id)
                                             notification.repoId?.let { repoId ->
                                                 repositories.firstOrNull { it.id == repoId }?.let { repo ->
                                                     viewModel.selectRepository(repo)
@@ -473,6 +433,8 @@ fun AppNavigationHost(
                                                 }
                                             }
                                         },
+                                        onMarkAllAsRead = { viewModel.markAllNotificationsAsRead() },
+                                        onConfigureNotifications = { isSettingsOpen = true },
                                     )
                                 }
 
@@ -490,6 +452,7 @@ fun AppNavigationHost(
                                             syncStatus = syncStatus,
                                             onToggleFollow = { experienceViewModel.toggleFollow(currentActiveUser.id, it) },
                                             onSyncNow = experienceViewModel::syncNow,
+                                            onNavigateToSettings = { isSettingsOpen = true },
                                             governanceContent = {
                                                 MeScreen(
                                                     currentSubTab = meSubTab,
@@ -554,6 +517,7 @@ fun AppNavigationHost(
                                                     onUpdatePolicySettings = { dualApp, allowUserRepos, revGate, segDuties ->
                                                         viewModel.updateEnterprisePolicies(dualApp, allowUserRepos, revGate, segDuties)
                                                     },
+                                                    onNavigateToSettings = { isSettingsOpen = true },
                                                 )
                                             },
                                         )

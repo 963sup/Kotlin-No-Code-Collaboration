@@ -31,6 +31,7 @@ fun PersonalCenterSwitchScreen(
     syncStatus: SyncStatusSummary,
     onToggleFollow: (String) -> Unit,
     onSyncNow: () -> Unit,
+    onNavigateToSettings: (() -> Unit)? = null,
     governanceContent: @Composable () -> Unit,
 ) {
     var social by rememberSaveable(profileUser.id) { mutableStateOf(true) }
@@ -46,7 +47,18 @@ fun PersonalCenterSwitchScreen(
         }
         Column(Modifier.fillMaxWidth()) {
             if (social) {
-                SocialProfileScreen(profileUser, activeUser, auditLogs, visibleRepositoryIds, follows, savedTargets, syncStatus, onToggleFollow, onSyncNow)
+                SocialProfileScreen(
+                    profileUser = profileUser,
+                    activeUser = activeUser,
+                    auditLogs = auditLogs,
+                    visibleRepositoryIds = visibleRepositoryIds,
+                    follows = follows,
+                    savedTargets = savedTargets,
+                    syncStatus = syncStatus,
+                    onToggleFollow = onToggleFollow,
+                    onSyncNow = onSyncNow,
+                    onNavigateToSettings = onNavigateToSettings,
+                )
             } else {
                 governanceContent()
             }

@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -67,6 +71,7 @@ fun SocialProfileScreen(
     syncStatus: SyncStatusSummary,
     onToggleFollow: (String) -> Unit,
     onSyncNow: () -> Unit,
+    onNavigateToSettings: (() -> Unit)? = null,
 ) {
     val governanceViewModel: GovernanceViewModel = viewModel()
     val users by governanceViewModel.users.collectAsState()
@@ -180,11 +185,29 @@ fun SocialProfileScreen(
                 .testTag("social_profile_header"),
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    profileUser.displayName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        profileUser.displayName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    if (onNavigateToSettings != null) {
+                        IconButton(
+                            onClick = onNavigateToSettings,
+                            modifier = Modifier.testTag("social_profile_settings_btn"),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
                 Text(
                     "@${profileUser.username} · ${profileUser.title}",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

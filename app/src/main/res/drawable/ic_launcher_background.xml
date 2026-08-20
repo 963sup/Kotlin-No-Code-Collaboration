@@ -14,10 +14,17 @@
                 android:endX="108"
                 android:endY="108"
                 android:type="linear">
-                <item android:color="#0B132B" android:offset="0.0" />
-                <item android:color="#1C2541" android:offset="0.5" />
-                <item android:color="#3A506B" android:offset="1.0" />
+                <item android:color="#0A0F1D" android:offset="0.0" />
+                <item android:color="#1E293B" android:offset="0.5" />
+                <item android:color="#0F172A" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
+    <!-- Subtle geometric background accent ring -->
+    <path
+        android:pathData="M54,16 A38,38 0 1,1 53.9,16"
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.4" />
 </vector>
+

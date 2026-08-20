@@ -1,8 +1,10 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -11,8 +13,10 @@ import androidx.compose.material.icons.filled.CorporateFare
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -20,6 +24,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -100,6 +105,7 @@ fun MeScreen(
     onRunPolicySimulation: (User, Repository, NoCodeArtifact?, GovernanceAction) -> Unit,
     onClearPolicySimulation: () -> Unit,
     onUpdatePolicySettings: (Boolean, Boolean, Boolean, Boolean) -> Unit,
+    onNavigateToSettings: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -109,45 +115,67 @@ fun MeScreen(
             .testTag("me_screen"),
     ) {
         // Top Sub-Navigation Tab Row
-        ScrollableTabRow(
-            selectedTabIndex = currentSubTab.ordinal,
-            containerColor = SophisticatedSurfaceDark,
-            contentColor = LavenderPrimary,
-            edgePadding = 12.dp,
-            indicator = { tabPositions ->
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[currentSubTab.ordinal]),
-                    color = LavenderPrimary,
-                )
-            },
-            divider = {},
-            modifier = Modifier.fillMaxWidth().testTag("me_sub_tab_row"),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SophisticatedSurfaceDark),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            MeSubTab.values().forEach { tab ->
-                val selected = currentSubTab == tab
-                Tab(
-                    selected = selected,
-                    onClick = { onSubTabChange(tab) },
-                    text = {
-                        Text(
-                            text = tab.label,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 12.sp,
-                            ),
-                            color = if (selected) LavenderPrimary else TextMediumEmphasis,
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = tab.label,
-                            modifier = Modifier.size(16.dp),
-                            tint = if (selected) LavenderPrimary else TextMediumEmphasis,
-                        )
-                    },
-                    modifier = Modifier.testTag(tab.tag),
-                )
+            ScrollableTabRow(
+                selectedTabIndex = currentSubTab.ordinal,
+                containerColor = SophisticatedSurfaceDark,
+                contentColor = LavenderPrimary,
+                edgePadding = 12.dp,
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[currentSubTab.ordinal]),
+                        color = LavenderPrimary,
+                    )
+                },
+                divider = {},
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("me_sub_tab_row"),
+            ) {
+                MeSubTab.values().forEach { tab ->
+                    val selected = currentSubTab == tab
+                    Tab(
+                        selected = selected,
+                        onClick = { onSubTabChange(tab) },
+                        text = {
+                            Text(
+                                text = tab.label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                ),
+                                color = if (selected) LavenderPrimary else TextMediumEmphasis,
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = tab.label,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (selected) LavenderPrimary else TextMediumEmphasis,
+                            )
+                        },
+                        modifier = Modifier.testTag(tab.tag),
+                    )
+                }
+            }
+
+            if (onNavigateToSettings != null) {
+                IconButton(
+                    onClick = onNavigateToSettings,
+                    modifier = Modifier.testTag("me_settings_btn"),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = TextMediumEmphasis,
+                    )
+                }
             }
         }
 
